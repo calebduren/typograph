@@ -1,0 +1,14 @@
+/* Opening quotes in English, left-aligned prose. Leave room in the gutter. */
+[data-typograph-hanging] {
+  hanging-punctuation: none;
+}
+.typograph-opening {
+  display: inline-block;
+  inline-size: 0;
+  text-indent: 0;
+  white-space: nowrap;
+}
+.typograph-opening > span {
+  display: inline-block;
+  transform: translateX(-100%);
+}

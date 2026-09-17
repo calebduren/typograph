@@ -1,0 +1,140 @@
+{
+  "node": "v22.19.0",
+  "cpu": "Apple M3 Max",
+  "platform": "darwin",
+  "warmups": 3,
+  "samples": 40,
+  "bundle": {
+    "minifiedBytes": 9927,
+    "gzipBytes": 4042,
+    "includesTypehug": true
+  },
+  "results": [
+    {
+      "scenario": "dense-apostrophes",
+      "spacing": false,
+      "characters": 4002,
+      "medianMs": 0.346,
+      "p95Ms": 0.674
+    },
+    {
+      "scenario": "dense-apostrophes",
+      "spacing": false,
+      "characters": 16002,
+      "medianMs": 1.301,
+      "p95Ms": 1.502
+    },
+    {
+      "scenario": "dense-apostrophes",
+      "spacing": false,
+      "characters": 64002,
+      "medianMs": 5.274,
+      "p95Ms": 6.159
+    },
+    {
+      "scenario": "dense-apostrophes",
+      "spacing": true,
+      "characters": 4002,
+      "medianMs": 0.777,
+      "p95Ms": 1.089
+    },
+    {
+      "scenario": "dense-apostrophes",
+      "spacing": true,
+      "characters": 16002,
+      "medianMs": 2.596,
+      "p95Ms": 2.806
+    },
+    {
+      "scenario": "dense-apostrophes",
+      "spacing": true,
+      "characters": 64002,
+      "medianMs": 10.997,
+      "p95Ms": 11.787
+    },
+    {
+      "scenario": "long-word",
+      "spacing": false,
+      "characters": 4000,
+      "medianMs": 0.092,
+      "p95Ms": 0.108
+    },
+    {
+      "scenario": "long-word",
+      "spacing": false,
+      "characters": 16000,
+      "medianMs": 0.343,
+      "p95Ms": 0.432
+    },
+    {
+      "scenario": "long-word",
+      "spacing": false,
+      "characters": 64000,
+      "medianMs": 1.452,
+      "p95Ms": 1.618
+    },
+    {
+      "scenario": "long-word",
+      "spacing": true,
+      "characters": 4000,
+      "medianMs": 0.102,
+      "p95Ms": 0.113
+    },
+    {
+      "scenario": "long-word",
+      "spacing": true,
+      "characters": 16000,
+      "medianMs": 0.356,
+      "p95Ms": 0.511
+    },
+    {
+      "scenario": "long-word",
+      "spacing": true,
+      "characters": 64000,
+      "medianMs": 1.499,
+      "p95Ms": 1.676
+    },
+    {
+      "scenario": "ordinary-prose",
+      "spacing": false,
+      "characters": 4056,
+      "medianMs": 0.214,
+      "p95Ms": 0.402
+    },
+    {
+      "scenario": "ordinary-prose",
+      "spacing": false,
+      "characters": 16068,
+      "medianMs": 0.749,
+      "p95Ms": 0.872
+    },
+    {
+      "scenario": "ordinary-prose",
+      "spacing": false,
+      "characters": 64038,
+      "medianMs": 3.411,
+      "p95Ms": 3.621
+    },
+    {
+      "scenario": "ordinary-prose",
+      "spacing": true,
+      "characters": 4056,
+      "medianMs": 0.794,
+      "p95Ms": 0.909
+    },
+    {
+      "scenario": "ordinary-prose",
+      "spacing": true,
+      "characters": 16068,
+      "medianMs": 2.603,
+      "p95Ms": 2.925
+    },
+    {
+      "scenario": "ordinary-prose",
+      "spacing": true,
+      "characters": 64038,
+      "medianMs": 11.133,
+      "p95Ms": 11.709
+    }
+  ]
+}

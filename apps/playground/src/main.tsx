@@ -1,370 +1,334 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowDown, ArrowDownToLine, ArrowUpRight, Copy } from 'lucide-react';
-import { principles } from '@calebduren/typograph/principles';
-import { TypographyLab, type SpecimenTopic } from './TypographyLab';
-import { PunctuationLab } from './PunctuationLab';
-import { Disclosure } from './Controls';
-import { installCommand, packageFilename } from './distribution';
-import { integrationSnippet } from './model';
+import { ArrowUpRight, Copy, Check } from 'lucide-react';
+import { ChatComparison } from './ChatComparison';
+import { agentPrompt } from './agent-prompts';
+import { useScrollFade } from './use-scroll-fade';
+import {
+  defaultSettings,
+  integrationCode,
+  integrationStacks,
+  settingsSummary,
+  type IntegrationStack,
+  type TypographySettings,
+} from './integration-settings';
+import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url';
 import './fonts.css';
-import './styles.css';
+import './landing.css';
 
-const topics: { id: SpecimenTopic; title: string }[] = [
-  { id: 'rhythm', title: 'Rhythm & measure' },
-  { id: 'hierarchy', title: 'Hierarchy' },
-  { id: 'punctuation', title: 'Punctuation' },
-  { id: 'numbers', title: 'Numbers' },
-];
-
-function Mark() {
+function Integration({ settings }: { settings: TypographySettings }) {
+  const [recipe, setRecipe] = useState<IntegrationStack>('AI Elements');
+  const [mode, setMode] = useState<'prompt' | 'code'>('prompt');
+  const [copiedContent, setCopiedContent] = useState('');
+  const [error, setError] = useState('');
+  const promptArea = useRef<HTMLDivElement>(null);
+  useScrollFade(promptArea, `${recipe}:${mode}`);
+  const content =
+    mode === 'prompt' ? agentPrompt(recipe, settings) : integrationCode(recipe, settings);
+  const copied = copiedContent === content;
+  useEffect(() => {
+    // This state mirrors the selected recipe and clears a stale copy error.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setError('');
+  }, [content]);
+  useEffect(() => {
+    if (!copiedContent) return;
+    const timer = window.setTimeout(() => setCopiedContent(''), 3000);
+    return () => window.clearTimeout(timer);
+  }, [copiedContent]);
   return (
-    <svg className="brand-symbol" viewBox="0 0 32 32" aria-hidden="true">
-      <path fill="currentColor" d="M2 4h23v6H2zm9 8h7v16h-7z" />
-      <circle cx="26" cy="24" r="4" fill="var(--gray)" />
-    </svg>
+    <section
+      id="integrate"
+      className="integration section-rule"
+      aria-labelledby="integration-title"
+    >
+      <div className="section-intro">
+        <h2 id="integration-title">
+          A small addition.
+          <br />
+          Right where you render.
+        </h2>
+        <p>
+          Add the selected refinements to your existing Markdown pipeline. Keep your fonts, your
+          components, and your original messages.
+        </p>
+        <p className="muted">Works in the browser. No model call, API key, or new service.</p>
+        <p className="selected-settings">
+          <span>Your configuration</span>
+          {settingsSummary(settings)}
+        </p>
+        <p>
+          Building with an agent? Choose your stack and copy the prompt into your coding assistant.
+        </p>
+        <a className="underlined" href="/integration.md">
+          Read the integration guide <ArrowUpRight size={15} aria-hidden="true" />
+        </a>
+        <p className="release-note">
+          Pre-release preview. The chat package is not yet on npm. The guide includes local setup
+          from source.
+        </p>
+      </div>
+      <div className="recipe">
+        <div className="recipe-tab-row">
+          <div
+            className="recipe-tabs segmented-control"
+            role="group"
+            aria-label="Integration examples"
+          >
+            {integrationStacks.map((name) => (
+              <button
+                key={name}
+                aria-pressed={recipe === name}
+                onClick={() => {
+                  setRecipe(name);
+                  setCopiedContent('');
+                  setError('');
+                }}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="recipe-tools">
+          <div
+            className="recipe-modes segmented-control"
+            role="group"
+            aria-label="Integration format"
+          >
+            {(['prompt', 'code'] as const).map((value) => (
+              <button
+                key={value}
+                aria-pressed={mode === value}
+                onClick={() => {
+                  setMode(value);
+                  setCopiedContent('');
+                  setError('');
+                }}
+              >
+                {value === 'prompt' ? 'Agent prompt' : 'Code'}
+              </button>
+            ))}
+          </div>
+          <button
+            className="recipe-copy"
+            aria-label={mode === 'prompt' ? 'Copy agent prompt' : 'Copy integration code'}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(content);
+                setCopiedContent(content);
+                setError('');
+              } catch {
+                setCopiedContent('');
+                setError(
+                  `Copy unavailable. Select the ${mode === 'prompt' ? 'prompt' : 'code'} below and copy it manually.`,
+                );
+              }
+            }}
+          >
+            {copied ? (
+              <Check size={15} aria-hidden="true" />
+            ) : (
+              <Copy size={15} aria-hidden="true" />
+            )}{' '}
+            <span aria-live="polite">
+              {copied ? 'Copied' : mode === 'prompt' ? 'Copy prompt' : 'Copy code'}
+            </span>
+          </button>
+        </div>
+        {mode === 'prompt' ? (
+          <div
+            ref={promptArea}
+            className="agent-prompt scroll-fade"
+            role="region"
+            tabIndex={0}
+            aria-label={`${recipe} agent prompt`}
+            key={recipe}
+          >
+            <div>{content}</div>
+          </div>
+        ) : (
+          <pre tabIndex={0} aria-label={`${recipe} code example`}>
+            <code>{content}</code>
+          </pre>
+        )}
+        <p className="recipe-note">
+          {mode === 'prompt'
+            ? 'Includes setup from source, English-only defaults, streaming behavior, and checks for your app.'
+            : 'A fixed English preset needs no finish callback. Changing rules at runtime? The guide includes the tested Streamdown wrapper.'}
+        </p>
+        <p role="alert" className="recipe-error" hidden={!error}>
+          {error}
+        </p>
+      </div>
+    </section>
   );
 }
 
-function App() {
-  const [topic, setTopic] = useState<SpecimenTopic>('rhythm');
-  const [copied, setCopied] = useState('');
-  const [notice, setNotice] = useState('');
-  const [integration, setIntegration] = useState('React Markdown');
+function Landing() {
+  const [settings, setSettings] = useState(defaultSettings);
   useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => {
-      setNotice('');
-      setCopied('');
-    }, 3500);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
-  async function copy(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(key);
-      setNotice('Copied to your clipboard.');
-    } catch {
-      setNotice('Clipboard access is unavailable. Select the text and copy it manually.');
-    }
-  }
-
+    // React mounts after navigation, so initial fragment targets do not exist yet.
+    const target = document.getElementById(window.location.hash.slice(1));
+    target?.scrollIntoView({ behavior: 'instant' });
+  }, []);
   return (
     <>
-      <a className="skip-link" href="#specimen">
-        Skip to specimen
+      <a className="skip-link" href="#demo">
+        Skip to the comparison
       </a>
-      <header className="site-header" id="top">
-        <a className="wordmark" href="#top" aria-label="Typograph home">
-          <Mark />
-          <span>typograph</span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="#specimen">Specimen</a>
-          <a href="#principles">Principles</a>
-          <a href="#skill">Agent skill</a>
-          <a className="nav-download" href="#get">
-            Get Typograph <ArrowDown size={15} />
+      <div className="page-frame">
+        <header className="site-header" id="top">
+          <a className="wordmark" href="#top" aria-label="Typograph home">
+            typograph
           </a>
-        </nav>
-      </header>
-      <main>
-        <section className="intro" aria-labelledby="intro-title">
-          <h1 id="intro-title">
-            Type with <span>intention.</span>
-          </h1>
-          <div className="intro-aside">
-            <p>
-              Good typography is a relationship between letters, words, and the space around them.
-            </p>
-            <p className="muted">
-              Typograph brings that care to the web, with practical tools and principles for you and
-              your agents.
-            </p>
-            <a className="inline-link" href="#specimen">
-              Find your rhythm <ArrowDown size={17} />
+          <nav aria-label="Main navigation">
+            <a href="#demo">Try it</a>
+            <a href="#integrate">Integration</a>
+            <a href="https://github.com/calebduren/typograph">
+              GitHub <ArrowUpRight size={13} aria-hidden="true" />
             </a>
-          </div>
-        </section>
-
-        <section
-          className="specimen-section"
-          id="specimen"
-          aria-label="Interactive typography specimen"
-        >
-          <div className="specimen-nav">
-            <div className="topic-switch" role="group" aria-label="Choose a typography specimen">
-              {topics.map(({ id, title }) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={topic === id}
-                  onClick={() => setTopic(id)}
-                >
-                  {title}
-                </button>
-              ))}
-            </div>
-            <span className="specimen-hint">A study in the details</span>
-          </div>
-          <div hidden={topic === 'punctuation'}>
-            <TypographyLab topic={topic === 'punctuation' ? 'rhythm' : topic} />
-          </div>
-          <div hidden={topic !== 'punctuation'}>
-            <PunctuationLab active={topic === 'punctuation'} />
-          </div>
-        </section>
-
-        <section
-          className="principles-section section-grid"
-          id="principles"
-          aria-labelledby="principles-title"
-        >
-          <div className="section-intro">
-            <h2 id="principles-title">
-              A reason for <br />
-              every rule.
-            </h2>
-            <p>Typography becomes easier to judge when you know what to look for.</p>
-            <p className="muted">
-              These principles connect an intention to something you can observe, change, and check.
-            </p>
-          </div>
-          <div className="principle-list">
-            {principles.map((principle) => (
-              <Disclosure title={principle.title} key={principle.id}>
-                <p className="principle-summary">{principle.summary}</p>
-                <dl className="principle-details">
-                  <div>
-                    <dt>Look for</dt>
-                    <dd>{principle.observe}</dd>
-                  </div>
-                  <div>
-                    <dt>Make a decision</dt>
-                    <dd>{principle.action}</dd>
-                  </div>
-                  <div>
-                    <dt>Check the result</dt>
-                    <dd>{principle.verify}</dd>
-                  </div>
-                  <div>
-                    <dt>Use judgment</dt>
-                    <dd>{principle.exception}</dd>
-                  </div>
-                </dl>
-                <div className="principle-sources">
-                  <span>{principle.kind}</span>
-                  {principle.sources.map((source) => (
-                    <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
-                      {source.title}
-                      <ArrowUpRight size={13} />
-                    </a>
-                  ))}
-                </div>
-              </Disclosure>
-            ))}
-          </div>
-        </section>
-
-        <section className="skill-section section-grid" id="skill" aria-labelledby="skill-title">
-          <div className="section-intro">
-            <h2 id="skill-title">
-              Give your agent <br />
-              an eye for type.
-            </h2>
-            <p>
-              The same principles, written as a practical skill. It starts with your content, your
-              fonts, and the way people read.
-            </p>
-            <a className="button primary-button" href="./downloads/typograph-skill.tar.gz" download>
-              Download the skill <ArrowDownToLine size={16} />
-            </a>
-            <a
-              className="inline-link quiet-link"
-              href="./skill/SKILL.md"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Read the instructions <ArrowUpRight size={15} />
-            </a>
-          </div>
-          <div className="skill-preview">
-            <div className="skill-prompt">
-              <span>Try asking</span>
+          </nav>
+        </header>
+        <main>
+          <section className="hero" aria-labelledby="hero-title">
+            <div className="hero-copy">
+              <h1 id="hero-title">
+                Nicer typography <br />
+                for streaming AI.
+              </h1>
               <p>
-                “Use Typograph to improve the typography on this page. Keep our fonts. Explain the
-                changes.”
+                Careful English punctuation for AI responses, with optional spacing that keeps
+                related words together.
               </p>
-              <button
-                className="text-button"
-                onClick={() =>
-                  copy(
-                    'Use $typograph to improve the typography on this page. Keep our fonts. Explain the changes.',
-                    'prompt',
-                  )
-                }
-              >
-                <Copy size={15} />
-                {copied === 'prompt' ? 'Copied' : 'Copy prompt'}
-              </button>
+              <p className="scope-line">
+                English only <span aria-hidden="true">·</span> Open source{' '}
+                <span aria-hidden="true">·</span> Runs locally
+              </p>
             </div>
-            <ol className="skill-sequence">
-              <li>
-                <strong>Understand the context.</strong>
-                <span>Reading, scanning, comparing, or watching text arrive.</span>
-              </li>
-              <li>
-                <strong>Make the relationships deliberate.</strong>
-                <span>Choose a hierarchy. Connect the size, measure, and leading.</span>
-              </li>
-              <li>
-                <strong>Look at the result.</strong>
-                <span>Inspect real content, fallback fonts, narrow screens, and larger text.</span>
-              </li>
-            </ol>
-            <p className="skill-install">
-              Extract the archive into your project’s <code>.agents/skills/</code> directory. The{' '}
-              <code>typograph</code> folder includes the skill and its references.
-            </p>
-          </div>
-        </section>
-
-        <section className="get-section section-grid" id="get" aria-labelledby="get-title">
-          <div className="section-intro">
-            <h2 id="get-title">
-              A place in <br />
-              your toolkit.
-            </h2>
-            <p>
-              Use the reading styles, the punctuation engine, or the skill. Each works
-              independently.
-            </p>
-            <p className="muted">
-              This preview is distributed as an installable archive. Download it, then run the
-              command from the same directory.
-            </p>
-            <a className="button primary-button" href={`./downloads/${packageFilename}`} download>
-              Download the package <ArrowDownToLine size={16} />
+            <figure
+              className="punctuation-proof"
+              aria-label="The quick brown fox says, ‘Let’s go!’ Opening quotation mark hangs in lilac; smart punctuation is highlighted in blue."
+            >
+              <div className="proof-result" data-rulers="true" aria-hidden="true">
+                <span className="typograph-opening">
+                  <span data-change="hanging">“</span>
+                </span>
+                The quick
+                <br />
+                brown fox says,
+                <br />
+                <mark data-change="punctuation">‘</mark>Let<mark data-change="punctuation">’</mark>s
+                go!<mark data-change="punctuation">’”</mark>
+              </div>
+            </figure>
+          </section>
+          <ChatComparison settings={settings} onSettingsChange={setSettings} />
+          <Integration settings={settings} />
+          <section className="principles section-rule" aria-labelledby="care-title">
+            <h2 id="care-title">Careful where it counts.</h2>
+            <div className="principle-row">
+              <h3>Prose gets the polish.</h3>
+              <p>
+                {settings.punctuation
+                  ? 'Quotes and apostrophes follow their context, even across emphasis and links.'
+                  : 'Smart punctuation is off. Original quote marks and apostrophes stay as written.'}{' '}
+                {settings.spacing
+                  ? 'Non-breaking spaces keep pairs like 30 min together.'
+                  : 'Non-breaking spaces are off. Your original word spacing stays intact.'}
+              </p>
+            </div>
+            <div className="principle-row">
+              <h3>Literal stays literal.</h3>
+              <p>
+                Code, math, URLs, and link destinations keep their original characters. Your app
+                retains the original message for storage and copying.
+              </p>
+            </div>
+            <div className="principle-row">
+              <h3>{settings.hanging ? 'An even reading edge.' : 'A stream has room to finish.'}</h3>
+              <p>
+                {settings.hanging
+                  ? 'Opening quotes sit just outside the first line of paragraphs and headings. The helper uses real text, keeps copying intact, and needs no native browser support for hanging punctuation.'
+                  : 'An opening quote can wait for its words. A partial “30 m” can still become “30 million.” Conservative choices come first.'}
+              </p>
+            </div>
+          </section>
+          <section id="scope" className="scope-section section-rule" aria-labelledby="scope-title">
+            <div>
+              <h2 id="scope-title">Small, by intention.</h2>
+              <p>
+                English only is the scope. A focused set of rules, with explicit limits and room for
+                your app’s own choices.
+              </p>
+            </div>
+            <div className="scope-details">
+              <dl>
+                <div>
+                  <dt>Language</dt>
+                  <dd>
+                    One English house style. Set the response language explicitly; other or unknown
+                    languages pass through.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Size</dt>
+                  <dd>
+                    About 4 KB gzip for the core, including the spacing engine. Hanging punctuation
+                    adds a separate small helper and stylesheet.{' '}
+                    <a href={benchmarkUrl} className="underlined">
+                      View the measurement
+                    </a>
+                    .
+                  </dd>
+                </div>
+                <div>
+                  <dt>Built on</dt>
+                  <dd>
+                    <a href="https://typehug.aliszu.com/" className="underlined">
+                      Typehug
+                    </a>{' '}
+                    for optional no-break spacing. Remark for Markdown structure. MIT licensed.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>
+                    A tested, unpublished candidate. Browser profiling and reading evaluations
+                    continue before release.
+                  </dd>
+                </div>
+              </dl>
+              <div className="scope-limits">
+                <h3>What it doesn’t do</h3>
+                <p>
+                  No language detection, regional quote styles, hyphenation, or automatic rewriting
+                  of your content. No-break spacing is off by default. Very long tokens skip
+                  optional spacing to avoid expensive processing.
+                </p>
+                <p>
+                  Paste English prose into the demo. For mixed-language replies, the host app must
+                  select English content or opt out. Selecting or copying displayed text includes
+                  its typographic characters.
+                </p>
+              </div>
+            </div>
+          </section>
+        </main>
+        <footer className="site-footer">
+          <a className="wordmark" href="#top">
+            typograph
+          </a>
+          <span>Consider the details.</span>
+          <div>
+            <a href="https://calebduren.com">
+              Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" />
             </a>
           </div>
-          <div className="integration-panel">
-            <div className="install-command">
-              <code>{installCommand}</code>
-              <button
-                className="icon-button"
-                aria-label="Copy install command"
-                onClick={() => copy(installCommand, 'install')}
-              >
-                <Copy size={16} />
-              </button>
-            </div>
-            <div className="integration-toolbar">
-              <label htmlFor="integration">Use it with</label>
-              <select
-                id="integration"
-                value={integration}
-                onChange={(event) => setIntegration(event.target.value)}
-              >
-                <option>Reading CSS</option>
-                <option>React Markdown</option>
-                <option>Streamdown</option>
-                <option>Plain text</option>
-                <option>HTML / rehype</option>
-              </select>
-              <button
-                className="text-button"
-                onClick={() =>
-                  copy(
-                    integration === 'Reading CSS'
-                      ? cssExample
-                      : integrationSnippet(integration, {}),
-                    'code',
-                  )
-                }
-              >
-                <Copy size={15} />
-                {copied === 'code' ? 'Copied' : 'Copy code'}
-              </button>
-            </div>
-            <pre className="integration-code">
-              <code>
-                {integration === 'Reading CSS' ? cssExample : integrationSnippet(integration, {})}
-              </code>
-            </pre>
-            <p className="integration-note">
-              The punctuation engine runs locally, with no runtime dependencies. The skill works
-              with your existing agent.
-            </p>
-          </div>
-        </section>
-        <section className="colophon section-grid" aria-labelledby="colophon-title">
-          <div className="section-intro">
-            <h2 id="colophon-title">
-              Built on a <br />
-              long tradition.
-            </h2>
-          </div>
-          <div>
-            <p>
-              Informed by Robert Bringhurst’s <cite>The Elements of Typographic Style</cite>,
-              Richard Rutter’s adaptation for the web, and Impeccable’s approach to typography. The
-              reading CSS builds on shadcn Typeset.
-            </p>
-            <div className="source-links">
-              <a href="https://webtypography.net/" target="_blank" rel="noreferrer">
-                Web typography <ArrowUpRight size={14} />
-              </a>
-              <a href="https://impeccable.style/docs/typeset/" target="_blank" rel="noreferrer">
-                Impeccable <ArrowUpRight size={14} />
-              </a>
-              <a href="https://ui.shadcn.com/docs/typeset" target="_blank" rel="noreferrer">
-                shadcn Typeset <ArrowUpRight size={14} />
-              </a>
-            </div>
-            <p className="colophon-note">
-              English punctuation conventions. Contextual typography guidance. Every automatic
-              change can be inspected.
-            </p>
-          </div>
-        </section>
-      </main>
-      <footer className="site-footer">
-        <a className="wordmark" href="#top">
-          <Mark />
-          <span>typograph</span>
-        </a>
-        <span>Consider the details.</span>
-        <div className="footer-links">
-          <a href="https://github.com/calebduren/typograph" target="_blank" rel="noreferrer">
-            Source <ArrowUpRight size={14} />
-          </a>
-          <a href="https://calebduren.com" target="_blank" rel="noreferrer">
-            Caleb Durenberger <ArrowUpRight size={14} />
-          </a>
-        </div>
-        <p className="font-credit">
-          Set in{' '}
-          <a href="https://displaay.net/typeface/serrif" target="_blank" rel="noreferrer">
-            Serrif
-          </a>{' '}
-          and{' '}
-          <a href="https://displaay.net/typeface/saans" target="_blank" rel="noreferrer">
-            Saans
-          </a>{' '}
-          by{' '}
-          <a href="https://displaay.net/" target="_blank" rel="noreferrer">
-            Displaay Type Foundry
-          </a>
-          .
-        </p>
-      </footer>
-      <div className="toast" role="status" aria-live="polite" data-visible={!!notice}>
-        {notice}
+        </footer>
       </div>
     </>
   );
 }
 
-const cssExample = `import '@calebduren/typograph/typography.css';\n\n<article className="typeset typeset-article type-measure">\n  {children}\n</article>\n\n/* Your fonts. A considered starting rhythm. */\n.typeset-article {\n  --typeset-font-body: var(--font-body);\n  --typeset-size: 1.125rem;\n  --typeset-leading: 1.666667;\n  --typograph-measure: 64ch;\n}`;
-
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(<Landing />);

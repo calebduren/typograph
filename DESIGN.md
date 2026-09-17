@@ -12,7 +12,6 @@ colors:
   line: '#d8d8d8'
   accent: '#242424'
   accent-soft: '#dedede'
-  guide: '#8d8d8d30'
   dark-hover: '#dedede'
   dark-paper: '#242424'
   dark-sheet: '#292929'
@@ -22,97 +21,88 @@ colors:
   dark-line: '#4b4b4b'
   dark-accent: '#fcfcfc'
   dark-accent-soft: '#454545'
-  dark-guide: '#8d8d8d33'
+  change-punctuation: '#dfeafa'
+  change-spacing: '#f5e8c5'
+  change-hanging: '#e8dff3'
+  dark-change-punctuation: '#27405b'
+  dark-change-spacing: '#50452a'
+  dark-change-hanging: '#453650'
 typography:
-  display:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.625rem
-    fontWeight: 400
-    lineHeight: 1.2
-    letterSpacing: normal
-  display-mobile:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.625rem
-    fontWeight: 400
-    lineHeight: 1.2
-    letterSpacing: normal
-  headline:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.625rem
-    fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: normal
   wordmark:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.5rem
-    fontWeight: 600
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
+    fontSize: 1.25rem
+    fontWeight: 500
     lineHeight: 1
     letterSpacing: normal
   body:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
     fontSize: 1rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: normal
-  intro:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.0625rem
-    fontWeight: 400
-    lineHeight: 1.6
-    letterSpacing: normal
   label:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
     fontSize: 0.875rem
     fontWeight: 600
     lineHeight: 1.5
     letterSpacing: normal
   annotation:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
     fontSize: 0.8125rem
     fontWeight: 400
     lineHeight: 1.55
     letterSpacing: normal
-  reading:
-    fontFamily: "'Serrif', 'Fraunces Variable', Georgia, serif"
-    fontSize: 1.125rem
-    fontWeight: 400
-    lineHeight: 1.6666666666666667
-    letterSpacing: normal
-  reading-title:
-    fontFamily: "'Serrif', 'Fraunces Variable', Georgia, serif"
-    fontSize: min(1.5em, 1.625rem)
-    fontWeight: 400
-    lineHeight: 1.15
-    letterSpacing: normal
   code:
-    fontFamily: "'Saans', 'DM Mono', ui-monospace, monospace"
+    fontFamily: "ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', monospace"
     fontSize: 0.8125rem
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: normal
   body-small:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
     fontSize: 0.9375rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: normal
-  wordmark-mobile:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.25rem
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: normal
-  prompt-mobile:
-    fontFamily: "'Saans', 'DM Sans Variable', sans-serif"
-    fontSize: 1.25rem
+  homepage-heading:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
+    fontSize: 1.625rem
+    fontWeight: 500
+    lineHeight: 1.25
+    letterSpacing: -0.015em
+  homepage-reading:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
+    fontSize: 1.125rem
     fontWeight: 400
-    lineHeight: 1.45
+    lineHeight: 1.7
     letterSpacing: normal
+  homepage-reading-mobile:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
+    fontSize: 1rem
+    fontWeight: 400
+    lineHeight: 1.7
+    letterSpacing: normal
+  homepage-proof:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
+    fontSize: clamp(1.625rem, 3.8vw, 3.5rem)
+    fontWeight: 450
+    lineHeight: 1.1
+    letterSpacing: -0.025em
+  homepage-proof-mobile:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
+    fontSize: clamp(1.625rem, 8vw, 2.5rem)
+    fontWeight: 450
+    lineHeight: 1.1
+    letterSpacing: -0.015em
 rounded:
+  segmented-option: 0.25rem
+  chat-bubble: 0.75rem
   control: 0.125rem
   track: 1rem
   circle: 50%
   annotation: 1px
+  proof-mark: 0.06em
+  segmented-control: 0.5rem
 spacing:
   compact: 0.5rem
   inline: 0.75rem
@@ -124,38 +114,15 @@ spacing:
   mobile-section: 3.5rem
   section: 6rem
 components:
-  button-primary:
-    backgroundColor: '{colors.ink}'
-    textColor: '{colors.paper}'
-    typography: '{typography.label}'
-    rounded: '{rounded.control}'
-    padding: 0.65rem 1rem
-  button-primary-hover:
-    backgroundColor: '{colors.hover}'
-    textColor: '{colors.sheet}'
-  button-secondary:
-    backgroundColor: transparent
-    textColor: '{colors.ink}'
-    typography: '{typography.label}'
-    rounded: '{rounded.control}'
-    padding: 0.65rem 1rem
-  select:
-    backgroundColor: '{colors.paper}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.control}'
-    padding: 0.625rem
-  specimen-nav:
-    textColor: '{colors.muted}'
-    typography: '{typography.label}'
-    padding: 1.25rem 0
-  prompt-panel:
-    backgroundColor: '{colors.soft}'
-    textColor: '{colors.ink}'
-    padding: 2rem
   switch:
     textColor: '{colors.ink}'
     size: 1.75rem 1rem
     rounded: '{rounded.track}'
+  homepage-comparison-pane:
+    backgroundColor: '{colors.sheet}'
+    textColor: '{colors.ink}'
+    typography: '{typography.homepage-reading}'
+    padding: 1.5rem 2rem 1rem
 ---
 
 # Design System: Typograph
@@ -164,60 +131,66 @@ components:
 
 **Creative North Star: "Type with intention"**
 
-Typograph uses geometric construction, asymmetric proportion, a monochrome palette, and restrained tonal emphasis. The identity follows the approved minimalist/Bauhaus direction. The small T and point are the recurring mark; typography supplies the expression.
+Typograph uses geometric construction, asymmetric proportion, a monochrome palette, and restrained tonal emphasis. The identity follows the approved minimalist/Bauhaus direction. A small, medium-weight wordmark stands alone; typography supplies the expression.
 
-The interface uses a clear sans serif voice. The reading specimen introduces a contrasting serif so people can see the relationships among size, measure, leading, and space. These are Typograph’s own brand choices; the portable skill preserves the identity of the product where it is used.
+The interface uses a clear sans serif voice. The current homepage applies this established identity to an English chat comparison with ruled sections and equal reading columns. These are Typograph’s own brand choices; integrations preserve the identity of the product where they are used.
 
 **Key Characteristics:**
 
-- Geometric T and gray point.
+- A plain wordmark and an enlarged punctuation proof.
 - Sentence-case labels with natural tracking.
 - Asymmetric layouts and grouped space.
 - Flat surfaces, visible controls, and inspectable text.
 
 ## Colors
 
-The palette is anchored by #242424 ink, #8d8d8d gray, and #fcfcfc paper. All supporting tones are neutral grays. Paper is the page, sheet is the reading surface, soft is the inset panel, muted is supporting text, and line is the fine boundary. Gray supplies the large display emphasis and mark point; the darker muted token keeps small supporting text readable. The soft accent supports selection and the translucent guide marks line intervals. Dark-prefixed tokens are the automatic dark-mode values, activated by `prefers-color-scheme`.
+The palette is anchored by #242424 ink, #8d8d8d gray, and #fcfcfc paper. Structural surfaces and supporting text remain neutral grays. The user-requested annotation colors are the sole functional exception: blue for smart punctuation, amber for non-breaking spaces, and lilac for hanging quotes, with matching dark-mode values. Paper is the page, sheet is the reading surface, soft is the inset panel, muted is supporting text, and line is the fine boundary. The homepage uses muted for supporting text. Ink carries the complete hero heading. The soft neutral accent remains the selection color, named `--selected` on the homepage. The homepage proof and optional preview highlights use the dedicated `change-*` tokens; lilac takes precedence on a hanging quote. Text-bearing highlights use backgrounds on negative-layer pseudo-elements within an isolated prose/proof container, preserving the neighboring glyphs even with close letter-spacing. Legend swatches retain ordinary backgrounds. Preview annotation markup stays mounted; Show changes only reveals its backgrounds and absolute rulers. The legend always reserves its layout space, becoming invisible and hidden from accessibility when disabled, so highlighting cannot change glyph geometry, reading height, or scroll position. Dark-prefixed tokens are the automatic dark-mode values, activated by `prefers-color-scheme`.
 
-**The Monochrome Rule.** Use neutral tones derived from the three palette anchors. Never use pure black, pure white, or colored accents. Use ink for reading and active states; reserve middle gray for large type and accents.
+**The Monochrome Rule.** Use neutral tones derived from the three palette anchors. Avoid pure black, pure white, and decorative colored accents. The documented functional change annotations are permitted in the homepage proof, preview, and legend. Use ink for reading and active states; reserve middle gray for large type and accents.
 
 ## Typography
 
-Saans carries the display, labels, interface prose, and numeral study. Serrif is the reading voice, with Saans available in the specimen. Two variable WOFF2 files supply the pair: Saans supports weights 300–900; Serrif supports 100–900. Both have an actual slant axis from −10 to 0. Body text uses 400 and emphasis uses 600; semantic italics use the supplied 10-degree slant with synthesis disabled. Serrif’s width is explicitly set to 100%. Source and code use Saans’s `MONO` axis at 100. Vite uses the local brand files when present; clean checkouts use self-hosted DM Sans, Fraunces, and DM Mono, plus Source Serif 4 for the numeral study. Both supplied Displaay fonts have verified proportional and tabular forms.
+San Francisco carries the interface on Apple platforms; Inter Variable supplies the equivalent voice on Windows and other platforms. Apple-specific system aliases precede Inter, while Helvetica Neue, Helvetica, Segoe UI, and the generic system face follow it. Code uses native monospace families. No font is synthesized.
 
-The site’s authored type scale tops out at 1.625rem, about 26px at the default root size. Display and section headings share this ceiling; reading headings, lead text, Markdown headings, and enlarged numeral comparisons use capped relative sizes. At widths up to 430px, the wordmark becomes 1.25rem. Browser zoom and reader text preferences remain effective because the cap is relative. The site has no tracked-uppercase styling. The root uses `font-synthesis: none` and normal caps. Footer attribution links Serrif, Saans, and Displaay Type Foundry.
+The two bundled Inter 4.1 WOFF2 files provide roman and italic faces, weights 100–900, and automatic optical sizing from 14–32. Body text uses 400 and emphasis uses 600. Semantic italics request the actual italic face. System fonts are resolved by the browser without user-agent detection; no Apple or Microsoft font files are distributed.
 
-The article starts at 18/30 with 64ch maximum measure and one line of paragraph space. Documentation starts at 16/26 and 68ch, conversation at 16/24 and 58ch; their paragraph gap is three quarters of a line. These are optional toolkit starting points. The specimen exports rem sizes and a unitless line-height. A `ch` is a zero-glyph advance, not a character count.
+The site’s interface and reading type scale tops out at 1.625rem, about 26px at the default root size. Display and section headings share this ceiling; reading headings, lead text, and Markdown headings use capped relative sizes. The wordmark is 1.25rem at weight 500 across widths. The user-requested punctuation illustration is the sole oversized exception, reaching 3.5rem on wide screens and shrinking to fit on mobile. Browser zoom and reader text preferences remain effective because the cap is relative. The site has no tracked-uppercase styling. The root uses `font-synthesis: none` and normal caps. There are no visible font credits. The bundled files retain their SIL Open Font License.
 
-**The Compact Scale Rule.** Keep authored site type at or below 1.625rem while preserving reader scaling. Establish hierarchy through weight, spacing, and structure.
+The `homepage-*` roles record the current reading, heading, and proof styles. Homepage headings use medium weight and slightly tight tracking. The unprocessed and formatted responses use the same renderer and reading role. The original pane defaults to rendered text; its Markdown tab exposes the editable source. Formatted blocks have a 1.25em gap; the editor preserves source newlines. Reading drops to its mobile role at 520px. The wordmark retains its established size and weight, with -0.035em tracking on this route. The enlarged homepage proof uses its own recorded role, reaching 3.5rem on wide screens and 2.5rem on phones. Code retains the native monospace stack; integration recipes use a 1.75 line-height. The homepage does not compile Tailwind. Streamdown's emitted utility names are not style dependencies: scoped `.response-prose` rules target semantic elements and `data-streamdown` hooks. These explicitly style its strong spans, block-level code lines, inline code, lists, headings, rules, and tables. Code and table height caps are disabled so long blocks remain inside the shared comparison scroller; only horizontal overflow is local to those blocks.
+
+**The Platform Font Rule.** Keep the requested system/Inter stacks. Never add Arial. Inter is an explicit product choice, including when generic design heuristics flag common faces.
+
+**The Compact Scale Rule.** Keep interface and reading type at or below 1.625rem while preserving reader scaling. Only the explicit hero illustration uses oversized text. Establish hierarchy through weight, spacing, and structure.
 
 **The Real Forms Rule.** Assume true small caps are unavailable. Never synthesize small caps, and use the weights and italics actually loaded.
 
-**The Relationship Rule.** Choose size, measure, leading, and paragraph space together, then inspect actual text. A guide interval is not proof of baseline alignment.
+**The Relationship Rule.** Choose size, measure, leading, and paragraph space together, then inspect actual text. Do not overlay a repeating grid on mixed-size prose.
 
 ## Layout
 
-Page content is capped at 80rem with a fluid gutter from 1.25rem to 4rem. The desktop specimen pairs a 17rem control rail with a flexible reading surface; the rail becomes 15rem at 1050px. Supporting sections use unequal columns and the section spacing token. At 760px, the page and specimen stack, controls use two columns, and sections use the mobile spacing token. The smallest breakpoint is 430px.
+The current homepage at `/` uses a 78rem maximum frame with 3.5rem side gutters, reducing to 2rem at 1100px and 1.25rem at 800px. Fine rules organize the header, hero, controls, and supporting sections. Desktop comparison panes have equal widths; one shared control sets their maximum reading measure from 28–64ch, initially 48ch. The measure scales with the font’s zero glyph; it is not an exact character count. Each pane clamps to available space. At 800px, the same comparison becomes a single visible pane with an Original/With Typograph switch; supporting sections also stack. At 520px, the hero stacks and its single sample uses three compact lines. The complete route sequence and interaction contract live in LANDING_PAGE_BRIEF.md.
 
-Keep repeated role spacing consistent while allowing each reading context its own rhythm. Preserve native text resizing and reflow. Desktop-only breaks require explicit word spaces for the narrow layout. Source and code scroll locally when their literal content cannot wrap.
+Keep repeated role spacing consistent while allowing each reading context its own rhythm. Preserve native text resizing and reflow. Desktop-only breaks require explicit word spaces for the narrow layout. The comparison scrolls as one region; code retains local horizontal overflow when its literal content cannot wrap.
 
 ## Elevation & Depth
 
 **The Flat Surface Rule.** Use tonal surfaces and fine boundaries to group content. The implemented system has no box shadows.
 
-The reading sheet, subdued code panel, and prompt panel establish grouping through tone. The functional rhythm overlay is a measuring aid, not a background treatment for other surfaces.
+The homepage comparison, source editor, and recipe panel establish grouping through tone and fine rules. Its static punctuation proof highlights smart punctuation and the hanging opening quote, with faint vertical reading guides. The sample reads “The quick brown fox says, ‘Let’s go!’” with no before-state or caption. Preview guides appear only with both Show changes and Hanging punctuation enabled; they use ink at 12% opacity in light mode and paper at 14% in dark mode.
 
 ## Shapes
 
-The geometric T is made of rectangular strokes and a separate gray point. Panels are rectangular; buttons and native selects have slight corner relief using the control radius. Rounded switch tracks and circular thumbs describe an on/off mechanism. Preserve that functional exception instead of rounding unrelated panels.
+The wordmark has no adjacent symbol. Panels are rectangular; buttons and native selects have slight corner relief using the control radius. Rounded switch tracks and circular thumbs describe an on/off mechanism. Preserve that functional exception instead of rounding unrelated panels.
 
 ## Components
 
-Buttons use clear labels, a minimum 2.75rem height, and a fine boundary. Primary actions reverse paper on ink and use the hover tone on hover; secondary actions gain the soft surface. Icon actions have at least a 2rem target. Focus is a 2px accent outline with 4px offset; disabled actions visibly reduce emphasis.
+On the homepage, actions are compact text links or transparent buttons, usually with a 2.75rem minimum height. Icons support explicit labels; integration copy actions include a text label and a 2.75rem target. Native selects use the existing control radius, paper surface, fine border, and a 2.5rem minimum height. Three switches above the preview select smart punctuation, non-breaking spaces, and hanging punctuation for the formatted preview and generated integration code/prompts. “Show changes” is a separate switch inside the formatted pane and affects only preview highlighting. Reuse the shared button-based Toggle with role="switch", aria-checked, a pill track, and a circular thumb. The user prefers switches over checkbox visuals. Sliders show shared playback progress and reading width. Focus is a 2px ink outline with 5px offset; disabled controls use 0.45 opacity. The skip link becomes visible on keyboard focus.
 
-Native selects retain their semantics and use the paper surface and control radius. Sliders keep labeled values next to the control. Topic navigation uses neutral labels and a 2px ink active underline, with a 180ms ease-out transition. Its actual interaction is a group of pressed-state buttons, not a tab panel.
+A single substantial example is shared by Text and Conversation, with no example picker. The original pane defaults to unprocessed rendered text and offers a Markdown editor tab. Switching tabs preserves edits and the full source; during replay both rendered panes show the same accumulated prefix. The editor remains capped at 12,000 characters. A Reset example text action appears only after editing. Both comparison columns live inside one native vertical scroll container. There is no JavaScript scroll synchronization and no per-column vertical scrolling. The Markdown textarea grows with a hidden CSS grid sizing mirror, so it shares that same viewport. Mobile keeps the simple Original/With Typograph switch within the existing scroller. Replay follows arriving text until the visitor scrolls back in the shared viewport.
 
-Switches move their thumb over 160ms after pointer input. Principle disclosures expand over 220ms, rotate their plus over 180ms, and make collapsed content inert. Keyboard changes remain immediate where the component tracks input modality. Reduced-motion preferences remove transitions and smooth scrolling. The numeral study and punctuation inspector demonstrate actual changes; unsupported enhancements remain clearly explained.
+The comparison workspace runs from the refinement switches through the caption at 100dvh, with a 48rem desktop minimum, 58rem at 800px, and 64rem at 520px. Its heading sits above the workspace. The switches, Text/Conversation buttons, and mobile pane selector form one sticky top control group. The shared reading viewport flexes to take the remaining height; pane headings, playback controls, and captions stay outside it. The page does not force scroll snapping. The shared comparison viewport and agent-prompt region use 80px alpha-mask fades with a smoothstep opacity curve. Each edge disappears when that boundary is reached or the content fits. Source focus stays on the field; other masked regions have inset focus outlines. Black RGB values in alpha stops encode opacity only, not a displayed palette color.
+
+Every view selector uses the same button-like segmented control: a soft surface with a fine boundary and 0.5rem corners; the active option has a paper fill, fine border, and 0.25rem corners. This applies to Text/Conversation, Text/Markdown, mobile Original/With Typograph, integration stack, and Agent prompt/Code. These remain groups of pressed-state buttons. The integration panel appears directly after the preview and before “Careful where it counts.” Copy success lives in its button; failure adds a manual-copy alert. The scope limits are always visible at 0.8125rem. The footer keeps the wordmark, signature, and author link; integration documentation remains linked in the integration section. Motion remains limited to smooth anchor scrolling and pointer-operated switch thumbs; reduced motion removes these. Streaming starts only after user action.
 
 ## Do's and Don'ts
 
@@ -231,8 +204,8 @@ Switches move their thumb over 160ms after pointer input. Principle disclosures 
 
 ### Don’t
 
-- Don’t use pure black, pure white, or colored accents.
+- Don’t use pure black, pure white, or decorative colored accents. Reserve the three annotation colors for explaining actual refinements.
 - Don’t add mascots or decorative landscape imagery.
 - Don’t add tracked uppercase eyebrows or synthetic small caps.
 - Don’t treat a valid CSS declaration as proof that a font contains the feature.
-- Don’t impose this site’s visual identity on products using the skill.
+- Don’t impose this site’s visual identity on products using the package.

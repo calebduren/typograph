@@ -1,11 +1,14 @@
-# Specimen font
+# Inter Variable
 
-Source Serif 4 Roman variable WOFF2, unmodified from Adobe’s source-serif repository. Used only for the numeral specimen: its real proportional and tabular forms make the comparison observable. No small caps are enabled.
+Inter 4.1, by Rasmus Andersson and The Inter Project Authors. The unmodified WOFF2 files come from the `web/` folder in the supplied Inter 4.1 download, alongside its variable TTF files.
 
-Source: https://github.com/adobe-fonts/source-serif/blob/5f220b17d27ed64873f22cde0dd593685387bd19/WOFF2/VAR/SourceSerif4Variable-Roman.otf.woff2
+Source: https://github.com/rsms/inter/releases/tag/v4.1
+Website: https://rsms.me/inter/
+License: SIL Open Font License 1.1, included in `Inter-LICENSE.txt`. These assets retain their font license; Typograph’s code is MIT-licensed.
 
-Revision: `5f220b17d27ed64873f22cde0dd593685387bd19`
+Both roman and italic faces support weights 100–900 and optical sizes 14–32. The browser loads them when earlier system faces in the font stack are unavailable. Apple fonts are requested from the operating system and are not bundled.
 
-SHA-256: `f146ee102dddcc5bc7a2cf4af5bcf129832195941b92bd0a512626f390688c1e`
+SHA-256:
 
-License: SIL Open Font License 1.1, included in SourceSerif4-LICENSE.md.
+- `InterVariable.woff2`: `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3`
+- `InterVariable-Italic.woff2`: `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a`

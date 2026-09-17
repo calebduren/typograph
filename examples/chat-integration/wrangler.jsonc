@@ -1,0 +1,11 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "typograph-chat-integration",
+  "main": "server/worker.ts",
+  "compatibility_date": "2026-09-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "RecordedChat", "class_name": "RecordedChat" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RecordedChat"] }],
+}

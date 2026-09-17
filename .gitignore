@@ -12,7 +12,3 @@ PRODUCT.md
 .impeccable/
 release/
 apps/playground/.local/
-
-# Built distributable resources
-apps/playground/public/downloads/
-apps/playground/public/skill/

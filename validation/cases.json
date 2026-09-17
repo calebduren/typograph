@@ -1,0 +1,261 @@
+[
+  {
+    "id": "dialogue",
+    "family": "quotes",
+    "input": "\"Hello,\" she said.",
+    "expected": "“Hello,” she said."
+  },
+  {
+    "id": "nested-dialogue",
+    "family": "quotes",
+    "input": "\"She said 'hello'.\"",
+    "expected": "“She said ‘hello’.”"
+  },
+  {
+    "id": "contraction",
+    "family": "quotes",
+    "input": "It's ready; O'Brien agrees.",
+    "expected": "It’s ready; O’Brien agrees."
+  },
+  {
+    "id": "plural-possessive",
+    "family": "quotes",
+    "input": "The cats' bowls are here.",
+    "expected": "The cats’ bowls are here."
+  },
+  {
+    "id": "decade",
+    "family": "quotes",
+    "input": "The '90s were loud.",
+    "expected": "The ’90s were loud."
+  },
+  {
+    "id": "elision-em",
+    "family": "quotes",
+    "input": "Give 'em a chance.",
+    "expected": "Give ’em a chance."
+  },
+  {
+    "id": "elision-n",
+    "family": "quotes",
+    "input": "Rock 'n' roll.",
+    "expected": "Rock ’n’ roll."
+  },
+  {
+    "id": "quoted-elision-word",
+    "family": "quotes",
+    "input": "The word 'em' is short.",
+    "expected": "The word ‘em’ is short."
+  },
+  {
+    "id": "single-quoted-word",
+    "family": "quotes",
+    "input": "The word 'care' matters.",
+    "expected": "The word ‘care’ matters."
+  },
+  {
+    "id": "quoted-number",
+    "family": "quotes",
+    "input": "The label says '90'.",
+    "expected": "The label says ‘90’."
+  },
+  {
+    "id": "quoted-model",
+    "family": "quotes",
+    "input": "\"Model 3\" ships today.",
+    "expected": "“Model 3” ships today."
+  },
+  {
+    "id": "unicode-contraction",
+    "family": "quotes",
+    "input": "Élodie's café.",
+    "expected": "Élodie’s café."
+  },
+  { "id": "unicode-astral", "family": "quotes", "input": "𐐀's letter.", "expected": "𐐀’s letter." },
+  {
+    "id": "nested-contraction",
+    "family": "quotes",
+    "input": "\"It's a 'good' day.\"",
+    "expected": "“It’s a ‘good’ day.”"
+  },
+  {
+    "id": "already-curly",
+    "family": "quotes",
+    "input": "“That’s ‘lovely’.”",
+    "expected": "“That’s ‘lovely’.”"
+  },
+  { "id": "unclosed", "family": "quotes", "input": "\"Hello", "expected": "“Hello" },
+  { "id": "ambiguous-isolated", "family": "preserve", "input": "\"", "expected": "\"" },
+  {
+    "id": "measurement",
+    "family": "preserve",
+    "input": "She is 5'10\" tall.",
+    "expected": "She is 5'10\" tall."
+  },
+  {
+    "id": "measurement-in-dialogue",
+    "family": "preserve",
+    "input": "\"She is 5'10\" tall.\"",
+    "expected": "“She is 5'10\" tall.”"
+  },
+  {
+    "id": "inch-label",
+    "family": "preserve",
+    "input": "A 24\" monitor.",
+    "expected": "A 24\" monitor."
+  },
+  {
+    "id": "derivative",
+    "family": "preserve",
+    "input": "The derivative f'(x) exists.",
+    "expected": "The derivative f'(x) exists."
+  },
+  {
+    "id": "ellipsis-policy",
+    "family": "preserve",
+    "input": "Wait... really?",
+    "expected": "Wait... really?"
+  },
+  {
+    "id": "dash-policy",
+    "family": "preserve",
+    "input": "One -- two --- three.",
+    "expected": "One -- two --- three."
+  },
+  {
+    "id": "bare-url-apostrophe",
+    "family": "preserve",
+    "input": "Visit https://example.com/it's-here today.",
+    "expected": "Visit https://example.com/it's-here today."
+  },
+  {
+    "id": "email-apostrophe",
+    "family": "preserve",
+    "input": "Mail o'brien@example.com.",
+    "expected": "Mail o'brien@example.com."
+  },
+  {
+    "id": "escaped-quote",
+    "family": "preserve",
+    "input": "Say \\\"hello\\\".",
+    "expected": "Say \"hello\"."
+  },
+  {
+    "id": "escaped-after-entity",
+    "family": "preserve",
+    "input": "A &amp; B said \\\"hello\\\".",
+    "expected": "A & B said \"hello\"."
+  },
+  {
+    "id": "unclosed-inline-code",
+    "family": "preserve",
+    "input": "Say \"hello\". `const x = \"hi\"",
+    "expected": "Say “hello”. `const x = \"hi\""
+  },
+  { "id": "empty-double-quote", "family": "preserve", "input": "\"\"", "expected": "\"\"" },
+  {
+    "id": "units",
+    "family": "spacing",
+    "input": "Wait 30 min and walk 5 km.",
+    "expected": "Wait 30 min and walk 5 km."
+  },
+  {
+    "id": "initial",
+    "family": "spacing",
+    "input": "Dr. Smith will call.",
+    "expected": "Dr. Smith will call."
+  },
+  {
+    "id": "figure",
+    "family": "spacing",
+    "input": "See Fig. 2 before leaving.",
+    "expected": "See Fig. 2 before leaving."
+  },
+  {
+    "id": "no-false-unit",
+    "family": "preserve",
+    "input": "It took 30 million years.",
+    "expected": "It took 30 million years."
+  },
+  {
+    "id": "url-apostrophe",
+    "family": "structure",
+    "input": "Visit [the guide](https://example.com/it's-here).",
+    "expected": "Visit the guide."
+  },
+  {
+    "id": "link-label",
+    "family": "structure",
+    "input": "Read [\"the guide\"](https://example.com/it's-here).",
+    "expected": "Read “the guide”."
+  },
+  {
+    "id": "inline-code",
+    "family": "structure",
+    "input": "Use `const x = \"hi\"` and say \"hello\".",
+    "expected": "Use const x = \"hi\" and say “hello”."
+  },
+  {
+    "id": "fenced-code",
+    "family": "structure",
+    "input": "Say \"hello\".\n\n```js\nconst x = \"hi\";\n```",
+    "expected": "Say “hello”.\n\nconst x = \"hi\";"
+  },
+  {
+    "id": "bold-cross-unit",
+    "family": "spacing",
+    "input": "Wait 30 **min** before leaving.",
+    "expected": "Wait 30 min before leaving."
+  },
+  {
+    "id": "bold-cross-name",
+    "family": "spacing",
+    "input": "Dr. **Smith** will call.",
+    "expected": "Dr. Smith will call."
+  },
+  {
+    "id": "inline-code-unit",
+    "family": "structure",
+    "input": "Wait 30 `min` before leaving.",
+    "expected": "Wait 30 min before leaving."
+  },
+  {
+    "id": "inline-math",
+    "family": "structure",
+    "input": "Compute $f'(x)$, then say \"done\".",
+    "expected": "Compute f'(x), then say “done”."
+  },
+  {
+    "id": "raw-html-attribute",
+    "family": "structure",
+    "input": "Say <span title=\"don't\">\"hello\"</span>.",
+    "expected": "Say “hello”."
+  },
+  {
+    "id": "citation-link",
+    "family": "structure",
+    "input": "See [Fig. 2](https://example.com/fig-2) and Fig. 3.",
+    "expected": "See Fig. 2 and Fig. 3."
+  },
+  {
+    "id": "french-unsupported",
+    "family": "locale",
+    "locale": "fr",
+    "input": "Elle a dit: \"Bonjour\".",
+    "expected": "Elle a dit: \"Bonjour\"."
+  },
+  {
+    "id": "german-unsupported",
+    "family": "locale",
+    "locale": "de",
+    "input": "Er sagte: \"Guten Morgen\".",
+    "expected": "Er sagte: \"Guten Morgen\"."
+  },
+  {
+    "id": "polish-unsupported",
+    "family": "locale",
+    "locale": "pl",
+    "input": "To jest test i mamy 30 min.",
+    "expected": "To jest test i mamy 30 min."
+  }
+]

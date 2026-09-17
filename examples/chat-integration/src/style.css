@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+@source "../../../node_modules/streamdown/dist/*.js";
+
+:root {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: #242424;
+  background: #fafaf8;
+  --background: #fafaf8;
+  --foreground: #242424;
+  --primary: #242424;
+  --primary-foreground: white;
+  --secondary: #f0f0ec;
+  --secondary-foreground: #242424;
+  --muted: #eeeee9;
+  --muted-foreground: #666;
+  --accent: #eeeee9;
+  --accent-foreground: #242424;
+  --border: #d9d9d3;
+  --input: #d9d9d3;
+  --ring: #555;
+  --radius: 0.4rem;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+header p {
+  color: #666;
+  margin-bottom: 24px;
+}
+nav,
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+}
+button,
+select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 7px 12px;
+  background: white;
+}
+button:disabled {
+  opacity: 0.45;
+}
+button:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid #2762b8;
+  outline-offset: 3px;
+}
+a {
+  text-decoration: underline;
+}
+article {
+  margin: 24px 0;
+  padding: 20px;
+  background: white;
+  border: 1px solid #deded8;
+  border-radius: 8px;
+}
+article > .response {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+article p {
+  margin: 0 0 12px;
+}
+article pre {
+  overflow-x: auto;
+}
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+}
+details {
+  margin-top: 20px;
+  font-size: 13px;
+}
+details pre {
+  white-space: pre-wrap;
+}
+output {
+  font-size: 13px;
+}

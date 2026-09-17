@@ -4,4 +4,6 @@ dist
 release
 .wrangler
 .impeccable
-benchmarks/results.json
+coverage
+playwright-report
+test-results

@@ -1,0 +1,39 @@
+{
+  "name": "@typograph/chat",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Conservative typography for streamed Markdown chat responses",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "./dist/hanging.css"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./hanging": {
+      "types": "./dist/hanging.d.ts",
+      "import": "./dist/hanging.js"
+    },
+    "./hanging.css": "./dist/hanging.css"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/hanging.ts --format esm --dts --minify --clean && cp src/hanging.css dist/hanging.css"
+  },
+  "dependencies": {
+    "@typehug/en": "0.2.0",
+    "@types/hast": "3.0.4",
+    "@types/mdast": "4.0.4"
+  }
+}

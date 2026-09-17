@@ -1,17 +1,14 @@
-# Releasing Typograph
+# Release preparation
 
-This iteration is a local prerelease: `@calebduren/typograph@2.0.0-next.1`. The unscoped `typograph` name belongs to an unrelated npm project. The scoped name is configured locally; registry publication and ownership have not been verified.
+`@typograph/chat@0.0.0` is a private, unpublished candidate. Confirm the final registry name and access before changing publication settings or advertising a public install command.
 
-1. Update the library and playground versions, workspace dependency, lockfile, and changelogs.
-2. Run `npm ci` and `npm run check`.
-3. Review `release/calebduren-typograph-<version>.tgz`, produced by the consumer check. Inspect `npm pack --dry-run -w @calebduren/typograph` for unintended files.
-4. Check the generated package and skill links in the site. `npm run build:resources` copies the complete skill folder, creates both archives, and records package integrity. It is already part of the build.
-5. When changing the punctuation engine, run `npm run bench` and review the measurements. The benchmark covers punctuation entrypoints, not the whole typography system.
-6. Create the release and attach the tested archive when ready to publish. Archive installation works independently of npm registry availability.
-7. For a registry release, first verify access to the `@calebduren` scope. Publish from `packages/typograph` with `npm publish --access public --tag next` for this prerelease. Use npm's login and required second factor. Advertise a registry install command only after an independent public install succeeds.
-8. When ready to host, build and deploy with `npx wrangler deploy`. The checked-in configuration creates a dedicated `typograph` Worker for `typograph.dev` and `typograph.ing`. Confirm the active Cloudflare account owns the intended zones before applying it.
-9. Verify the production root page, hashed assets, downloads, clipboard feedback, mobile layout, and redirects.
+1. Update the package version, workspace dependencies, lockfile, and changelog together.
+2. Run `npm ci`, `npm run check`, `npm run test:landing`, and `npm run test:chat-integration`.
+3. Review `release/typograph-chat-<version>.tgz` and `release/chat-package-check.json`. The clean-consumer check creates them after verifying exports, declared dependencies, public TypeScript types, and the file allowlist. Inspect `npm pack --dry-run -w @typograph/chat` for unintended files.
+4. When the engine changes, run `npm run bench:chat`; use `npm run bench` for a Streamdown server-render comparison. Review real streamed replies, narrow screens, zoom, and selection/copy behavior before release.
+5. Publish only after the chosen registry name, access, version, and artifact are verified. Check an independent public installation before replacing source-install instructions on the site.
+6. For an authorized site deployment, `npm run build` produces `apps/playground/dist`. The existing Wrangler configuration targets `typograph.dev` and `typograph.ing`; verify the account and intended zones before deploying. Afterward check the root page, assets, integration guide, comparison, clipboard feedback, mobile layout, and redirect.
 
-The primary domain is `typograph.dev`. Requests to `typograph.ing` redirect to the primary domain while preserving path and query. Other missing assets remain 404 responses. Both domains were registered by the owner; checked-in routes are preparation, not evidence of deployment.
+The secondary domain redirects to `typograph.dev`, preserving path and query. Missing assets remain 404 responses. Configuration is not evidence of deployment.
 
-The package contains JavaScript, types, optional CSS, documentation, license, and upstream notices. Skill downloads contain only the portable skill and its references. No development metadata, private fonts, or credentials belong in either archive.
+The package ships JavaScript, TypeScript declarations, optional hanging CSS, documentation, and license notices. It contains no fonts or site UI. Keep credentials and development artifacts out of release archives. No package or site is published by the verification commands.

@@ -1,15 +1,16 @@
-@import '@fontsource-variable/fraunces';
-@import '@fontsource-variable/fraunces/wght-italic.css';
-@import '@fontsource-variable/dm-sans';
-@import '@fontsource-variable/dm-sans/wght-italic.css';
-@import '@fontsource/dm-mono/400.css';
-@import '@typograph/brand-fonts';
-
-/* Adobe’s full font retains real pnum/tnum features for the numeral specimen. */
+/* Inter 4.1. Original webfonts and SIL OFL are included in public/fonts/. */
 @font-face {
-  font-family: 'Source Serif 4';
-  src: url('/fonts/SourceSerif4Variable-Roman.woff2') format('woff2');
-  font-weight: 200 900;
+  font-family: 'Inter Variable';
+  src: url('/fonts/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('/fonts/InterVariable-Italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
   font-display: swap;
 }
