@@ -11,6 +11,8 @@ import { Streamdown, defaultRemarkPlugins } from 'streamdown';
 import hangingPunctuation from '@calebduren/typograph/hanging';
 import { chunkEnds, example, remarkPreview, previewRehypePlugins } from './chat-preview';
 import { Toggle } from './Toggle';
+import { TypographyControls } from './TypographyControls';
+import { Slider } from './Slider';
 import { useScrollFade } from './use-scroll-fade';
 import { settingsSummary, type TypographySettings } from './integration-settings';
 
@@ -169,25 +171,8 @@ export function ChatComparison({
     <>
       <div className="comparison-controls">
         <div className="typography-settings" role="group" aria-label="Typography settings">
-          <div className="typography-settings-switches">
-            <Toggle
-              label="Smart punctuation"
-              checked={settings.punctuation}
-              onChange={(punctuation) => onSettingsChange({ ...settings, punctuation })}
-            />
-            <Toggle
-              label="Non-breaking spaces"
-              checked={settings.spacing}
-              onChange={(spacing) => onSettingsChange({ ...settings, spacing })}
-            />
-            <Toggle
-              label="Hanging punctuation"
-              checked={settings.hanging}
-              onChange={(hanging) => onSettingsChange({ ...settings, hanging })}
-            />
-          </div>
-          <p>
-            Your selection updates the preview, code, and agent prompts below.          </p>
+          <TypographyControls settings={settings} onSettingsChange={onSettingsChange} />
+          <p>Your selection updates the preview, code, and agent prompts below.</p>
         </div>
         <div className="demo-toolbar">
           <div className="preview-modes segmented-control" role="group" aria-label="Preview mode">
@@ -390,21 +375,24 @@ export function ChatComparison({
         </div>
       </div>
       <div className="playback-controls">
+        <span className="sr-only" role="status" data-testid="playback-state">
+          {complete ? 'Complete' : !running ? 'Paused' : thinking ? 'Thinking' : 'Streaming'}
+        </span>
         <button className="replay-button" disabled={!source} onClick={replay}>
           {running && !complete ? 'Pause' : complete ? 'Replay stream' : 'Continue'}
         </button>
         <label className="timeline">
           <span className="sr-only">Stream progress</span>
-          <input
-            aria-label="Stream progress"
-            type="range"
+          <Slider
+            label="Stream progress"
             min={0}
             max={Math.max(1, ends.length)}
             value={position}
             disabled={!source}
-            onChange={(event) => {
+            valueText={`${Math.round((position / Math.max(1, ends.length)) * 100)}% of example`}
+            onChange={(value) => {
               setRunning(false);
-              setCursor(Number(event.target.value));
+              setCursor(value);
             }}
           />
         </label>
@@ -413,14 +401,14 @@ export function ChatComparison({
           title="ch scales with the font’s zero glyph; it is not an exact character count."
         >
           Measure{' '}
-          <input
-            aria-label="Reading width"
-            type="range"
+          <Slider
+            label="Reading width"
             min={28}
             max={64}
             step={2}
             value={width}
-            onChange={(event) => setWidth(Number(event.target.value))}
+            valueText={`${width} ch maximum`}
+            onChange={setWidth}
           />
           <output>{width} ch max</output>
         </label>

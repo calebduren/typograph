@@ -135,11 +135,15 @@ test('playback pauses, scrubs, and resumes through an ambiguous prefix', async (
   await page
     .getByRole('textbox', { name: 'Original Markdown' })
     .fill('It took 30 million small decisions. Wait 30 min before leaving.');
-  await page.getByRole('switch', { name: 'Non-breaking spaces' }).click();
-  await expect(page.getByRole('switch', { name: 'Non-breaking spaces' })).toHaveAttribute(
-    'aria-checked',
-    'true',
-  );
+  await page
+    .getByRole('group', { name: 'Typography settings', exact: true })
+    .getByRole('switch', { name: 'Non-breaking spaces' })
+    .click();
+  await expect(
+    page
+      .getByRole('group', { name: 'Typography settings', exact: true })
+      .getByRole('switch', { name: 'Non-breaking spaces' }),
+  ).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Replay stream' }).click();
   await expect(page.getByTestId('playback-state')).toHaveText('Streaming');
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
@@ -329,7 +333,10 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   const formatted = page.getByTestId('formatted-response');
   const text = await formatted.textContent();
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
-  await page.getByRole('switch', { name: 'Hanging punctuation' }).click();
+  await page
+    .getByRole('group', { name: 'Typography settings', exact: true })
+    .getByRole('switch', { name: 'Hanging punctuation' })
+    .click();
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
   for (const width of ['28', '64']) {
     await page.getByRole('slider', { name: 'Reading width' }).fill(width);
@@ -385,11 +392,17 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   );
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: `${review}/mobile-hanging.png`, fullPage: true });
-  await page.getByRole('switch', { name: 'Hanging punctuation' }).click();
+  await page
+    .getByRole('group', { name: 'Typography settings', exact: true })
+    .getByRole('switch', { name: 'Hanging punctuation' })
+    .click();
   await expect(formatted.locator('.typograph-opening')).toHaveCount(0);
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
   expect(await formatted.textContent()).toBe(text);
-  await page.getByRole('switch', { name: 'Non-breaking spaces' }).click();
+  await page
+    .getByRole('group', { name: 'Typography settings', exact: true })
+    .getByRole('switch', { name: 'Non-breaking spaces' })
+    .click();
   expect(
     await formatted
       .locator('mark[data-typograph-change=spacing]')
@@ -404,17 +417,16 @@ test('conversation replays a user message, pauses thinking, streams, and cancels
   await page.goto('/');
   const original = page.getByTestId('source-editor');
   const source = await original.inputValue();
-  await page.getByRole('button', { name: 'Conversation', exact: true }).click();
+  await page.getByRole('button', { name: 'AI Conversation', exact: true }).click();
   await expect(page.locator('.formatted-pane .chat-user')).toContainText(example.question);
   await expect(page.getByTestId('playback-state')).toHaveText('Complete');
-  await expect(page.getByText('Scripted conversation · No model call')).toBeVisible();
   await expect(original).toHaveValue(example.text);
   await page
     .getByRole('group', { name: 'Preview mode' })
     .getByRole('button', { name: 'Text', exact: true })
     .click();
   await expect(original).toHaveValue(example.text);
-  await page.getByRole('button', { name: 'Conversation', exact: true }).click();
+  await page.getByRole('button', { name: 'AI Conversation', exact: true }).click();
   await page.getByRole('button', { name: 'Replay stream' }).click();
   await expect(page.getByTestId('playback-state')).toHaveText('Thinking');
   await expect(page.locator('.formatted-pane .thinking-note')).toBeVisible();
@@ -444,7 +456,10 @@ test('conversation replays a user message, pauses thinking, streams, and cancels
   await expect(page.getByTestId('playback-state')).toHaveText('Complete');
   expect(await scrollArea.evaluate((node) => node.scrollTop)).toBe(0);
   await expect(page.getByTestId('formatted-response')).toContainText('“It’s in the details,”');
-  await page.getByRole('switch', { name: 'Hanging punctuation' }).click();
+  await page
+    .getByRole('group', { name: 'Typography settings', exact: true })
+    .getByRole('switch', { name: 'Hanging punctuation' })
+    .click();
   await page.getByRole('switch', { name: 'Show changes' }).click();
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: `${review}/conversation.png`, fullPage: true });
@@ -767,8 +782,14 @@ test('Show changes only paints annotations without changing glyph positions or t
     await page.goto('/#demo');
     await expect(page.getByTestId('formatted-response')).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
-    await page.getByRole('switch', { name: 'Non-breaking spaces', exact: true }).click();
-    await page.getByRole('switch', { name: 'Hanging punctuation', exact: true }).click();
+    await page
+      .getByRole('group', { name: 'Typography settings', exact: true })
+      .getByRole('switch', { name: 'Non-breaking spaces', exact: true })
+      .click();
+    await page
+      .getByRole('group', { name: 'Typography settings', exact: true })
+      .getByRole('switch', { name: 'Hanging punctuation', exact: true })
+      .click();
     const viewport = page.getByRole('region', { name: 'Text comparison' });
     const geometry = () =>
       viewport.evaluate((area) => {
@@ -867,4 +888,71 @@ test('plain CSS styles Streamdown markup, code lines, and long blocks without Ta
     area.scrollTop = 0;
   });
   await page.screenshot({ path: `${review}/renderer-css-mobile.png` });
+});
+
+test('integration switches share settings with the comparison and copied instructions', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  const preview = page.getByRole('group', { name: 'Typography settings', exact: true });
+  const integration = page.getByRole('group', {
+    name: 'Integration typography settings',
+    exact: true,
+  });
+  await expect(integration.getByRole('switch')).toHaveCount(3);
+  await integration.getByRole('switch', { name: 'Non-breaking spaces' }).click();
+  await integration.getByRole('switch', { name: 'Smart punctuation' }).click();
+  await expect(preview.getByRole('switch', { name: 'Non-breaking spaces' })).toBeChecked();
+  await expect(preview.getByRole('switch', { name: 'Smart punctuation' })).not.toBeChecked();
+  await expect(page.getByTestId('formatted-response')).toContainText('"It\'s in the details');
+  expect(await page.getByTestId('formatted-response').textContent()).toContain('30\u00a0min');
+  await preview.getByRole('switch', { name: 'Hanging punctuation' }).click();
+  await expect(integration.getByRole('switch', { name: 'Hanging punctuation' })).toBeChecked();
+  await page.getByRole('button', { name: 'Copy agent prompt' }).click();
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain('punctuation: false, spacing: true');
+  expect(copied).toContain('Hanging punctuation: on');
+  await integration.getByRole('switch', { name: 'Hanging punctuation' }).click();
+  await expect(page.getByRole('button', { name: 'Copy agent prompt' })).toHaveText('Copy prompt');
+});
+
+test('sliders preserve native keyboard input, clamp elastic dragging, and respect reduced motion', async ({
+  page,
+}) => {
+  await page.goto('/#demo');
+  const width = page.getByRole('slider', { name: 'Reading width' });
+  await width.focus();
+  await width.press('Home');
+  await expect(width).toHaveValue('28');
+  await width.press('End');
+  await expect(width).toHaveValue('64');
+  await width.press('ArrowLeft');
+  await expect(width).toHaveValue('62');
+  await expect(width).toHaveAttribute('aria-valuetext', '62 ch maximum');
+  const visual = page.locator('.width-control .slider-visual');
+  const bounds = (await width.boundingBox())!;
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width + 80, bounds.y + bounds.height / 2);
+  await expect(width).toHaveValue('64');
+  expect(
+    await visual.evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).a),
+  ).toBeGreaterThan(1);
+  await page.mouse.up();
+  await expect(visual).toHaveCSS('transform', 'none');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x - 80, bounds.y + bounds.height / 2);
+  await expect(width).toHaveValue('28');
+  await expect(visual).toHaveCSS('transform', 'none');
+  await page.mouse.up();
+  await page
+    .getByRole('group', { name: 'Original view' })
+    .getByRole('button', { name: 'Markdown', exact: true })
+    .click();
+  await page.getByRole('textbox', { name: 'Original Markdown' }).fill('');
+  await expect(page.getByRole('slider', { name: 'Stream progress' })).toBeDisabled();
 });

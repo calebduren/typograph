@@ -1,13 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowUpRight, Copy, Check } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { TypographyControls } from './TypographyControls';
 import { agentPrompt } from './agent-prompts';
 import { useScrollFade } from './use-scroll-fade';
 import {
   defaultSettings,
   integrationCode,
   integrationStacks,
-  settingsSummary,
   type IntegrationStack,
   type TypographySettings,
 } from './integration-settings';
@@ -20,7 +20,13 @@ const ChatComparison = lazy(() =>
   import('./ChatComparison').then((module) => ({ default: module.ChatComparison })),
 );
 
-function Integration({ settings }: { settings: TypographySettings }) {
+function Integration({
+  settings,
+  onSettingsChange,
+}: {
+  settings: TypographySettings;
+  onSettingsChange: (settings: TypographySettings) => void;
+}) {
   const [recipe, setRecipe] = useState<IntegrationStack>('AI Elements');
   const [mode, setMode] = useState<'prompt' | 'code'>('prompt');
   const [copiedContent, setCopiedContent] = useState('');
@@ -52,15 +58,14 @@ function Integration({ settings }: { settings: TypographySettings }) {
           <br />
           Right where you render.
         </h2>
-        <p>
-          Add the selected refinements to your existing Markdown pipeline. Keep your fonts, your
-          components, and your original messages.
-        </p>
         <p className="muted">Works in the browser. No model call, API key, or new service.</p>
-        <p className="selected-settings">
-          <span>Your configuration</span>
-          {settingsSummary(settings)}
-        </p>
+        <div
+          className="integration-settings"
+          role="group"
+          aria-label="Integration typography settings"
+        >
+          <TypographyControls settings={settings} onSettingsChange={onSettingsChange} />
+        </div>
         <p>
           Building with an agent? Choose your stack and copy the prompt into your coding assistant.
         </p>
@@ -216,8 +221,9 @@ function Landing() {
                 <br />
                 brown fox says,
                 <br />
-                <mark data-change="punctuation">‘</mark>Oh, that<mark data-change="punctuation">’</mark>s
-                better.<mark data-change="punctuation">’”</mark>
+                <mark data-change="punctuation">‘</mark>Oh, that
+                <mark data-change="punctuation">’</mark>s better.
+                <mark data-change="punctuation">’”</mark>
               </div>
             </figure>
           </section>
@@ -234,7 +240,7 @@ function Landing() {
               </Suspense>
             </div>
           </section>
-          <Integration settings={settings} />
+          <Integration settings={settings} onSettingsChange={setSettings} />
           <section className="principles section-rule" aria-labelledby="care-title">
             <h2 id="care-title">Careful where it counts.</h2>
             <div className="principle-row">
@@ -336,7 +342,6 @@ function Landing() {
           <a className="wordmark" href="#top">
             typograph
           </a>
-          <span>Details, considered.</span>
           <div>
             <a href="https://calebduren.com">
               Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
