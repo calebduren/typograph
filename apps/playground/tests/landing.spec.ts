@@ -507,7 +507,7 @@ test('conversation replays a user message, pauses thinking, streams, and cancels
   await expect(original).toHaveValue(example.text);
   await page
     .getByRole('group', { name: 'Preview mode' })
-    .getByRole('button', { name: 'Text', exact: true })
+    .getByRole('button', { name: 'Example Text', exact: true })
     .click();
   await expect(original).toHaveValue(example.text);
   await page.getByRole('button', { name: 'AI Conversation', exact: true }).click();
@@ -690,7 +690,7 @@ test('vertical scroll fades follow both edges, resized content, and restored pro
     .poll(() =>
       preview.evaluate((node) => getComputedStyle(node).getPropertyValue('--scroll-fade-bottom')),
     )
-    .toBe('80px');
+    .toBe('96px');
   await page
     .getByRole('group', { name: 'Original view' })
     .getByRole('button', { name: 'Markdown', exact: true })
@@ -703,16 +703,16 @@ test('vertical scroll fades follow both edges, resized content, and restored pro
       bottom: getComputedStyle(node).getPropertyValue('--scroll-fade-bottom'),
     }));
   for (const area of [preview, prompt]) {
-    await expect.poll(() => edges(area)).toEqual({ top: '0px', bottom: '80px' });
+    await expect.poll(() => edges(area)).toEqual({ top: '0px', bottom: '96px' });
     expect(await area.evaluate((node) => getComputedStyle(node).maskImage)).not.toBe('none');
     await area.evaluate((node) => {
       node.scrollTop = (node.scrollHeight - node.clientHeight) / 2;
     });
-    await expect.poll(() => edges(area)).toEqual({ top: '80px', bottom: '80px' });
+    await expect.poll(() => edges(area)).toEqual({ top: '96px', bottom: '96px' });
     await area.evaluate((node) => {
       node.scrollTop = node.scrollHeight;
     });
-    await expect.poll(() => edges(area)).toEqual({ top: '80px', bottom: '0px' });
+    await expect.poll(() => edges(area)).toEqual({ top: '96px', bottom: '0px' });
     await area.evaluate((node) => {
       node.scrollTop = 0;
     });
@@ -724,17 +724,17 @@ test('vertical scroll fades follow both edges, resized content, and restored pro
   await page.getByRole('button', { name: 'Cloudflare', exact: true }).click();
   await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
   const replacement = page.getByRole('region', { name: 'Typography agent prompt' });
-  await expect.poll(() => edges(replacement)).toEqual({ top: '0px', bottom: '80px' });
+  await expect.poll(() => edges(replacement)).toEqual({ top: '0px', bottom: '96px' });
   await replacement.evaluate((node) => {
     node.scrollTop = node.scrollHeight;
   });
-  await expect.poll(() => edges(replacement)).toEqual({ top: '80px', bottom: '0px' });
+  await expect.poll(() => edges(replacement)).toEqual({ top: '96px', bottom: '0px' });
   await page.getByRole('button', { name: 'Reset example' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Original', exact: true }).click();
-  await expect.poll(() => edges(preview)).toEqual({ top: '0px', bottom: '80px' });
+  await expect.poll(() => edges(preview)).toEqual({ top: '0px', bottom: '96px' });
   await page.getByRole('button', { name: 'With Typograph', exact: true }).click();
-  await expect.poll(() => edges(preview)).toEqual({ top: '0px', bottom: '80px' });
+  await expect.poll(() => edges(preview)).toEqual({ top: '0px', bottom: '96px' });
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: `${review}/scroll-fades-mobile-dark.png`, fullPage: true });

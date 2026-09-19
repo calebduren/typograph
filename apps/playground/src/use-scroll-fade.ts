@@ -6,8 +6,8 @@ export function useScrollFade(ref: RefObject<HTMLElement | null>, mountKey?: str
     const element = ref.current;
     if (!element) return;
     const remaining = Math.max(0, element.scrollHeight - element.clientHeight - element.scrollTop);
-    const top = element.clientHeight ? Math.min(80, Math.max(0, element.scrollTop)) : 0;
-    const bottom = element.clientHeight ? Math.min(80, remaining) : 0;
+    const top = element.clientHeight ? Math.min(96, Math.max(0, element.scrollTop)) : 0;
+    const bottom = element.clientHeight ? Math.min(96, remaining) : 0;
     element.style.setProperty('--scroll-fade-top', `${top}px`);
     element.style.setProperty('--scroll-fade-bottom', `${bottom}px`);
   }, [ref]);
