@@ -65,7 +65,7 @@ function Integration({ settings }: { settings: TypographySettings }) {
           Building with an agent? Choose your stack and copy the prompt into your coding assistant.
         </p>
         <a className="underlined" href="/integration.md">
-          Read the integration guide <ArrowUpRight size={15} aria-hidden="true" />
+          Read the integration guide <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
         </a>
         <p className="release-note">
           <code>npm install @calebduren/typograph</code>
@@ -129,11 +129,6 @@ function Integration({ settings }: { settings: TypographySettings }) {
               }
             }}
           >
-            {copied ? (
-              <Check size={15} aria-hidden="true" />
-            ) : (
-              <Copy size={15} aria-hidden="true" />
-            )}{' '}
             <span aria-live="polite">
               {copied ? 'Copied' : mode === 'prompt' ? 'Copy prompt' : 'Copy code'}
             </span>
@@ -189,7 +184,7 @@ function Landing() {
             <a href="#demo">Try it</a>
             <a href="#integrate">Integration</a>
             <a href="https://github.com/calebduren/typograph">
-              GitHub <ArrowUpRight size={13} aria-hidden="true" />
+              GitHub <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
             </a>
           </nav>
         </header>
@@ -211,7 +206,7 @@ function Landing() {
             </div>
             <figure
               className="punctuation-proof"
-              aria-label="The quick brown fox says, ‘Let’s go!’ Opening quotation mark hangs in lilac; smart punctuation is highlighted in blue."
+              aria-label="The quick brown fox says, ‘Oh, that’s better.’ Opening quotation mark hangs in lilac; smart punctuation is highlighted in blue."
             >
               <div className="proof-result" data-rulers="true" aria-hidden="true">
                 <span className="typograph-opening">
@@ -221,8 +216,8 @@ function Landing() {
                 <br />
                 brown fox says,
                 <br />
-                <mark data-change="punctuation">‘</mark>Let<mark data-change="punctuation">’</mark>s
-                go!<mark data-change="punctuation">’”</mark>
+                <mark data-change="punctuation">‘</mark>Oh, that<mark data-change="punctuation">’</mark>s
+                better.<mark data-change="punctuation">’”</mark>
               </div>
             </figure>
           </section>
@@ -300,10 +295,11 @@ function Landing() {
                 <div>
                   <dt>Built on</dt>
                   <dd>
+                    Remark for Markdown structure.{' '}
                     <a href="https://typehug.aliszu.com/" className="underlined">
                       Typehug
                     </a>{' '}
-                    for optional no-break spacing. Remark for Markdown structure. MIT licensed.
+                    for optional no-break spacing. MIT licensed.
                   </dd>
                 </div>
                 <div>
@@ -340,10 +336,10 @@ function Landing() {
           <a className="wordmark" href="#top">
             typograph
           </a>
-          <span>Consider the details.</span>
+          <span>Details, considered.</span>
           <div>
             <a href="https://calebduren.com">
-              Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" />
+              Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
             </a>
           </div>
         </footer>

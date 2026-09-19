@@ -10,6 +10,7 @@
   --muted: #666666;
   --line: #d8d8d8;
   --sheet: #f7f7f7;
+  --brand: #ff0000;
   --soft: #ededed;
   --selected: #dedede;
   --change-punctuation: #dfeafa;
@@ -19,9 +20,11 @@
   color: var(--ink);
   background: var(--paper);
   color-scheme: light dark;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
   scrollbar-color: var(--line) var(--paper);
   accent-color: var(--ink);
+  text-wrap: pretty;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -78,7 +81,11 @@ a {
   text-underline-offset: 0.22em;
 }
 a:hover {
-  text-decoration: underline;
+  color: var(--brand);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--brand);
+  text-decoration-thickness: 0.75px;
+  text-underline-offset: 0.22em;
 }
 button,
 input,
@@ -170,7 +177,10 @@ textarea {
   font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: -0.025em;
-  color: red;
+  color: var(--brand)
+}
+.brand {
+  color: var(--brand); 
 }
 .site-header nav,
 .site-footer > div {
@@ -183,9 +193,15 @@ textarea {
 .site-footer a,
 .underlined {
   display: inline-flex;
-  gap: 0.4rem;
+  gap: 0.125rem;
   align-items: center;
 }
+.site-header nav a svg,
+.site-footer a svg,
+.underlined svg {
+  transform: translateY(0.5px);
+}
+.underlined 
 .hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -241,29 +257,24 @@ textarea {
   background: var(--paper);
 }
 .segmented-control {
+  font-size: 0.8125rem;
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 2px;
   width: fit-content;
   max-width: 100%;
-  padding: 0.25rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
+  border-radius: 6px;
   background: var(--soft);
 }
 .segmented-control button {
-  min-height: 2.5rem;
-  padding: 0.35rem 0.65rem;
+  padding: 4px 12px;
   border: 1px solid transparent;
-  border-radius: 0.25rem;
-  font-size: 0.8125rem;
-  line-height: 1.4;
+  border-radius: 6px;
   color: var(--muted);
 }
 .segmented-control button:hover:not(:disabled) {
   color: var(--ink);
-  background: var(--sheet);
 }
 .segmented-control button[aria-pressed='true'] {
   color: var(--ink);
@@ -287,23 +298,30 @@ textarea {
 }
 .typography-settings {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.25rem 2rem;
   padding-block: 1rem;
-  border-block: 1px solid var(--line);
   font-size: 0.875rem;
 }
+.typography-settings-switches {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
 .typography-settings p {
-  flex-basis: 100%;
   color: var(--muted);
-  font-size: 0.8125rem;
 }
 .demo-toolbar {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  min-height: 4.5rem;
-  padding: 0.5rem 0;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--line);
   font-size: 0.8125rem;
 }
@@ -326,17 +344,15 @@ select {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  width: 2rem;
-  height: 1.125rem;
-  padding: 2px;
-  border: 1px solid var(--muted);
+  width: 26px;
+  padding: 1px;
   border-radius: 1rem;
   background: var(--soft);
 }
 .toggle-thumb {
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
+  width: 16px;
+  height: 12px;
+  border-radius: 1rem;
   background: var(--muted);
 }
 .toggle[aria-checked='true'] .toggle-track {
@@ -344,7 +360,7 @@ select {
   background: var(--ink);
 }
 .toggle[aria-checked='true'] .toggle-thumb {
-  transform: translateX(0.875rem);
+  transform: translateX(8px);
   background: var(--paper);
 }
 .toggle[data-motion='on'] .toggle-thumb {
@@ -436,9 +452,9 @@ select {
 }
 /* Streamdown emits Tailwind classes; this plain-CSS app styles its markup directly. */
 .response-prose blockquote {
-  margin: 0;
+  margin: 1rem 0 0 0;
   padding-inline-start: 1.25em;
-  border-left: 1px solid var(--line);
+  border-left: 2px solid var(--line);
 }
 .response-prose ul,
 .response-prose ol {
@@ -471,7 +487,7 @@ select {
   margin-block: 1.25em 0;
 }
 .response-prose a {
-  text-decoration: underline;
+  text-decoration: dotted;
 }
 .response-prose strong,
 .response-prose [data-streamdown='strong'] {
@@ -567,8 +583,7 @@ mark::before,
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  padding-block: 1rem;
-  border-block: 1px solid var(--line);
+  padding-top: 1.5rem;
   font-size: 0.8125rem;
 }
 .replay-button {
@@ -576,7 +591,7 @@ mark::before,
   gap: 0.6rem;
   align-items: center;
   min-height: 2.75rem;
-  min-width: 8rem;
+  min-width: 88px;
 }
 .timeline {
   flex: 1;
@@ -659,32 +674,25 @@ input[type='range'] {
 }
 .principles {
   display: grid;
-  grid-template-columns: 1fr 1.6fr;
+  grid-template-columns: 1fr 2fr;
   column-gap: 4rem;
+  row-gap: 3rem;
 }
 .principles > h2 {
   grid-row: span 3;
 }
 .principle-row {
   display: grid;
-  grid-template-columns: 1fr 1.65fr;
+  grid-template-columns: 1fr 2fr;
   gap: 2rem;
-  padding-bottom: 1.75rem;
-  margin-bottom: 1.75rem;
-  border-bottom: 1px solid var(--line);
-}
-.principle-row:last-child {
-  margin-bottom: 0;
-  border-bottom: 0;
-  padding-bottom: 0;
+  padding-top: 0.5rem;
 }
 .principle-row p {
   color: var(--muted);
-  font-size: 0.9375rem;
 }
 .integration {
   display: grid;
-  grid-template-columns: 1fr 1.6fr;
+  grid-template-columns: 1fr 2fr;
   gap: 4rem;
 }
 .section-intro > p {
@@ -700,7 +708,10 @@ input[type='range'] {
   font-size: 0.875rem;
 }
 .underlined {
-  text-decoration: underline;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--muted);
+  text-decoration-thickness: 0.75px;
+  text-underline-offset: 0.25em;
 }
 .section-intro .release-note {
   margin-top: 1.75rem;
@@ -720,7 +731,7 @@ input[type='range'] {
   background: var(--sheet);
 }
 .recipe-tab-row {
-  padding: 1rem 1.5rem 0.25rem;
+  padding: 1.5rem;
 }
 .recipe-tools {
   display: flex;
@@ -728,8 +739,7 @@ input[type='range'] {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.25rem 1rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.8125rem;
+  padding: 0 1.5rem 1.5rem;
 }
 .recipe-copy {
   display: inline-flex;
@@ -755,7 +765,6 @@ input[type='range'] {
   padding: 0.75rem 1.5rem 1.5rem;
 }
 .recipe-note {
-  border-top: 1px solid var(--line);
   margin-inline: 1.5rem;
   padding-block: 1rem 1.5rem;
   font-size: 0.8125rem;
@@ -767,29 +776,33 @@ input[type='range'] {
 }
 .scope-section {
   display: grid;
-  grid-template-columns: 1fr 1.6fr;
+  grid-template-columns: 1fr 2fr;
   gap: 4rem;
 }
 .scope-section > div > p {
   max-width: 24rem;
   margin-top: 1.25rem;
   color: var(--muted);
-  font-size: 0.9375rem;
+}
+.scope-details {
+  padding-top: 0.5rem;
+}
+.scope-details > dl {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
 }
 .scope-details dl > div {
   display: grid;
   grid-template-columns: 7rem 1fr;
   gap: 1.25rem;
-  padding-bottom: 1.25rem;
-  font-size: 0.9375rem;
 }
 .scope-details dd {
   color: var(--muted);
 }
 .scope-limits {
-  border-top: 1px solid var(--line);
-  padding-top: 1rem;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
+  padding-top: 3rem;
 }
 .scope-limits h3 {
   font-size: inherit;
@@ -804,8 +817,8 @@ input[type='range'] {
   padding-block: 1.5rem 2.5rem;
   border-top: 1px solid var(--line);
   display: flex;
-  align-items: center;
-  gap: 2rem;
+  align-items: baseline;
+  gap: 1rem;
 }
 .site-footer > span {
   color: var(--muted);
@@ -849,7 +862,8 @@ mark[data-typograph-change='spacing'] {
 .reset-example {
   min-height: 2.75rem;
   margin-left: auto;
-  text-decoration: underline;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--muted);
   text-underline-offset: 0.25em;
 }
 .source-field {

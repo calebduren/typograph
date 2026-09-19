@@ -7,7 +7,6 @@ import {
   type CSSProperties,
   type ComponentProps,
 } from 'react';
-import { Pause, Play, RotateCcw } from 'lucide-react';
 import { Streamdown, defaultRemarkPlugins } from 'streamdown';
 import hangingPunctuation from '@calebduren/typograph/hanging';
 import { chunkEnds, example, remarkPreview, previewRehypePlugins } from './chat-preview';
@@ -86,7 +85,6 @@ function ConversationContext({
   return (
     <div className="conversation-context reading">
       <div className="chat-user">
-        <span>You</span>
         <p>{question}</p>
       </div>
       <div className="chat-agent-label">
@@ -171,26 +169,25 @@ export function ChatComparison({
     <>
       <div className="comparison-controls">
         <div className="typography-settings" role="group" aria-label="Typography settings">
-          <Toggle
-            label="Smart punctuation"
-            checked={settings.punctuation}
-            onChange={(punctuation) => onSettingsChange({ ...settings, punctuation })}
-          />
-          <Toggle
-            label="Non-breaking spaces"
-            checked={settings.spacing}
-            onChange={(spacing) => onSettingsChange({ ...settings, spacing })}
-          />
-          <Toggle
-            label="Hanging punctuation"
-            checked={settings.hanging}
-            onChange={(hanging) => onSettingsChange({ ...settings, hanging })}
-          />
+          <div className="typography-settings-switches">
+            <Toggle
+              label="Smart punctuation"
+              checked={settings.punctuation}
+              onChange={(punctuation) => onSettingsChange({ ...settings, punctuation })}
+            />
+            <Toggle
+              label="Non-breaking spaces"
+              checked={settings.spacing}
+              onChange={(spacing) => onSettingsChange({ ...settings, spacing })}
+            />
+            <Toggle
+              label="Hanging punctuation"
+              checked={settings.hanging}
+              onChange={(hanging) => onSettingsChange({ ...settings, hanging })}
+            />
+          </div>
           <p>
-            Your selection updates the preview, code, and agent prompts below.
-            {settings.hanging &&
-              ' Hanging applies to opening quotes in paragraphs, headings, and list items.'}
-          </p>
+            Your selection updates the preview, code, and agent prompts below.          </p>
         </div>
         <div className="demo-toolbar">
           <div className="preview-modes segmented-control" role="group" aria-label="Preview mode">
@@ -203,7 +200,7 @@ export function ChatComparison({
                   if (cursor === -1) setCursor(0);
                 }}
               >
-                {value === 'text' ? 'Text' : 'Conversation'}
+                {value === 'text' ? 'Text' : 'AI Conversation'}
               </button>
             ))}
           </div>
@@ -227,6 +224,7 @@ export function ChatComparison({
           <button
             aria-pressed={mobileView === 'formatted'}
             onClick={() => setMobileView('formatted')}
+            className="brand"
           >
             With Typograph
           </button>
@@ -253,7 +251,7 @@ export function ChatComparison({
             </div>
           </div>
           <div className="pane-heading formatted-pane">
-            <h3>With Typograph</h3>
+            <h3 className="brand">With Typograph</h3>
             <Toggle label="Show changes" checked={highlight} onChange={setHighlight} />
           </div>
         </div>
@@ -393,13 +391,6 @@ export function ChatComparison({
       </div>
       <div className="playback-controls">
         <button className="replay-button" disabled={!source} onClick={replay}>
-          {running && !complete ? (
-            <Pause size={16} aria-hidden="true" />
-          ) : complete ? (
-            <RotateCcw size={16} aria-hidden="true" />
-          ) : (
-            <Play size={16} aria-hidden="true" />
-          )}
           {running && !complete ? 'Pause' : complete ? 'Replay stream' : 'Continue'}
         </button>
         <label className="timeline">
@@ -417,15 +408,6 @@ export function ChatComparison({
             }}
           />
         </label>
-        <span className="playback-state" data-testid="playback-state">
-          {running && thinking
-            ? 'Thinking'
-            : playing
-              ? 'Streaming'
-              : complete
-                ? 'Complete'
-                : 'Paused'}
-        </span>
         <label
           className="width-control"
           title="ch scales with the font’s zero glyph; it is not an exact character count."
@@ -442,18 +424,6 @@ export function ChatComparison({
           />
           <output>{width} ch max</output>
         </label>
-      </div>
-      <div className="demo-caption">
-        <p>
-          {custom
-            ? 'Try quotes, apostrophes, links, and code. Only English prose is refined.'
-            : example.note}
-        </p>
-        <span>
-          {mode === 'conversation'
-            ? 'Scripted conversation · No model call'
-            : 'English only · Local preview'}
-        </span>
       </div>
     </>
   );
