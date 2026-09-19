@@ -85,6 +85,8 @@ This independent layout helper hangs an opening straight or curly quote at the s
 
 Ambiguous leading straight apostrophes, including `'em`, `'Tis`, and `'90s`, remain inside the reading edge when punctuation conversion is off. Curly opening quotes produced by the punctuation plugin can hang normally.
 
+The isolated quote does not retain the font's pair kerning with the following letter. This can be noticeable with pairs such as `“A`, especially in large headings; the helper does not measure or compensate for individual font pairs.
+
 It does not hang punctuation at every wrapped line ending or handle full optical margin alignment. Provide a left gutter and preserve the generated classes/attributes in custom renderers. Opt out of RTL, vertical, centered, and right-aligned text. Code, math, tables, and unknown custom elements pass through. Raw HTML and escaped opening quotes are protected when original source positions are available. The helper supports `skip(node)` and the same explicit English-locale requirement as the core, but operates on HTML (HAST) nodes. Its span additions are separate from the core's text-only substitutions.
 
 ## Copy and persistence

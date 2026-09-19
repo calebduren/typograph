@@ -126,6 +126,8 @@ Opening straight and curly quotes remain real text, exactly once, for selection,
 
 Leave enough space in the left gutter and avoid clipping overflow. Custom renderers must preserve the generated `.typograph-opening` spans and `data-typograph-hanging` attribute. The stylesheet disables native hanging on affected blocks to prevent Safari hanging the quote twice. It does not set your font, line height, paragraph width, or alignment; opt out of centered, right-aligned, RTL, and vertical text. This is a small layout helper, not a full CSS-property polyfill. Use the memoization guidance above if toggling it at runtime.
 
+The quote's separate inline block does not preserve pair kerning with the next letter. Pairs such as `“A` can look more open, especially at heading sizes. The helper does not measure fonts or add manual spacing corrections; check your chosen font and opt out where this tradeoff is undesirable.
+
 ## Instructions for your coding agent
 
 The landing page's Integration section has one copyable, self-contained agent prompt. Set the three typography switches above the preview or in Integration, leave **Agent prompt** selected, and use **Copy prompt**. Paste it into the agent working in your app's repository. The prompt asks the agent to inspect the existing renderer and choose the appropriate integration, including guidance for AI Elements/shadcn, Cloudflare Agents, and other Remark renderers. It covers package installation, the exact selected settings, preservation of your app's design and raw messages, and verification. Select **Code** to reveal the stack buttons and choose a shorter manual configuration for the same settings.

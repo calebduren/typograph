@@ -84,13 +84,13 @@ typography:
     letterSpacing: normal
   homepage-proof:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
-    fontSize: clamp(1.875rem, 11cqi, 6rem)
+    fontSize: 14cqi
     fontWeight: 450
     lineHeight: 1.1
     letterSpacing: -0.025em
   homepage-proof-mobile:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
-    fontSize: clamp(1.875rem, 11cqi, 6rem)
+    fontSize: 13.2cqi
     fontWeight: 450
     lineHeight: 1.1
     letterSpacing: -0.015em

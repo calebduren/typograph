@@ -35,7 +35,7 @@ export const example = {
   note: 'Quotes, apostrophes, related words, and literal details. Use Show changes to follow the refinements.',
   text: `"It's in the details," she said. "Give 'em a little room." That's a useful starting point for a studio review: make the work easy to read, then give people enough context to respond thoughtfully.
 
-## "A little room to think"
+## "Room to think"
 
 Start with the reader's questions. What's new? Why does it matter? What should happen next? The designers' notes don't need to become a pitch; they need to help someone understand the choices. A reference from the '90s can sit beside a new idea without either feeling out of place.
 
