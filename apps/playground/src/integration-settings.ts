@@ -1,8 +1,8 @@
 export type TypographySettings = { punctuation: boolean; spacing: boolean; hanging: boolean };
 export const defaultSettings: TypographySettings = {
   punctuation: true,
-  spacing: false,
-  hanging: false,
+  spacing: true,
+  hanging: true,
 };
 export const integrationStacks = ['AI Elements', 'Cloudflare', 'Remark'] as const;
 export type IntegrationStack = (typeof integrationStacks)[number];

@@ -26,7 +26,7 @@ const allowedTags = { mark: [] };
 const plainComponents: ComponentProps<typeof Streamdown>['components'] = {
   img: ({ alt }) => <span className="image-description">[Image: {alt || 'no description'}]</span>,
   a: ({ href, children }) => (
-    <a href={href} target="_blank" rel="noreferrer">
+    <a href={href} target="_blank" rel="noopener noreferrer">
       {children}
     </a>
   ),
@@ -120,7 +120,7 @@ export function ChatComparison({
   const [cursor, setCursor] = useState(Number.MAX_SAFE_INTEGER);
   const [running, setRunning] = useState(false);
   const [width, setWidth] = useState(48);
-  const [highlight, setHighlight] = useState(false);
+  const [highlight, setHighlight] = useState(true);
   const [mobileView, setMobileView] = useState<'original' | 'formatted'>('formatted');
   const [mode, setMode] = useState<'text' | 'conversation'>('text');
   const scrollArea = useRef<HTMLDivElement>(null);
@@ -172,7 +172,7 @@ export function ChatComparison({
       <div className="comparison-controls">
         <div className="typography-settings" role="group" aria-label="Typography settings">
           <TypographyControls settings={settings} onSettingsChange={onSettingsChange} />
-          <p>Your selection updates the preview, code, and agent prompts below.</p>
+          <p>Settings update the preview and setup below.</p>
         </div>
       </div>
       <div className="demo-toolbar">

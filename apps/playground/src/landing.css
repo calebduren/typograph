@@ -341,7 +341,7 @@ textarea {
   align-items: flex-end;
   justify-content: space-between;
   gap: 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .section-heading p {
@@ -1271,6 +1271,10 @@ mark[data-typograph-change='spacing'] {
 }
 
 @media (max-width: 800px) {
+  :root {
+    font-size: 16px;
+  }
+
   .page-frame {
     width: calc(100% - 2.5rem);
   }
@@ -1282,7 +1286,15 @@ mark[data-typograph-change='spacing'] {
 
   .site-header nav {
     gap: 1.2rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+  }
+
+  .site-header a,
+  .segmented-control button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero {
@@ -1297,11 +1309,13 @@ mark[data-typograph-change='spacing'] {
   }
 
   .punctuation-proof {
-    padding: 40px 0 40px 1.5rem;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 40px 1.5rem;
   }
 
   .hero-copy > p {
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
 
   .scope-line {
@@ -1317,12 +1331,59 @@ mark[data-typograph-change='spacing'] {
   }
 
   .mobile-comparison-switch {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     margin-bottom: 0.75rem;
   }
 
   .comparison-workspace {
-    min-height: 58rem;
+    height: auto;
+    min-height: 0;
+  }
+
+  .comparison-controls {
+    position: static;
+  }
+
+  .typography-settings {
+    display: block;
+    font-size: 0.875rem;
+  }
+
+  .typography-settings-switches {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .typography-settings p {
+    margin-top: 0.5rem;
+  }
+
+  .demo-toolbar {
+    padding-bottom: 0.75rem;
+    border-bottom: 0;
+  }
+
+  .demo-toolbar .segmented-control,
+  .recipe-tabs {
+    width: 100%;
+  }
+
+  .demo-toolbar .segmented-control button,
+  .mobile-comparison-switch button,
+  .recipe-tabs button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .comparison-frame {
+    flex: none;
+  }
+
+  .preview-scroll {
+    flex: none;
+    height: clamp(24rem, 60svh, 36rem);
   }
 
   .comparison-headings,
@@ -1346,6 +1407,8 @@ mark[data-typograph-change='spacing'] {
 
   .change-key {
     grid-column: 1;
+    gap: 0.5rem 0.75rem;
+    font-size: 0.75rem;
   }
 
   .original-pane {
@@ -1354,6 +1417,11 @@ mark[data-typograph-change='spacing'] {
 
   .pane-heading h3 {
     display: none;
+  }
+
+  .pane-heading {
+    min-height: 0;
+    padding-block: 0.5rem;
   }
 
   .pane-heading.formatted-pane {
@@ -1414,6 +1482,38 @@ mark[data-typograph-change='spacing'] {
     padding-top: 2rem;
   }
 
+  .release-note code {
+    overflow-wrap: anywhere;
+  }
+
+  .recipe-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .recipe-modes button {
+    padding-inline: 0.5rem;
+  }
+
+  .recipe-tab-row {
+    padding: 0 1rem 1rem;
+  }
+
+  .recipe-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .agent-prompt {
+    font-size: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .reading {
+    font-size: 1rem;
+  }
+
   .site-footer {
     margin-top: 3.5rem;
   }
@@ -1427,12 +1527,16 @@ mark[data-typograph-change='spacing'] {
 }
 
 @media (max-width: 520px) {
-  .site-header nav {
-    gap: 0.9rem;
+  .site-header {
+    flex-wrap: wrap;
+    gap: 0;
+    padding-block: 0.75rem 0.5rem;
   }
 
-  .site-header nav a:last-child {
-    display: none;
+  .site-header nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
   .hero-copy {
@@ -1452,8 +1556,6 @@ mark[data-typograph-change='spacing'] {
   }
 
   .punctuation-proof {
-    border-left: 0;
-    border-top: 1px solid var(--line);
     padding: 40px 1rem;
   }
 
@@ -1461,17 +1563,8 @@ mark[data-typograph-change='spacing'] {
     letter-spacing: -0.015em;
   }
 
-  .comparison-workspace {
-    min-height: 64rem;
-  }
-
   .section-heading h2 {
     font-size: 1.5rem;
-  }
-
-  .typography-settings {
-    column-gap: 1.5rem;
-    font-size: 0.8125rem;
   }
 
   .comparison-pane,
@@ -1480,17 +1573,7 @@ mark[data-typograph-change='spacing'] {
     padding-inline: 1rem;
   }
 
-  .reading {
-    font-size: 1rem;
-  }
-
   .recipe pre {
-    padding-inline: 1rem;
-  }
-
-  .recipe-tools,
-  .recipe-tab-row,
-  .agent-prompt {
     padding-inline: 1rem;
   }
 

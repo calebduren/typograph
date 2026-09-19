@@ -72,9 +72,19 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   expect((await page.request.get('/.vite/manifest.json')).status()).toBe(404);
   const measurement = page.getByRole('link', { name: 'View the measurement' });
   await expect(measurement).toHaveAttribute('href', /^\/assets\/.*\.json$/);
-  await measurement.click();
-  await expect(page).toHaveURL(/\/assets\/.*\.json$/);
-  const data = await page.request.get(page.url());
+  for (const link of await page.locator('a[href]:not([href^="#"])').all()) {
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  }
+  for (const link of await page.locator('a[href^="#"]').all()) {
+    const target = await link.getAttribute('href');
+    await expect(page.locator(target!)).toHaveCount(1);
+    expect(await link.getAttribute('target')).toBeNull();
+  }
+  const [measurementTab] = await Promise.all([page.waitForEvent('popup'), measurement.click()]);
+  await expect(measurementTab).toHaveURL(/\/assets\/.*\.json$/);
+  const data = await page.request.get(measurementTab.url());
+  await measurementTab.close();
   expect(data.status()).toBe(200);
   expect((await data.json()).bundle.gzipBytes).toBeGreaterThan(0);
   expect(data.headers()['cache-control']).toContain('immutable');
@@ -142,11 +152,17 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
     .first()
     .evaluate((node) => node.setAttribute('data-retained', 'yes'));
   const highlightSwitch = page.getByRole('switch', { name: 'Show changes' });
-  await expect(highlightSwitch).toHaveAttribute('aria-checked', 'false');
+  for (const setting of await page.getByRole('switch').all()) await expect(setting).toBeChecked();
+  await expect(formatted).toHaveAttribute('data-rulers', 'true');
+  await expect(page.getByRole('region', { name: 'Typography agent prompt' })).toContainText(
+    'punctuation: true, spacing: true',
+  );
   await highlightSwitch.focus();
   await page.keyboard.press('Space');
-  await expect(highlightSwitch).toHaveAttribute('aria-checked', 'true');
-  await expect(formatted.locator('mark').first()).toBeVisible();
+  await expect(highlightSwitch).not.toBeChecked();
+  await page.keyboard.press('Space');
+  await expect(highlightSwitch).toBeChecked();
+  await expect(formatted.locator('mark').filter({ hasText: '’' }).first()).toBeVisible();
   await expect(original.locator('mark')).toHaveCount(0);
   await expect(formatted.locator('p').first()).toHaveAttribute('data-retained', 'yes');
   await formatted.evaluate((node) => {
@@ -170,7 +186,7 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
   await expect(formatted.getByRole('table')).toBeVisible();
   await expect(formatted.getByRole('link', { name: 'the guide' })).toHaveAttribute(
     'href',
-    "https://example.com/it's-here",
+    '/integration.md',
   );
   expect(errors).toEqual([]);
 });
@@ -189,7 +205,7 @@ test('playback pauses, scrubs, and resumes through an ambiguous prefix', async (
   await page
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Non-breaking spaces' })
-    .click();
+    .setChecked(true);
   await expect(
     page
       .getByRole('group', { name: 'Typography settings', exact: true })
@@ -403,12 +419,13 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/');
   const formatted = page.getByTestId('formatted-response');
+  await page.getByRole('switch', { name: 'Show changes' }).setChecked(false);
   const text = await formatted.textContent();
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
   await page
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Hanging punctuation' })
-    .click();
+    .setChecked(true);
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
   for (const width of ['28', '64']) {
     await page.getByRole('slider', { name: 'Reading width' }).fill(width);
@@ -475,14 +492,14 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   await page
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Hanging punctuation' })
-    .click();
+    .setChecked(false);
   await expect(formatted.locator('.typograph-opening')).toHaveCount(0);
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
   expect(await formatted.textContent()).toBe(text);
   await page
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Non-breaking spaces' })
-    .click();
+    .setChecked(true);
   const spacingColor = await page
     .locator('.change-key [data-change="spacing"]')
     .evaluate((node) => getComputedStyle(node).backgroundColor);
@@ -543,8 +560,8 @@ test('conversation replays a user message, pauses thinking, streams, and cancels
   await page
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Hanging punctuation' })
-    .click();
-  await page.getByRole('switch', { name: 'Show changes' }).click();
+    .setChecked(true);
+  await page.getByRole('switch', { name: 'Show changes' }).setChecked(true);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: `${review}/conversation.png`, fullPage: true });
   await page.getByRole('button', { name: 'Replay stream' }).click();
@@ -619,7 +636,7 @@ test('highlight backgrounds sit beneath adjacent glyphs in the hero and response
   page,
 }) => {
   await page.goto('/');
-  await page.getByRole('switch', { name: 'Show changes' }).click();
+  await page.getByRole('switch', { name: 'Show changes' }).setChecked(true);
   for (const selector of ['.proof-result', '.formatted-pane .response-prose']) {
     await expect(page.locator(selector)).toHaveCSS('isolation', 'isolate');
     const layers = await page.locator(`${selector} mark`).evaluateAll((marks) =>
@@ -656,7 +673,7 @@ test('highlight backgrounds sit beneath adjacent glyphs in the hero and response
 });
 
 test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }) => {
-  for (const width of [320, 768, 1301]) {
+  for (const width of [320, 390, 520, 768, 1301]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -665,6 +682,22 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
+    if (width <= 800) {
+      await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toBeVisible();
+      for (const control of await page.locator('button:visible, .site-header a').all()) {
+        expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      }
+      const reader = page.getByRole('region', { name: 'Text comparison' });
+      expect((await reader.boundingBox())!.height).toBeGreaterThanOrEqual(384);
+      await page.getByRole('button', { name: 'Code', exact: true }).click();
+      for (const stack of ['AI Elements', 'Cloudflare', 'Remark']) {
+        await page.getByRole('button', { name: stack, exact: true }).click();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+      }
+      await page.screenshot({ path: `${review}/mobile-${width}.png`, fullPage: true });
+    }
     if (width === 1301) await page.screenshot({ path: `${review}/user-1301.png`, fullPage: true });
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -872,11 +905,11 @@ test('Show changes only paints annotations without changing glyph positions or t
     await page
       .getByRole('group', { name: 'Typography settings', exact: true })
       .getByRole('switch', { name: 'Non-breaking spaces', exact: true })
-      .click();
+      .setChecked(true);
     await page
       .getByRole('group', { name: 'Typography settings', exact: true })
       .getByRole('switch', { name: 'Hanging punctuation', exact: true })
-      .click();
+      .setChecked(true);
     const viewport = page.getByRole('region', { name: 'Text comparison' });
     const geometry = () =>
       viewport.evaluate((area) => {
@@ -989,13 +1022,15 @@ test('integration switches share settings with the comparison and copied instruc
     exact: true,
   });
   await expect(integration.getByRole('switch')).toHaveCount(3);
-  await integration.getByRole('switch', { name: 'Non-breaking spaces' }).click();
+  await integration.getByRole('switch', { name: 'Non-breaking spaces' }).setChecked(false);
+  await expect(preview.getByRole('switch', { name: 'Non-breaking spaces' })).not.toBeChecked();
+  await integration.getByRole('switch', { name: 'Non-breaking spaces' }).setChecked(true);
   await integration.getByRole('switch', { name: 'Smart punctuation' }).click();
   await expect(preview.getByRole('switch', { name: 'Non-breaking spaces' })).toBeChecked();
   await expect(preview.getByRole('switch', { name: 'Smart punctuation' })).not.toBeChecked();
   await expect(page.getByTestId('formatted-response')).toContainText('"It\'s in the details');
   expect(await page.getByTestId('formatted-response').textContent()).toContain('30\u00a0min');
-  await preview.getByRole('switch', { name: 'Hanging punctuation' }).click();
+  await preview.getByRole('switch', { name: 'Hanging punctuation' }).setChecked(true);
   await expect(integration.getByRole('switch', { name: 'Hanging punctuation' })).toBeChecked();
   await page.getByRole('button', { name: 'Copy agent prompt' }).click();
   const copied = await page.evaluate(() => navigator.clipboard.readText());

@@ -69,7 +69,7 @@ function Integration({
           Building with an agent? Copy the prompt into your coding assistant. It will find the right
           integration for your app.
         </p>
-        <a className="underlined" href="/integration.md">
+        <a className="underlined" href="/integration.md" target="_blank" rel="noopener noreferrer">
           Read the integration guide <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
         </a>
         <p className="release-note">
@@ -189,7 +189,11 @@ function Landing() {
           <nav aria-label="Main navigation">
             <a href="#demo">Try it</a>
             <a href="#integrate">Integration</a>
-            <a href="https://github.com/calebduren/typograph">
+            <a
+              href="https://github.com/calebduren/typograph"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               GitHub <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
             </a>
           </nav>
@@ -289,7 +293,12 @@ function Landing() {
                   <dd>
                     About 4 KB gzip for the core, including the spacing engine. Hanging punctuation
                     adds a separate small helper and stylesheet.{' '}
-                    <a href={benchmarkUrl} className="underlined">
+                    <a
+                      href={benchmarkUrl}
+                      className="underlined"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       View the measurement
                     </a>
                     .
@@ -299,7 +308,12 @@ function Landing() {
                   <dt>Built on</dt>
                   <dd>
                     Remark for Markdown structure.{' '}
-                    <a href="https://typehug.aliszu.com/" className="underlined">
+                    <a
+                      href="https://typehug.aliszu.com/"
+                      className="underlined"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       Typehug
                     </a>{' '}
                     for optional no-break spacing. MIT licensed.
@@ -311,6 +325,8 @@ function Landing() {
                     <a
                       href="https://www.npmjs.com/package/@calebduren/typograph"
                       className="underlined"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       Version 0.1.0 on npm
                     </a>
@@ -323,8 +339,9 @@ function Landing() {
                 <h3>What it doesn’t do</h3>
                 <p>
                   No language detection, regional quote styles, hyphenation, or automatic rewriting
-                  of your content. No-break spacing is off by default. Very long tokens skip
-                  optional spacing to avoid expensive processing.
+                  of your content. The package keeps no-break spacing opt-in; this demo starts with
+                  all three refinements on. Very long tokens skip optional spacing to avoid
+                  expensive processing.
                 </p>
                 <p>
                   Paste English prose into the demo. For mixed-language replies, the host app must
@@ -340,7 +357,7 @@ function Landing() {
             typograph
           </a>
           <div>
-            <a href="https://calebduren.com">
+            <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
               Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
             </a>
           </div>

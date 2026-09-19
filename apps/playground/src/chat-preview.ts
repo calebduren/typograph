@@ -32,7 +32,7 @@ export const previewRehypePlugins: Pluggable[] = Object.entries(defaultRehypePlu
 export const example = {
   question:
     'Can you help me write a thoughtful brief for our studio review, with a checklist and a small code example?',
-  note: 'Quotes, apostrophes, related words, and literal details. Turn on Show changes to follow the refinements.',
+  note: 'Quotes, apostrophes, related words, and literal details. Use Show changes to follow the refinements.',
   text: `"It's in the details," she said. "Give 'em a little room." That's a useful starting point for a studio review: make the work easy to read, then give people enough context to respond thoughtfully.
 
 ## "A little room to think"
@@ -41,7 +41,7 @@ Start with the reader's questions. What's new? Why does it matter? What should h
 
 Maya put it this way: "When someone says 'it's ready,' ask what they've checked." Keep **the important words** clear, let *a quieter aside* stay quiet, and give each paragraph one useful job.
 
-"Read [the guide](https://example.com/it's-here) when you're ready." Quotation marks can span a link or **a change in emphasis** without losing their place. The words remain yours; only their presentation changes.
+"Read [the guide](/integration.md) when you're ready." Quotation marks can span a link or **a change in emphasis** without losing their place. The words remain yours; only their presentation changes.
 
 ### Plan the review
 
@@ -56,7 +56,7 @@ Dr. Smith and J. R. Park have 30 min to review Fig. 2 before the rest of the tea
 
 ### Keep the exact details
 
-Some characters carry instructions. Keep \`const message = "It's ready.";\` exactly as written, and leave \`"literal code"\` alone. A file path, an email address such as studio@example.com, and a URL like https://example.com/it's-here aren't prose to be rewritten.
+Some characters carry instructions. Keep \`const message = "It's ready.";\` exactly as written, and leave \`"literal code"\` alone. A file path, an email address such as \`studio@example.com\`, and a URL like \`https://example.com/it's-here\` aren't prose to be rewritten.
 
 \`\`\`js
 const message = "It's ready.";
