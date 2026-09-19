@@ -647,7 +647,12 @@ test('comparison fits the desktop viewport, sticks controls, and preserves edito
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const height of [900, 1100]) {
     await page.setViewportSize({ width: 1301, height });
-    await page.goto('/#demo');
+    await page.goto('/');
+    await expect(page.getByTestId('formatted-response')).toBeVisible();
+    // Settle font substitution before measuring navigation and viewport geometry.
+    // Initial fragments during lazy loading are covered by the hero-loading test.
+    await page.evaluate(() => document.fonts.ready);
+    await page.getByRole('link', { name: 'Try it', exact: true }).click();
     await expect
       .poll(async () => Math.abs((await page.locator('#demo').boundingBox())?.y ?? Infinity))
       .toBeLessThan(1);
@@ -680,7 +685,10 @@ test('comparison fits the desktop viewport, sticks controls, and preserves edito
   await expect(page.getByRole('heading', { name: 'What it doesn’t do' })).toBeVisible();
   await expect(page.locator('.scope-details summary')).toHaveCount(0);
   await page.setViewportSize({ width: 1301, height: 901 });
-  await page.goto('/#demo');
+  await page.goto('/');
+  await expect(page.getByTestId('formatted-response')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await page.getByRole('link', { name: 'Try it', exact: true }).click();
   await expect
     .poll(async () => Math.abs((await page.locator('#demo').boundingBox())?.y ?? Infinity))
     .toBeLessThan(1);
