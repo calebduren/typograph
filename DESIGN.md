@@ -17,16 +17,16 @@ colors:
   dark-sheet: '#292929'
   dark-soft: '#333333'
   dark-ink: '#fcfcfc'
-  dark-muted: '#b5b5b5'
-  dark-line: '#4b4b4b'
+  dark-muted: '#b6b4b4'
+  dark-line: '#3d3d3d'
   dark-accent: '#fcfcfc'
-  dark-accent-soft: '#454545'
-  change-punctuation: '#dfeafa'
-  change-spacing: '#f5e8c5'
-  change-hanging: '#e8dff3'
-  dark-change-punctuation: '#27405b'
-  dark-change-spacing: '#50452a'
-  dark-change-hanging: '#453650'
+  dark-accent-soft: '#424242'
+  change-punctuation: '#f0a8a8'
+  change-spacing: '#e6b3b3'
+  change-hanging: '#e8e8e8'
+  dark-change-punctuation: '#723131'
+  dark-change-spacing: '#683b3b'
+  dark-change-hanging: '#424242'
 typography:
   wordmark:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, 'Segoe UI', system-ui"
@@ -144,7 +144,7 @@ The interface uses a clear sans serif voice. The current homepage applies this e
 
 ## Colors
 
-The palette is anchored by #242424 ink, #8d8d8d gray, and #fcfcfc paper. Structural surfaces and supporting text remain neutral grays. The user-requested annotation colors are the sole functional exception: blue for smart punctuation, amber for non-breaking spaces, and lilac for hanging quotes, with matching dark-mode values. Paper is the page, sheet is the reading surface, soft is the inset panel, muted is supporting text, and line is the fine boundary. The homepage uses muted for supporting text. Ink carries the complete hero heading. The soft neutral accent remains the selection color, named `--selected` on the homepage. The homepage proof and optional preview highlights use the dedicated `change-*` tokens; lilac takes precedence on a hanging quote. Text-bearing highlights use backgrounds on negative-layer pseudo-elements within an isolated prose/proof container, preserving the neighboring glyphs even with close letter-spacing. Legend swatches retain ordinary backgrounds. Preview annotation markup stays mounted; Show changes only reveals its backgrounds and absolute rulers. The legend always reserves its layout space, becoming invisible and hidden from accessibility when disabled, so highlighting cannot change glyph geometry, reading height, or scroll position. Dark-prefixed tokens are the automatic dark-mode values, activated by `prefers-color-scheme`.
+The palette is anchored by #242424 ink, #8d8d8d gray, and #fcfcfc paper. Structural surfaces and supporting text remain neutral grays. The annotation colors are the sole functional exception: dusty rose for smart punctuation, a quieter rose for non-breaking spaces, and neutral gray for hanging quotes. Dark mode keeps the same hue family, lifting those washes off paper instead of introducing a separate blue/amber/lilac palette. Paper is the page, sheet is the reading surface, soft is the inset panel, muted is supporting text, and line is the fine boundary. The homepage uses muted for supporting text. Ink carries the complete hero heading. The soft neutral accent remains the selection color, named `--selected` on the homepage. The hero and both preview columns use faint dashed guides that extend 40px above and below the text and fade to transparent across each extension. Preview padding reserves that space even when guides are hidden, so Show changes cannot alter layout. The homepage proof and optional preview highlights use the dedicated `change-*` tokens; hanging gray takes precedence on a hanging quote. Text-bearing highlights use backgrounds on negative-layer pseudo-elements within an isolated prose/proof container, preserving the neighboring glyphs even with close letter-spacing. Legend swatches retain ordinary backgrounds. Preview annotation markup stays mounted; Show changes only reveals its backgrounds and absolute rulers. The legend always reserves its layout space, becoming invisible and hidden from accessibility when disabled, so highlighting cannot change glyph geometry, reading height, or scroll position. Dark-prefixed tokens are the automatic dark-mode values, activated by `prefers-color-scheme`.
 
 **The Monochrome Rule.** Use neutral tones derived from the three palette anchors. Avoid pure black, pure white, and decorative colored accents. The documented functional change annotations are permitted in the homepage proof, preview, and legend. Use ink for reading and active states; reserve middle gray for large type and accents.
 
@@ -188,9 +188,9 @@ On the homepage, actions are compact text links or transparent buttons, usually 
 
 A single substantial example is shared by Text and Conversation, with no example picker. The original pane defaults to unprocessed rendered text and offers a Markdown editor tab. Switching tabs preserves edits and the full source; during replay both rendered panes show the same accumulated prefix. The editor remains capped at 12,000 characters. A Reset example text action appears only after editing. Both comparison columns live inside one native vertical scroll container. There is no JavaScript scroll synchronization and no per-column vertical scrolling. The Markdown textarea grows with a hidden CSS grid sizing mirror, so it shares that same viewport. Mobile keeps the simple Original/With Typograph switch within the existing scroller. Replay follows arriving text until the visitor scrolls back in the shared viewport.
 
-The comparison workspace runs from the refinement switches through the caption at 100dvh, with a 48rem desktop minimum, 58rem at 800px, and 64rem at 520px. Its heading sits above the workspace. The switches, Text/Conversation buttons, and mobile pane selector form one sticky top control group. The shared reading viewport flexes to take the remaining height; pane headings, playback controls, and captions stay outside it. The page does not force scroll snapping. The shared comparison viewport and agent-prompt region use 80px alpha-mask fades with a smoothstep opacity curve. Each edge disappears when that boundary is reached or the content fits. Source focus stays on the field; other masked regions have inset focus outlines. Black RGB values in alpha stops encode opacity only, not a displayed palette color.
+The comparison workspace runs from the refinement switches through the caption at 100dvh, with a 48rem desktop minimum, 58rem at 800px, and 64rem at 520px. Its heading sits above the workspace. Only the typography switches and their helper line stay sticky. The Text/AI Conversation buttons and mobile pane selector remain in normal page flow and scroll away. The shared reading viewport flexes to take the remaining height; pane headings, playback controls, and captions stay outside it. The page does not force scroll snapping. The shared comparison viewport and agent-prompt region use 80px alpha-mask fades with a smoothstep opacity curve. Each edge disappears when that boundary is reached or the content fits. Source focus stays on the field; other masked regions have inset focus outlines. Black RGB values in alpha stops encode opacity only, not a displayed palette color.
 
-Every view selector uses the same button-like segmented control: a soft surface with a fine boundary and 0.5rem corners; the active option has a paper fill, fine border, and 0.25rem corners. This applies to Text/Conversation, Text/Markdown, mobile Original/With Typograph, integration stack, and Agent prompt/Code. These remain groups of pressed-state buttons. The integration panel appears directly after the preview and before “Careful where it counts.” Its three switches reuse the preview controls and share the same settings; either set updates the preview, code, and copied prompts immediately. Copy success lives in its button; failure adds a manual-copy alert. The scope limits are always visible at 0.8125rem. The footer keeps the wordmark, signature, and author link; integration documentation remains linked in the integration section. Motion remains limited to smooth anchor scrolling, pointer-operated switch thumbs, and the slider interaction; reduced motion removes these. Streaming starts only after user action.
+Every view selector uses the same button-like segmented control: a soft surface with a fine boundary and 0.5rem corners; the active option has a paper fill, fine border, and 0.25rem corners. This applies to Text/Conversation, Text/Markdown, mobile Original/With Typograph, integration stack, and Agent prompt/Code. These remain groups of pressed-state buttons. The integration panel appears directly after the preview and before “Careful where it counts.” Its three switches reuse the preview controls and share the same settings; either set updates the preview, code, and copied prompts immediately. Agent prompt/Code are the primary integration controls. Stack buttons appear beneath them only in Code mode. The single agent prompt asks the agent to identify the existing renderer and choose the appropriate integration. Copy success lives in its button; failure adds a manual-copy alert. The scope limits are always visible at 0.8125rem. The footer keeps the wordmark, signature, and author link; integration documentation remains linked in the integration section. Motion remains limited to smooth anchor scrolling, pointer-operated switch thumbs, and the slider interaction; reduced motion removes these. Streaming starts only after user action.
 
 ## Do's and Don'ts
 

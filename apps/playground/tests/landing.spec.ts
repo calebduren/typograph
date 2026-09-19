@@ -14,12 +14,61 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
     'content',
     await page.title(),
   );
-  const imageUrl = await page.locator('meta[property="og:image"]').getAttribute('content');
+  const imageUrl = await page.locator('meta[property="og:image"]').first().getAttribute('content');
   expect(imageUrl).toBe('https://typograph.dev/social.png');
-  const image = await page.request.get(new URL(imageUrl!).pathname);
-  expect(image.status()).toBe(200);
-  expect(image.headers()['content-type']).toContain('image/png');
-  expect((await image.body()).subarray(1, 4).toString()).toBe('PNG');
+  await expect(page.locator('meta[property="og:image"]').nth(1)).toHaveAttribute(
+    'content',
+    'https://typograph.dev/social-square.png',
+  );
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', imageUrl!);
+  const expectPng = async (path: string, width: number, height: number) => {
+    const response = await page.request.get(path);
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('image/png');
+    const bytes = await response.body();
+    expect(bytes.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+    expect(bytes.readUInt32BE(16)).toBe(width);
+    expect(bytes.readUInt32BE(20)).toBe(height);
+  };
+  await expectPng('/social.png', 1200, 630);
+  await expectPng('/social-square.png', 1200, 1200);
+  await expectPng('/brand/avatar.png', 512, 512);
+  for (const size of [16, 32, 48]) {
+    await expect(page.locator(`link[rel="icon"][sizes="${size}x${size}"]`)).toHaveAttribute(
+      'href',
+      `/favicon-${size}.png`,
+    );
+    await expectPng(`/favicon-${size}.png`, size, size);
+  }
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute(
+    'href',
+    '/favicon.svg',
+  );
+  const vectorIcon = await page.request.get('/favicon.svg');
+  expect(vectorIcon.status()).toBe(200);
+  expect(vectorIcon.headers()['content-type']).toContain('image/svg+xml');
+  const favicon = await page.request.get('/favicon.ico');
+  expect(favicon.status()).toBe(200);
+  expect((await favicon.body()).subarray(0, 6)).toEqual(Buffer.from([0, 0, 1, 0, 3, 0]));
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+    'href',
+    '/apple-touch-icon.png',
+  );
+  await expectPng('/apple-touch-icon.png', 180, 180);
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/site.webmanifest');
+  const manifestResponse = await page.request.get('/site.webmanifest');
+  expect(manifestResponse.status()).toBe(200);
+  expect(manifestResponse.headers()['content-type']).toContain('application/manifest+json');
+  const webManifest = await manifestResponse.json();
+  expect(webManifest.name).toBe('Typograph');
+  expect(webManifest.icons).toHaveLength(3);
+  expect(
+    webManifest.icons.filter((icon: { purpose: string }) => icon.purpose === 'maskable'),
+  ).toHaveLength(1);
+  for (const icon of webManifest.icons) {
+    const [width, height] = icon.sizes.split('x').map(Number);
+    await expectPng(icon.src, width, height);
+  }
   expect((await page.request.get('/.vite/manifest.json')).status()).toBe(404);
   const measurement = page.getByRole('link', { name: 'View the measurement' });
   await expect(measurement).toHaveAttribute('href', /^\/assets\/.*\.json$/);
@@ -127,6 +176,8 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
 });
 
 test('playback pauses, scrubs, and resumes through an ambiguous prefix', async ({ page }) => {
+  // Keep automatic scrolling from consuming the short stream before Pause is clicked.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await page
     .getByRole('group', { name: 'Original view' })
@@ -227,32 +278,53 @@ test('integration recipes, local guide, and keyboard entry work', async ({ page 
   expect(await guide.text()).toContain('English-only');
 });
 
-test('agent prompts match the selected stack and offer a manual copy fallback', async ({
+test('one agent prompt covers every stack and code alone exposes stack selection', async ({
   page,
   context,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/');
+  const examples = page.getByRole('group', { name: 'Integration examples' });
+  const prompt = page.getByRole('region', { name: 'Typography agent prompt' });
+  await expect(examples).toHaveCount(0);
+  for (const expected of ['MessageResponse', 'useAgentChat', 'processor.runSync']) {
+    await expect(prompt).toContainText(expected);
+  }
+  const originalPrompt = await prompt.textContent();
+  await page.getByRole('button', { name: 'Copy agent prompt' }).click();
+  await expect(page.getByRole('button', { name: 'Copy agent prompt' })).toHaveText('Copied');
+  await expect(page.locator('.recipe-status')).toHaveCount(0);
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toBe(originalPrompt);
+  expect(copied).toContain('English-only');
+  expect(copied).toContain('npm install @calebduren/typograph');
+  expect(copied).toContain('text-wrap: pretty');
+
+  await page.getByRole('button', { name: 'Code', exact: true }).click();
+  await expect(examples).toBeVisible();
+  const formatBounds = await page.getByRole('group', { name: 'Integration format' }).boundingBox();
+  expect((await examples.boundingBox())!.y).toBeGreaterThan(formatBounds!.y + formatBounds!.height);
   for (const [stack, expected] of [
     ['AI Elements', 'MessageResponse'],
     ['Cloudflare', 'useAgentChat'],
     ['Remark', 'processor.runSync'],
   ]) {
-    await page.getByRole('button', { name: stack, exact: true }).click();
-    const prompt = page.getByRole('region', { name: `${stack} agent prompt` });
-    await expect(prompt).toContainText(expected);
-    await page.getByRole('button', { name: 'Copy agent prompt' }).click();
-    await expect(page.getByRole('button', { name: 'Copy agent prompt' })).toHaveText('Copied');
-    await expect(page.locator('.recipe-status')).toHaveCount(0);
-    const copied = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copied).toBe(await prompt.textContent());
-    expect(copied).toContain('English-only');
-    expect(copied).toContain('npm install @calebduren/typograph');
-    expect(copied).toContain('text-wrap: pretty');
+    await examples.getByRole('button', { name: stack, exact: true }).click();
+    const code = page.getByLabel(`${stack} code example`);
+    await expect(code).toContainText(expected);
+    await page.getByRole('button', { name: 'Copy integration code' }).click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      await code.textContent(),
+    );
   }
+  await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
+  await expect(examples).toHaveCount(0);
+  expect(await prompt.textContent()).toBe(originalPrompt);
   await page.getByRole('button', { name: 'Code', exact: true }).click();
-  await page.getByRole('button', { name: 'Copy integration code' }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('processor.runSync');
+  await expect(examples.getByRole('button', { name: 'Remark', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
   await page.evaluate(() => {
     Object.defineProperty(navigator.clipboard, 'writeText', {
@@ -264,7 +336,7 @@ test('agent prompts match the selected stack and offer a manual copy fallback', 
   await expect(page.getByRole('alert').filter({ hasText: 'Copy unavailable.' })).toContainText(
     'copy it manually',
   );
-  await expect(page.getByRole('region', { name: 'Remark agent prompt' })).toBeVisible();
+  await expect(prompt).toBeVisible();
 });
 
 test('all typography combinations stay in sync with previews, prompts, and code', async ({
@@ -292,7 +364,7 @@ test('all typography combinations stay in sync with previews, prompts, and code'
         expect(await formatted.textContent()).toContain(spacing ? '30\u00a0min' : '30 min');
         expect((await formatted.locator('.typograph-opening').count()) > 0).toBe(hanging);
         expect(await page.getByTestId('original-response').textContent()).toBe(original);
-        const prompt = page.getByRole('region', { name: 'AI Elements agent prompt' });
+        const prompt = page.getByRole('region', { name: 'Typography agent prompt' });
         await expect(prompt).toContainText(`punctuation: ${punctuation}, spacing: ${spacing}`);
         await expect(prompt).toContainText(`Hanging punctuation: ${hanging ? 'on' : 'off'}`);
         await page.getByRole('button', { name: 'Code', exact: true }).click();
@@ -304,23 +376,23 @@ test('all typography combinations stay in sync with previews, prompts, and code'
         await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
       }
   // Highlighting remains a local preview state, never part of a copied setup.
-  const before = await page.getByRole('region', { name: 'AI Elements agent prompt' }).textContent();
+  const before = await page.getByRole('region', { name: 'Typography agent prompt' }).textContent();
   await page.getByRole('switch', { name: 'Show changes' }).click();
-  expect(await page.getByRole('region', { name: 'AI Elements agent prompt' }).textContent()).toBe(
+  expect(await page.getByRole('region', { name: 'Typography agent prompt' }).textContent()).toBe(
     before,
   );
   await page.getByRole('button', { name: 'Copy agent prompt' }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(before);
   for (const stack of ['Cloudflare', 'Remark']) {
-    await page.getByRole('button', { name: stack, exact: true }).click();
-    await expect(page.getByRole('region', { name: `${stack} agent prompt` })).toContainText(
-      'Hanging punctuation: on',
-    );
     await page.getByRole('button', { name: 'Code', exact: true }).click();
+    await page.getByRole('button', { name: stack, exact: true }).click();
     await expect(page.getByLabel(`${stack} code example`)).toContainText(
       '@calebduren/typograph/hanging.css',
     );
     await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Typography agent prompt' })).toContainText(
+      'Hanging punctuation: on',
+    );
   }
 });
 
@@ -373,19 +445,27 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   await expect(page.getByTestId('playback-state')).toHaveText('Complete');
   expect(await formatted.locator('.typograph-opening').count()).toBeGreaterThan(2);
   await page.getByRole('switch', { name: 'Show changes' }).click();
+  const hangingColor = await page
+    .locator('.punctuation-proof [data-change="hanging"]')
+    .evaluate((node) => getComputedStyle(node, '::before').backgroundColor);
+  const punctuationColor = await page
+    .locator('.punctuation-proof mark[data-change="punctuation"]')
+    .first()
+    .evaluate((node) => getComputedStyle(node, '::before').backgroundColor);
+  expect(hangingColor).not.toBe(punctuationColor);
   expect(
     await formatted
       .locator('mark .typograph-opening > span')
       .first()
       .evaluate((node) => getComputedStyle(node, '::before').backgroundColor),
-  ).toBe('rgb(232, 223, 243)');
+  ).toBe(hangingColor);
   await expect(formatted).toHaveAttribute('data-rulers', 'true');
   expect(
     await formatted
       .locator('mark[data-typograph-change=punctuation]')
       .last()
       .evaluate((node) => getComputedStyle(node, '::before').backgroundColor),
-  ).toBe('rgb(223, 234, 250)');
+  ).toBe(punctuationColor);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
@@ -403,12 +483,16 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Non-breaking spaces' })
     .click();
+  const spacingColor = await page
+    .locator('.change-key [data-change="spacing"]')
+    .evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(spacingColor).not.toBe(punctuationColor);
   expect(
     await formatted
       .locator('mark[data-typograph-change=spacing]')
       .first()
       .evaluate((node) => getComputedStyle(node, '::before').backgroundColor),
-  ).toBe('rgb(245, 232, 197)');
+  ).toBe(spacingColor);
 });
 
 test('conversation replays a user message, pauses thinking, streams, and cancels on edit', async ({
@@ -597,7 +681,7 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
   await page.screenshot({ path: `${review}/dark.png`, fullPage: true });
 });
 
-test('vertical scroll fades follow both edges, resized content, and replaced prompts', async ({
+test('vertical scroll fades follow both edges, resized content, and restored prompts', async ({
   page,
 }) => {
   await page.goto('/');
@@ -612,7 +696,7 @@ test('vertical scroll fades follow both edges, resized content, and replaced pro
     .getByRole('button', { name: 'Markdown', exact: true })
     .click();
   const editor = page.getByRole('textbox', { name: 'Original Markdown' });
-  const prompt = page.getByRole('region', { name: 'AI Elements agent prompt' });
+  const prompt = page.getByRole('region', { name: 'Typography agent prompt' });
   const edges = (area: typeof editor) =>
     area.evaluate((node) => ({
       top: getComputedStyle(node).getPropertyValue('--scroll-fade-top'),
@@ -637,9 +721,9 @@ test('vertical scroll fades follow both edges, resized content, and replaced pro
   await editor.fill('"A short response."');
   await expect.poll(() => edges(preview)).toEqual({ top: '0px', bottom: '0px' });
   await page.getByRole('button', { name: 'Code', exact: true }).click();
-  await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
   await page.getByRole('button', { name: 'Cloudflare', exact: true }).click();
-  const replacement = page.getByRole('region', { name: 'Cloudflare agent prompt' });
+  await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
+  const replacement = page.getByRole('region', { name: 'Typography agent prompt' });
   await expect.poll(() => edges(replacement)).toEqual({ top: '0px', bottom: '80px' });
   await replacement.evaluate((node) => {
     node.scrollTop = node.scrollHeight;
@@ -676,8 +760,11 @@ test('comparison fits the desktop viewport, sticks controls, and preserves edito
     expect(Math.abs(bounds!.y)).toBeLessThan(1);
     const reading = await page.getByRole('region', { name: 'Text comparison' }).boundingBox();
     expect(reading!.height).toBeGreaterThan(height * 0.5);
+    const modeBefore = await page.getByRole('group', { name: 'Preview mode' }).boundingBox();
     await page.evaluate(() => window.scrollBy(0, 100));
     expect(Math.abs((await page.locator('.comparison-controls').boundingBox())!.y)).toBeLessThan(1);
+    const modeAfter = await page.getByRole('group', { name: 'Preview mode' }).boundingBox();
+    expect(Math.abs(modeBefore!.y - modeAfter!.y - 100)).toBeLessThan(1);
   }
   await page.goto('/#demo');
   const originalView = page.getByRole('group', { name: 'Original view' });

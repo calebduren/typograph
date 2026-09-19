@@ -174,46 +174,43 @@ export function ChatComparison({
           <TypographyControls settings={settings} onSettingsChange={onSettingsChange} />
           <p>Your selection updates the preview, code, and agent prompts below.</p>
         </div>
-        <div className="demo-toolbar">
-          <div className="preview-modes segmented-control" role="group" aria-label="Preview mode">
-            {(['text', 'conversation'] as const).map((value) => (
-              <button
-                key={value}
-                aria-pressed={mode === value}
-                onClick={() => {
-                  setMode(value);
-                  if (cursor === -1) setCursor(0);
-                }}
-              >
-                {value === 'text' ? 'Text' : 'AI Conversation'}
-              </button>
-            ))}
-          </div>
-          {custom && (
-            <button className="reset-example" onClick={() => changeSource(example.text)}>
-              Reset example
+      </div>
+      <div className="demo-toolbar">
+        <div className="preview-modes segmented-control" role="group" aria-label="Preview mode">
+          {(['text', 'conversation'] as const).map((value) => (
+            <button
+              key={value}
+              aria-pressed={mode === value}
+              onClick={() => {
+                setMode(value);
+                if (cursor === -1) setCursor(0);
+              }}
+            >
+              {value === 'text' ? 'Example Text' : 'AI Conversation'}
             </button>
-          )}
+          ))}
         </div>
-        <div
-          className="mobile-comparison-switch segmented-control"
-          role="group"
-          aria-label="Compare text"
+        {custom && (
+          <button className="reset-example" onClick={() => changeSource(example.text)}>
+            Reset example
+          </button>
+        )}
+      </div>
+      <div
+        className="mobile-comparison-switch segmented-control"
+        role="group"
+        aria-label="Compare text"
+      >
+        <button aria-pressed={mobileView === 'original'} onClick={() => setMobileView('original')}>
+          Original
+        </button>
+        <button
+          aria-pressed={mobileView === 'formatted'}
+          onClick={() => setMobileView('formatted')}
+          className="brand"
         >
-          <button
-            aria-pressed={mobileView === 'original'}
-            onClick={() => setMobileView('original')}
-          >
-            Original
-          </button>
-          <button
-            aria-pressed={mobileView === 'formatted'}
-            onClick={() => setMobileView('formatted')}
-            className="brand"
-          >
-            With Typograph
-          </button>
-        </div>
+          With Typograph
+        </button>
       </div>
       <div
         className="comparison-frame"

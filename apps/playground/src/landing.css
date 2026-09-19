@@ -14,8 +14,8 @@
   --softer: hsl(0, 0%, 93%);
   --soft: hsl(0, 0%, 82%);
   --selected: hsl(0, 0%, 87%);
-  --change-punctuation: hsl(0, 73%, 93%);
-  --change-spacing: hsl(0, 50%, 87%);
+  --change-punctuation: hsl(0, 70%, 80%);
+  --change-spacing: hsl(0, 50%, 80%);
   --change-hanging: hsl(0, 0%, 91%);
   --ruler: rgba(2, 1, 1, 0.12);
   color: var(--ink);
@@ -30,17 +30,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #242424;
-    --ink: #fcfcfc;
-    --muted: #b5b5b5;
-    --line: #4b4b4b;
-    --sheet: #292929;
-    --softer: #333333;
-    --selected: #454545;
-    --change-punctuation: #27405b;
-    --change-spacing: #50452a;
-    --change-hanging: #453650;
-    --ruler: rgb(252 252 252 / 0.14);
+    --paper: hsl(0, 0%, 14%);
+    --ink: hsl(0, 0%, 99%);
+    --muted: hsl(0, 1%, 71%);
+    --line: hsl(0, 0%, 24%);
+    --sheet: hsl(0, 0%, 16%);
+    --brand: hsl(0, 96%, 52%);
+    --softer: hsl(0, 0%, 20%);
+    --soft: hsl(0, 0%, 31%);
+    --selected: hsl(0, 0%, 26%);
+    --change-punctuation: hsl(0, 40%, 32%);
+    --change-spacing: hsl(0, 28%, 32%);
+    --change-hanging: hsl(0, 0%, 26%);
+    --ruler: hsl(0 1% 99% / 0.14);
   }
 }
 
@@ -214,7 +216,7 @@ textarea {
 }
 
 .site-header nav,
-.site-footer>div {
+.site-footer > div {
   display: flex;
   align-items: center;
   gap: 2rem;
@@ -236,26 +238,29 @@ textarea {
 }
 
 .hero {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
   min-height: 25rem;
   border-bottom: 1px solid var(--line);
 }
 
 .hero-copy {
   padding: 3.75rem 3.5rem 3rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.hero-copy>p {
+.hero-copy > p {
   max-width: 26rem;
-  margin-top: 1.2rem;
-  color: var(--muted);
+  margin-top: 1.5rem;
+  color: var(--ink);
 }
 
 .hero-copy .scope-line {
-  margin-top: 1.75rem;
-  font-size: 0.8125rem;
-  color: var(--ink);
+  margin-top: 0.5rem;
+  color: var(--muted);
   display: flex;
-  gap: 0.55rem;
   flex-wrap: wrap;
 }
 
@@ -266,6 +271,7 @@ textarea {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 .proof-result {
@@ -305,14 +311,14 @@ textarea {
   gap: 2px;
   width: fit-content;
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: 3px;
   background: var(--softer);
 }
 
 .segmented-control button {
   padding: 4px 12px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 3px;
   color: var(--muted);
 }
 
@@ -335,7 +341,7 @@ textarea {
   align-items: flex-end;
   justify-content: space-between;
   gap: 2rem;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.5rem;
 }
 
 .section-heading p {
@@ -370,11 +376,13 @@ textarea {
 
 .demo-toolbar {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--line);
   font-size: 0.8125rem;
+  padding-top: 1px;
 }
 
 select {
@@ -427,6 +435,7 @@ select {
 
 .mobile-comparison-switch {
   display: none;
+  flex-shrink: 0;
 }
 
 .comparison-frame {
@@ -468,7 +477,8 @@ select {
 
 .comparison-pane {
   min-width: 0;
-  padding: 0.5rem 2rem 1rem;
+  /* Always reserve the guide overhang so Show changes cannot shift the text. */
+  padding: 40px 2rem;
 }
 
 .original-pane {
@@ -514,19 +524,21 @@ select {
 
 /* Smoothstep alpha stops fade content fully into its existing surface. */
 .scroll-fade {
-  mask-image: linear-gradient(to bottom,
-      transparent,
-      rgb(0 0 0 / 0.104) calc(var(--scroll-fade-top, 0px) * 0.2),
-      rgb(0 0 0 / 0.352) calc(var(--scroll-fade-top, 0px) * 0.4),
-      rgb(0 0 0 / 0.648) calc(var(--scroll-fade-top, 0px) * 0.6),
-      rgb(0 0 0 / 0.896) calc(var(--scroll-fade-top, 0px) * 0.8),
-      var(--ink) var(--scroll-fade-top, 0px),
-      var(--ink) calc(100% - var(--scroll-fade-bottom, 0px)),
-      rgb(0 0 0 / 0.896) calc(100% - var(--scroll-fade-bottom, 0px) * 0.8),
-      rgb(0 0 0 / 0.648) calc(100% - var(--scroll-fade-bottom, 0px) * 0.6),
-      rgb(0 0 0 / 0.352) calc(100% - var(--scroll-fade-bottom, 0px) * 0.4),
-      rgb(0 0 0 / 0.104) calc(100% - var(--scroll-fade-bottom, 0px) * 0.2),
-      transparent);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(0 0 0 / 0.104) calc(var(--scroll-fade-top, 0px) * 0.2),
+    rgb(0 0 0 / 0.352) calc(var(--scroll-fade-top, 0px) * 0.4),
+    rgb(0 0 0 / 0.648) calc(var(--scroll-fade-top, 0px) * 0.6),
+    rgb(0 0 0 / 0.896) calc(var(--scroll-fade-top, 0px) * 0.8),
+    var(--ink) var(--scroll-fade-top, 0px),
+    var(--ink) calc(100% - var(--scroll-fade-bottom, 0px)),
+    rgb(0 0 0 / 0.896) calc(100% - var(--scroll-fade-bottom, 0px) * 0.8),
+    rgb(0 0 0 / 0.648) calc(100% - var(--scroll-fade-bottom, 0px) * 0.6),
+    rgb(0 0 0 / 0.352) calc(100% - var(--scroll-fade-bottom, 0px) * 0.4),
+    rgb(0 0 0 / 0.104) calc(100% - var(--scroll-fade-bottom, 0px) * 0.2),
+    transparent
+  );
   mask-mode: alpha;
 }
 
@@ -547,17 +559,17 @@ select {
   padding-inline-start: 1.5em;
 }
 
-.response-prose li+li {
+.response-prose li + li {
   margin-top: 0.5em;
 }
 
-.response-prose li>p+p,
-.response-prose li>ul,
-.response-prose li>ol {
+.response-prose li > p + p,
+.response-prose li > ul,
+.response-prose li > ol {
   margin-top: 0.5em;
 }
 
-.response-prose>*+* {
+.response-prose > * + * {
   margin-top: 1.25em;
 }
 
@@ -618,7 +630,7 @@ select {
   padding: 0.5rem 1rem 0;
 }
 
-.response-prose [data-streamdown='code-block-body'] pre>code>span {
+.response-prose [data-streamdown='code-block-body'] pre > code > span {
   display: block;
 }
 
@@ -658,14 +670,14 @@ select {
 
 mark,
 .proof-result [data-change],
-.show-changes .typograph-opening>span {
+.show-changes .typograph-opening > span {
   position: relative;
   background: transparent;
 }
 
 mark::before,
 .proof-result [data-change]::before,
-.show-changes .typograph-opening>span::before {
+.show-changes .typograph-opening > span::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -679,7 +691,7 @@ mark::before,
   visibility: hidden;
 }
 
-.show-changes .typograph-opening>span {
+.show-changes .typograph-opening > span {
   --annotation-color: var(--change-hanging);
 }
 
@@ -840,7 +852,7 @@ mark::before,
   max-width: 42rem;
 }
 
-.demo-caption>span {
+.demo-caption > span {
   white-space: nowrap;
 }
 
@@ -861,7 +873,7 @@ mark::before,
   padding: 1rem 2rem;
 }
 
-.change-key>span {
+.change-key > span {
   display: inline-flex;
   gap: 0.4rem;
   align-items: center;
@@ -888,7 +900,7 @@ mark::before,
   row-gap: 3rem;
 }
 
-.principles>h2 {
+.principles > h2 {
   grid-row: span 3;
 }
 
@@ -909,7 +921,7 @@ mark::before,
   gap: 4rem;
 }
 
-.section-intro>p {
+.section-intro > p {
   margin-top: 1.5rem;
   max-width: 24rem;
 }
@@ -918,7 +930,7 @@ mark::before,
   color: var(--muted);
 }
 
-.section-intro>a {
+.section-intro > a {
   margin-top: 1.75rem;
   font-size: 0.875rem;
 }
@@ -953,7 +965,7 @@ mark::before,
 }
 
 .recipe-tab-row {
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem;
 }
 
 .recipe-tools {
@@ -962,7 +974,7 @@ mark::before,
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.25rem 1rem;
-  padding: 0 1.5rem 1.5rem;
+  padding: 1.5rem;
 }
 
 .recipe-copy {
@@ -1010,7 +1022,7 @@ mark::before,
   gap: 4rem;
 }
 
-.scope-section>div>p {
+.scope-section > div > p {
   max-width: 24rem;
   margin-top: 1.25rem;
   color: var(--muted);
@@ -1020,13 +1032,13 @@ mark::before,
   padding-top: 0.5rem;
 }
 
-.scope-details>dl {
+.scope-details > dl {
   display: flex;
   flex-direction: column;
   gap: 3rem;
 }
 
-.scope-details dl>div {
+.scope-details dl > div {
   display: grid;
   grid-template-columns: 7rem 1fr;
   gap: 1.25rem;
@@ -1060,12 +1072,12 @@ mark::before,
   gap: 1rem;
 }
 
-.site-footer>span {
+.site-footer > span {
   color: var(--muted);
   font-size: 0.8125rem;
 }
 
-.site-footer>div {
+.site-footer > div {
   margin-left: auto;
   gap: 1.5rem;
   font-size: 0.8125rem;
@@ -1093,9 +1105,16 @@ mark[data-typograph-change='spacing'] {
 [data-rulers='true']::after {
   content: '';
   position: absolute;
-  inset-block: 0;
+  inset-block: -40px;
   width: 1px;
-  background: var(--ruler);
+  background: repeating-linear-gradient(to bottom, var(--ruler) 0 4px, transparent 4px 8px);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 64px,
+    #000 calc(100% - 64px),
+    transparent
+  );
   pointer-events: none;
 }
 
@@ -1173,12 +1192,13 @@ mark[data-typograph-change='spacing'] {
   color: var(--muted);
 }
 
-.source-note>span {
+.source-note > span {
   font-variant-numeric: tabular-nums;
 }
 
 .reading.conversation-context {
   min-height: 0;
+  margin-bottom: 40px;
 }
 
 .chat-user {
@@ -1191,7 +1211,7 @@ mark[data-typograph-change='spacing'] {
   font-size: 0.875rem;
 }
 
-.chat-user>span {
+.chat-user > span {
   display: block;
   margin-bottom: 0.25rem;
   color: var(--muted);
@@ -1207,7 +1227,7 @@ mark[data-typograph-change='spacing'] {
   margin-bottom: 1rem;
 }
 
-.chat-agent-label>span,
+.chat-agent-label > span,
 .thinking-note {
   color: var(--muted);
 }
@@ -1267,6 +1287,9 @@ mark[data-typograph-change='spacing'] {
 
   .hero {
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .hero-copy {
@@ -1274,10 +1297,10 @@ mark[data-typograph-change='spacing'] {
   }
 
   .punctuation-proof {
-    padding: 2.5rem 0 2.5rem 1.5rem;
+    padding: 40px 0 40px 1.5rem;
   }
 
-  .hero-copy>p {
+  .hero-copy > p {
     font-size: 0.9375rem;
   }
 
@@ -1372,7 +1395,7 @@ mark[data-typograph-change='spacing'] {
     gap: 2rem;
   }
 
-  .principles>h2 {
+  .principles > h2 {
     grid-row: auto;
   }
 
@@ -1381,8 +1404,8 @@ mark[data-typograph-change='spacing'] {
     padding-bottom: 1.5rem;
   }
 
-  .section-intro>p,
-  .scope-section>div>p {
+  .section-intro > p,
+  .scope-section > div > p {
     max-width: 36rem;
   }
 
@@ -1395,7 +1418,7 @@ mark[data-typograph-change='spacing'] {
     margin-top: 3.5rem;
   }
 
-  .site-footer>div {
+  .site-footer > div {
     margin-left: 0;
     flex-basis: 100%;
     flex-wrap: wrap;
@@ -1420,7 +1443,7 @@ mark[data-typograph-change='spacing'] {
     display: none;
   }
 
-  .hero-copy>p {
+  .hero-copy > p {
     max-width: 26rem;
   }
 
@@ -1431,7 +1454,7 @@ mark[data-typograph-change='spacing'] {
   .punctuation-proof {
     border-left: 0;
     border-top: 1px solid var(--line);
-    padding: 2rem 1rem;
+    padding: 40px 1rem;
   }
 
   .proof-result {
@@ -1471,7 +1494,7 @@ mark[data-typograph-change='spacing'] {
     padding-inline: 1rem;
   }
 
-  .scope-details dl>div {
+  .scope-details dl > div {
     grid-template-columns: 1fr;
     gap: 0.25rem;
   }

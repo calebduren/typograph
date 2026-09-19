@@ -32,9 +32,8 @@ function Integration({
   const [copiedContent, setCopiedContent] = useState('');
   const [error, setError] = useState('');
   const promptArea = useRef<HTMLDivElement>(null);
-  useScrollFade(promptArea, `${recipe}:${mode}`);
-  const content =
-    mode === 'prompt' ? agentPrompt(recipe, settings) : integrationCode(recipe, settings);
+  useScrollFade(promptArea, mode);
+  const content = mode === 'prompt' ? agentPrompt(settings) : integrationCode(recipe, settings);
   const copied = copiedContent === content;
   useEffect(() => {
     // This state mirrors the selected recipe and clears a stale copy error.
@@ -67,7 +66,8 @@ function Integration({
           <TypographyControls settings={settings} onSettingsChange={onSettingsChange} />
         </div>
         <p>
-          Building with an agent? Choose your stack and copy the prompt into your coding assistant.
+          Building with an agent? Copy the prompt into your coding assistant. It will find the right
+          integration for your app.
         </p>
         <a className="underlined" href="/integration.md">
           Read the integration guide <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
@@ -77,27 +77,6 @@ function Integration({
         </p>
       </div>
       <div className="recipe">
-        <div className="recipe-tab-row">
-          <div
-            className="recipe-tabs segmented-control"
-            role="group"
-            aria-label="Integration examples"
-          >
-            {integrationStacks.map((name) => (
-              <button
-                key={name}
-                aria-pressed={recipe === name}
-                onClick={() => {
-                  setRecipe(name);
-                  setCopiedContent('');
-                  setError('');
-                }}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-        </div>
         <div className="recipe-tools">
           <div
             className="recipe-modes segmented-control"
@@ -139,14 +118,36 @@ function Integration({
             </span>
           </button>
         </div>
+        {mode === 'code' && (
+          <div className="recipe-tab-row">
+            <div
+              className="recipe-tabs segmented-control"
+              role="group"
+              aria-label="Integration examples"
+            >
+              {integrationStacks.map((name) => (
+                <button
+                  key={name}
+                  aria-pressed={recipe === name}
+                  onClick={() => {
+                    setRecipe(name);
+                    setCopiedContent('');
+                    setError('');
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {mode === 'prompt' ? (
           <div
             ref={promptArea}
             className="agent-prompt scroll-fade"
             role="region"
             tabIndex={0}
-            aria-label={`${recipe} agent prompt`}
-            key={recipe}
+            aria-label="Typography agent prompt"
           >
             <div>{content}</div>
           </div>
@@ -204,14 +205,11 @@ function Landing() {
                 Careful English punctuation for AI responses, with optional spacing that keeps
                 related words together.
               </p>
-              <p className="scope-line">
-                English only <span aria-hidden="true">·</span> Open source{' '}
-                <span aria-hidden="true">·</span> Runs locally
-              </p>
+              <p className="scope-line">Open source, runs locally.</p>
             </div>
             <figure
               className="punctuation-proof"
-              aria-label="The quick brown fox says, ‘Oh, that’s better.’ Opening quotation mark hangs in lilac; smart punctuation is highlighted in blue."
+              aria-label="The quick brown fox says, ‘Oh, that’s better.’ Opening quotation mark hangs in gray; smart punctuation is highlighted in rose."
             >
               <div className="proof-result" data-rulers="true" aria-hidden="true">
                 <span className="typograph-opening">
@@ -231,7 +229,6 @@ function Landing() {
             <div className="section-heading">
               <div>
                 <h2 id="comparison-title">Small changes. A better read.</h2>
-                <p>The same words, with a little more care. Open Markdown to try your own.</p>
               </div>
             </div>
             <div id="demo" className="comparison-workspace">

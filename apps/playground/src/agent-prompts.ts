@@ -1,17 +1,6 @@
-import {
-  pluginOptions,
-  settingsSummary,
-  type IntegrationStack,
-  type TypographySettings,
-} from './integration-settings';
+import { pluginOptions, settingsSummary, type TypographySettings } from './integration-settings';
 
-const stackInstructions = {
-  'AI Elements': `This app uses Vercel AI SDK, AI Elements, or shadcn. Find the assistant text-part renderer and its owned MessageResponse component. Add the Remark plugin there, preserving Streamdown's default plugins and any app-specific plugins. Keep useChat, transport, tool components, and message storage unchanged. Inspect the installed versions: if rules can change at runtime, check MessageResponse and Streamdown memoization against examples/chat-integration/src/typography-response.tsx in the source repository. Do not force React key remounts.`,
-  Cloudflare: `This app uses Cloudflare Agents. Find the assistant text-part renderer fed by useAgentChat. Add the Remark plugin to its existing Markdown renderer; use Streamdown's remarkPlugins if that is already installed. Preserve default and app-specific plugins. Keep the Worker, Durable Object, WebSocket transport, persistence, and reconnect behavior unchanged. Typography belongs in the presentation layer.`,
-  Remark: `Find this app's existing Remark or unified Markdown pipeline and add the plugin once, preserving all existing plugins and sanitization. With unified, supply the original Markdown to the transformer: processor.runSync(processor.parse(markdown), markdown). This preserves escaped punctuation and unfinished syntax. If the app has no compatible Markdown pipeline, explain the smallest compatible integration before introducing a new renderer.`,
-};
-
-export function agentPrompt(stack: IntegrationStack, settings: TypographySettings): string {
+export function agentPrompt(settings: TypographySettings): string {
   return `Integrate Typograph into this app's assistant responses. Inspect the framework, package manager, renderer, and installed versions first. Preserve the product's fonts, styling, components, and existing behavior.
 
 SOURCE AND INSTALLATION
@@ -25,7 +14,13 @@ Hanging punctuation: ${settings.hanging ? 'on (opening quotes only)' : 'off'}
 Apply this exact configuration: ${settingsSummary(settings)}. Demo highlighting is not a product feature and must not be installed.
 
 INTEGRATION
-${stackInstructions[stack]}
+Choose the integration that matches the app's existing renderer. Add the Remark plugin once in the assistant text-part renderer, preserving default and app-specific plugins and sanitization. Typography belongs in the presentation layer; keep transports, tool components, and message storage unchanged.
+
+If the app uses AI Elements, find its owned MessageResponse component. With Streamdown, use remarkPlugins and preserve its defaults. If rules can change at runtime, inspect the installed versions and check MessageResponse and Streamdown memoization against examples/chat-integration/src/typography-response.tsx in the source repository. Do not force React key remounts.
+
+If the app uses Cloudflare Agents, find the renderer fed by useAgentChat. Keep the Worker, Durable Object, WebSocket transport, persistence, and reconnect behavior unchanged. The same renderer integration applies.
+
+With unified, supply the original Markdown to the transformer: processor.runSync(processor.parse(markdown), markdown). This preserves escaped punctuation and unfinished syntax. If the app has no compatible Markdown pipeline, explain the smallest compatible integration before introducing a new renderer.
 
 Import typography from '@calebduren/typograph' and register [typography, ${pluginOptions(settings)}] only for responses known to be English. This is English-only, with one house style and no language detection. Unknown, other-language, mixed-language, or verbatim responses should opt out. ${settings.spacing ? 'Enable conservative unit, initial, and abbreviation joins. Leave shortWords and lastWords off.' : 'Leave whitespace unchanged.'} Keep plugin configuration stable between renders and preserve the original Markdown source for the Remark transform.
 

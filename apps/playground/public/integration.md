@@ -126,7 +126,7 @@ Leave enough space in the left gutter and avoid clipping overflow. Custom render
 
 ## Instructions for your coding agent
 
-The landing page's Integration section has copyable, self-contained prompts for AI Elements/shadcn, Cloudflare Agents, and other Remark renderers. Set the three typography switches above the preview, choose your stack, leave **Agent prompt** selected, and use **Copy prompt**. Paste it into the agent working in your app's repository. The prompt covers package installation, the exact selected settings, preservation of your app's design and raw messages, and verification. **Code** shows the shorter manual configuration for the same settings.
+The landing page's Integration section has one copyable, self-contained agent prompt. Set the three typography switches above the preview or in Integration, leave **Agent prompt** selected, and use **Copy prompt**. Paste it into the agent working in your app's repository. The prompt asks the agent to inspect the existing renderer and choose the appropriate integration, including guidance for AI Elements/shadcn, Cloudflare Agents, and other Remark renderers. It covers package installation, the exact selected settings, preservation of your app's design and raw messages, and verification. Select **Code** to reveal the stack buttons and choose a shorter manual configuration for the same settings.
 
 ## Paragraph endings: CSS first
 

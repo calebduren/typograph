@@ -11,6 +11,10 @@
 /fonts/*
   Cache-Control: public, max-age=604800
 
+/site.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: no-cache
+
 /integration.md
   Content-Type: text/plain; charset=utf-8
   Content-Disposition: inline

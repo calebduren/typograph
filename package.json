@@ -10,7 +10,7 @@
   "scripts": {
     "build": "npm run build:chat && npm run build -w @typograph/playground",
     "build:chat": "npm run build -w @calebduren/typograph",
-    "build:social": "node scripts/generate-social-image.mjs",
+    "build:icons": "node scripts/build-favicon.mjs",
     "build:chat-integration": "npm run build -w @typograph/chat-integration",
     "test": "vitest run",
     "test:chat-integration": "npm run test:e2e -w @typograph/chat-integration",

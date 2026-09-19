@@ -12,6 +12,6 @@ The public package is `@calebduren/typograph`. The package and website share thi
 
 The secondary domain redirects to `typograph.dev`, preserving path and query. Missing assets remain 404 responses. Configuration is not evidence of deployment.
 
-The social-preview image is included; regenerate it with `npm run build:social` after changing its composition or bundled font. Keep the image provenance with the asset. The `.assetsignore` file excludes build manifests and source maps from deployment.
+Browser icons, home-screen icons, and both social-preview cards use the supplied brand exports. See [the asset map](../assets/brand/README.md) for their locations and provenance. Replace social cards with fresh design exports; run `npm run build:icons` after replacing the small favicon PNGs. The larger master exports remain outside the deployed site. The `.assetsignore` file excludes build manifests and source maps from deployment.
 
 The package ships JavaScript, TypeScript declarations, optional hanging CSS, documentation, and license notices. It contains no fonts or site UI. Keep credentials and development artifacts out of release archives. No package or site is published by the verification commands.
