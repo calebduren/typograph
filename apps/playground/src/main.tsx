@@ -157,7 +157,7 @@ function Integration({ settings }: { settings: TypographySettings }) {
         )}
         <p className="recipe-note">
           {mode === 'prompt'
-            ? 'Includes setup from source, English-only defaults, streaming behavior, and checks for your app.'
+            ? 'Includes installation, English-only defaults, streaming behavior, and checks for your app.'
             : 'A fixed English preset needs no finish callback. Changing rules at runtime? The guide includes the tested Streamdown wrapper.'}
         </p>
         <p role="alert" className="recipe-error" hidden={!error}>
