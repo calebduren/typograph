@@ -24,7 +24,7 @@ export function pluginOptions(settings: TypographySettings): string {
 }
 
 export function integrationCode(stack: IntegrationStack, settings: TypographySettings): string {
-  const imports = `import typography from '@typograph/chat';${settings.hanging ? "\nimport hangingPunctuation from '@typograph/chat/hanging';\nimport '@typograph/chat/hanging.css';" : ''}`;
+  const imports = `import typography from '@calebduren/typograph';${settings.hanging ? "\nimport hangingPunctuation from '@calebduren/typograph/hanging';\nimport '@calebduren/typograph/hanging.css';" : ''}`;
   if (stack === 'Remark') {
     return `import { unified } from 'unified';
 import remarkParse from 'remark-parse';${settings.hanging ? "\nimport remarkRehype from 'remark-rehype';" : ''}

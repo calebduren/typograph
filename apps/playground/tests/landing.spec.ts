@@ -1,8 +1,74 @@
 import { test, expect } from '@playwright/test';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { example } from '../src/chat-preview';
 
 const review = '../../.impeccable/review';
+
+test('production links, metadata, and asset headers work', async ({ page }) => {
+  const response = await page.goto('/');
+  const csp = response!.headers()['content-security-policy'];
+  expect(csp).toContain("style-src 'self';");
+  expect(csp).toContain("style-src-attr 'unsafe-inline'");
+  await expect(page).toHaveTitle('Typograph — Nicer typography for streaming AI.');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+    'content',
+    await page.title(),
+  );
+  const imageUrl = await page.locator('meta[property="og:image"]').getAttribute('content');
+  expect(imageUrl).toBe('https://typograph.dev/social.png');
+  const image = await page.request.get(new URL(imageUrl!).pathname);
+  expect(image.status()).toBe(200);
+  expect(image.headers()['content-type']).toContain('image/png');
+  expect((await image.body()).subarray(1, 4).toString()).toBe('PNG');
+  expect((await page.request.get('/.vite/manifest.json')).status()).toBe(404);
+  const measurement = page.getByRole('link', { name: 'View the measurement' });
+  await expect(measurement).toHaveAttribute('href', /^\/assets\/.*\.json$/);
+  await measurement.click();
+  await expect(page).toHaveURL(/\/assets\/.*\.json$/);
+  const data = await page.request.get(page.url());
+  expect(data.status()).toBe(200);
+  expect((await data.json()).bundle.gzipBytes).toBeGreaterThan(0);
+  expect(data.headers()['cache-control']).toContain('immutable');
+  const font = await page.request.get('/fonts/InterVariable.woff2');
+  expect(font.status()).toBe(200);
+  expect(font.headers()['cache-control']).toContain('max-age=604800');
+  const guide = await page.goto('/integration.md');
+  expect(guide!.headers()['content-type']).toContain('text/plain');
+  expect(guide!.headers()['content-disposition']).toBe('inline');
+  await expect(page.locator('body')).toContainText('English-only');
+});
+
+test('the hero renders while the comparison bundle is still loading', async ({ page }) => {
+  const manifest = JSON.parse(
+    await readFile(new URL('../dist/.vite/manifest.json', import.meta.url), 'utf8'),
+  );
+  expect(manifest['index.html'].dynamicImports).toHaveLength(1);
+  const comparisonBundle = manifest[manifest['index.html'].dynamicImports[0]].file;
+  let requestBlocked = false;
+  let release!: () => void;
+  const loaded = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route(`**/${comparisonBundle}`, async (route) => {
+    requestBlocked = true;
+    await loaded;
+    await route.continue();
+  });
+  try {
+    await page.goto('/#demo', { waitUntil: 'domcontentloaded' });
+    await expect.poll(() => requestBlocked).toBe(true);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Nicer typography for streaming AI.',
+    );
+    await expect(page.getByRole('status')).toHaveText('Loading the comparison…');
+  } finally {
+    release();
+  }
+  await expect(page.getByTestId('formatted-response')).toBeVisible();
+  expect(
+    Math.abs(await page.locator('#demo').evaluate((node) => node.getBoundingClientRect().top)),
+  ).toBeLessThan(2);
+});
 
 test('comparison uses the real plugin, preserves nodes, and supports native text copying', async ({
   page,
@@ -88,10 +154,14 @@ test('playback pauses, scrubs, and resumes through an ambiguous prefix', async (
   expect(await page.getByTestId('formatted-response').textContent()).toContain('30\u00a0min');
 });
 
-test('editing stays local, handles empty text, and retains a custom source', async ({ page }) => {
+test('editing stays local, handles empty text, and retains a custom source', async ({
+  page,
+  baseURL,
+}) => {
   const externalRequests: string[] = [];
   page.on('request', (request) => {
-    if (!request.url().startsWith('http://127.0.0.1:4173')) externalRequests.push(request.url());
+    if (new URL(request.url()).origin !== new URL(baseURL!).origin)
+      externalRequests.push(request.url());
   });
   await page.goto('/');
   await page
@@ -173,7 +243,7 @@ test('agent prompts match the selected stack and offer a manual copy fallback', 
     const copied = await page.evaluate(() => navigator.clipboard.readText());
     expect(copied).toBe(await prompt.textContent());
     expect(copied).toContain('English-only');
-    expect(copied).toContain('not published on npm');
+    expect(copied).toContain('npm install @calebduren/typograph');
     expect(copied).toContain('text-wrap: pretty');
   }
   await page.getByRole('button', { name: 'Code', exact: true }).click();
@@ -224,7 +294,9 @@ test('all typography combinations stay in sync with previews, prompts, and code'
         await page.getByRole('button', { name: 'Code', exact: true }).click();
         const code = page.getByLabel('AI Elements code example');
         await expect(code).toContainText(`punctuation: ${punctuation}, spacing: ${spacing}`);
-        expect((await code.textContent())?.includes('@typograph/chat/hanging.css')).toBe(hanging);
+        expect((await code.textContent())?.includes('@calebduren/typograph/hanging.css')).toBe(
+          hanging,
+        );
         await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
       }
   // Highlighting remains a local preview state, never part of a copied setup.
@@ -242,7 +314,7 @@ test('all typography combinations stay in sync with previews, prompts, and code'
     );
     await page.getByRole('button', { name: 'Code', exact: true }).click();
     await expect(page.getByLabel(`${stack} code example`)).toContainText(
-      '@typograph/chat/hanging.css',
+      '@calebduren/typograph/hanging.css',
     );
     await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
   }

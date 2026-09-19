@@ -1,4 +1,4 @@
-import typography from '@typograph/chat';
+import typography from '@calebduren/typograph';
 import type { Root } from 'mdast';
 import { defaultRehypePlugins } from 'streamdown';
 import type { Pluggable, Plugin } from 'unified';

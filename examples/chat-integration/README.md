@@ -4,7 +4,7 @@ One AI Elements UI, two real SDK paths, deterministic Markdown responses. No mod
 
 - **Vercel AI SDK:** `useChat` and `DefaultChatTransport` consume a real AI SDK UI-message HTTP stream. Completed, stopped, and failed raw messages are saved to sessionStorage for reload tests. This path does not claim active-stream resumption.
 - **Cloudflare:** `AIChatAgent`, `useAgent`, and `useAgentChat` use a local Worker and Durable Object through Wrangler. The SDK handles persistence and active-stream resumption after reconnect.
-- **Shared presentation:** official AI Elements Message source, shadcn components, Streamdown, and the local `@typograph/chat` package. Server transports never run typography over stored model output.
+- **Shared presentation:** official AI Elements Message source, shadcn components, Streamdown, and the local `@calebduren/typograph` package. Server transports never run typography over stored model output.
 
 ## Run locally
 

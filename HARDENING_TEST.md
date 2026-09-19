@@ -35,22 +35,35 @@ The AI SDK fixture saves settled raw messages in sessionStorage. Active resumpti
 
 Apple M3 Max, macOS, Node 22.19.0. Three warmups and 40 measured iterations per scenario, fresh text tree each time. Timed work is the plugin transformation, including protection scanning; tree construction, Markdown parsing, React rendering, and layout are excluded. Values below are milliseconds.
 
+Measurements refreshed after the audit fixes, including the new elision lookahead.
+
 | Input             | Characters | Spacing      | Median |    p95 |
 | ----------------- | ---------: | ------------ | -----: | -----: |
-| Dense apostrophes |      4,002 | off          |  0.346 |  0.674 |
-| Dense apostrophes |     16,002 | off          |  1.301 |  1.502 |
-| Dense apostrophes |     64,002 | off          |  5.274 |  6.159 |
-| Dense apostrophes |     64,002 | on           | 10.997 | 11.787 |
-| Ordinary prose    |      4,056 | off          |  0.214 |  0.402 |
-| Ordinary prose    |     64,038 | off          |  3.411 |  3.621 |
-| Ordinary prose    |     64,038 | on           | 11.133 | 11.709 |
-| One long token    |     64,000 | on, fallback |  1.499 |  1.676 |
+| Dense apostrophes |      4,002 | off          |  0.355 |  0.692 |
+| Dense apostrophes |     16,002 | off          |  1.335 |  1.497 |
+| Dense apostrophes |     64,002 | off          |  5.433 |  6.050 |
+| Dense apostrophes |     64,002 | on           | 11.270 | 11.835 |
+| Dense elisions    |      4,004 | off          |  0.288 |  0.664 |
+| Dense elisions    |     16,016 | off          |  1.093 |  1.301 |
+| Dense elisions    |     64,012 | off          |  4.892 |  5.205 |
+| One long token    |     64,000 | on, fallback |  1.594 |  1.821 |
+| Ordinary prose    |      4,056 | off          |  0.267 |  0.580 |
+| Ordinary prose    |     64,038 | off          |  4.218 |  4.541 |
+| Ordinary prose    |     64,038 | on           | 12.319 | 13.100 |
 
 The prior diagnostic measured 1,653.95 ms at 64,002 characters for dense apostrophes with spacing off, using the same machine/Node version and three warmups but seven samples. The new measurement demonstrates the removed pathological behavior; it is not a universal 300× application-speed claim.
 
-The minified ESM browser bundle, including Typehug, is **9,927 bytes / 4,042 bytes gzip**. The previous candidate measured 3,507 bytes gzip. This pass adds about 535 compressed bytes for correctness and defensive behavior. The fixture's full application is much larger because it includes chat SDKs, UI components, and upstream rendering plugins; do not use its app bundle as the utility's size.
+The minified ESM browser bundle, including Typehug, is **10,446 bytes / 4,250 bytes gzip**. The audit and launch fixes add 208 compressed bytes over the previous 4,042-byte hardening measurement. The fixture's full application is much larger because it includes chat SDKs, UI components, and upstream rendering plugins; do not use its app bundle as the utility's size.
 
 Run `npm run build:chat && npm run bench:chat`. The [script](scripts/benchmark-chat-engine.mjs) and [complete measured results](validation/chat-hardening-benchmark.json) are included. No timing threshold is asserted in CI: results depend on the machine, and real client-update budgets still need profiling.
+
+## Audit follow-up
+
+Adjacent nested quotes now establish quote context. Completed literal code spans are masked before unfinished-syntax detection, so embedded backticks and `](` cannot suppress typography in later prose. Elision-like quoted phrases can use a later closing mark while ignoring contractions and likely plural possessives; lookahead advances forwards rather than rescanning each suffix. New regressions cover both streaming and complete modes, independent rule switches, idempotence, and relevant stream prefixes.
+
+The optional hanging helper supports tight and nested list items as well as loose paragraphs. It leaves ambiguous leading straight apostrophes inside the margin when punctuation conversion is off. Cross-paragraph quote state and ambiguous inch marks remain explicit limitations in the package README.
+
+The complete core still includes Typehug even when spacing is off. At 4,250 gzip bytes, retaining the existing single-plugin configuration is the current tradeoff; a separate spacing entry point remains optional future API work.
 
 ## Verification at the hardening checkpoint
 
@@ -67,3 +80,9 @@ These historical totals include the superseded toolkit, which has since been rem
 This is a narrow English typography policy, not universal editorial correctness. Real anonymized model replies, editorial review, mixed-language decisions, narrow-screen/zoom comparisons, selection-copy and screen-reader checks, hydration, and slower-device browser profiling remain. The fixture is local; nothing was deployed or published. A shadcn registry entry and a public install command should follow those checks, not precede them.
 
 The controlled before/after streaming comparison is now implemented in the [landing page](LANDING_PAGE_BRIEF.md), using the tested engine and renderer integration.
+
+## Launch candidate checks (2026-09-19)
+
+The 0.1.0 candidate limits unfinished backtick protection to the current paragraph (including CRLF and whitespace-only blank lines), resolves quotes before footnotes, and excludes numeric measurements from elision lookahead. The hanging helper initializes missing properties on hand-built elements. All 113 unit/renderer checks pass, including eight new regressions that failed against the prior implementation.
+
+The paragraph-boundary scan is cached within a protection pass to avoid rescanning long paragraphs for each code span. The new dense-code-spans probe measures 0.386 / 0.793 / 3.456 ms at 4K / 16K / 64K characters with spacing off. See the recorded JSON for the complete environment and samples. These measurements are local and do not predict an application’s complete rendering time.

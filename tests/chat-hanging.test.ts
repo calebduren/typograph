@@ -14,6 +14,50 @@ const content = (node: Root | RootContent): string =>
   'value' in node ? node.value : 'children' in node ? node.children.map(content).join('') : '';
 
 describe('optional hanging punctuation', () => {
+  it('decorates a hand-built element with no properties', () => {
+    const paragraph = {
+      type: 'element',
+      tagName: 'p',
+      children: [text('"Hi" there')],
+    } as Element;
+    const tree = root(paragraph);
+    const transform = hanging({ locale: 'en' });
+    transform(tree);
+    expect(paragraph.properties).toEqual({ 'data-typograph-hanging': '' });
+    expect(content(tree)).toBe('"Hi" there');
+    const once = JSON.stringify(tree);
+    transform(tree);
+    expect(JSON.stringify(tree)).toBe(once);
+  });
+
+  it('supports tight, loose, and nested list items without wrapping twice', () => {
+    const tree = root(
+      element('ul', [
+        element('li', [text('“Tight.”'), element('ul', [element('li', [text('“Nested.”')])])]),
+        element('li', [text('\n'), element('p', [text('“Loose.”')])]),
+        element('li', [element('em', [text('“Emphasized.”')])]),
+      ]),
+    );
+    const before = content(tree);
+    const transform = hanging({ locale: 'en' });
+    transform(tree);
+    expect(content(tree)).toBe(before);
+    expect(JSON.stringify(tree).match(/typograph-opening/g)).toHaveLength(4);
+    const once = JSON.stringify(tree);
+    transform(tree);
+    expect(JSON.stringify(tree)).toBe(once);
+  });
+
+  it.each(["'em all", "'Tis the season", "'Round the corner", "'90s", "'t", "'"])(
+    'does not hang an ambiguous straight apostrophe: %s',
+    (value) => {
+      const tree = root(element('p', [text(value)]));
+      hanging({ locale: 'en' })(tree);
+      expect(content(tree)).toBe(value);
+      expect(JSON.stringify(tree)).not.toContain('typograph-opening');
+    },
+  );
+
   it('wraps the opening quote once and preserves every text character and link destination', () => {
     const link = element('a', [text('“Read this.”')]);
     link.properties.href = "https://example.com/it's";

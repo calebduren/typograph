@@ -2,7 +2,7 @@
 
 Careful English typography for streaming AI responses. A small Remark plugin refines punctuation in rendered Markdown while preserving the original messages. Optional non-breaking spaces keep related words together; a separate Rehype helper hangs opening quotes.
 
-**Pre-release:** `@typograph/chat` is a private, unpublished workspace package. Use a checkout containing the package or a locally built archive. No public npm install command is available yet.
+Try the comparison at [typograph.dev](https://typograph.dev). Install the package from [npm](https://www.npmjs.com/package/@calebduren/typograph).
 
 ## Try it locally
 
@@ -20,11 +20,10 @@ Open <http://127.0.0.1:4173/>. The landing page includes an editable comparison,
 Read the [package API](packages/chat-typography/README.md) and [integration guide](apps/playground/public/integration.md) for AI Elements/shadcn, Cloudflare Agents, and generic Remark pipelines. The [SDK fixture](examples/chat-integration/README.md) exercises real local transports with recorded responses.
 
 ```sh
-npm run build:chat
-npm pack -w @typograph/chat
+npm install @calebduren/typograph
 ```
 
-Install the resulting archive in your application using its package manager. The plugin uses one English house style with explicit locale selection. Other or unknown languages pass through; mixed-language replies should opt out. Code, math, URLs, and link destinations stay literal. Keep original Markdown for storage and original-text copying.
+The plugin uses one English house style with explicit locale selection. Other or unknown languages pass through; mixed-language replies should opt out. Code, math, URLs, and link destinations stay literal. Keep original Markdown for storage and original-text copying.
 
 ## Repository
 

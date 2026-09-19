@@ -6,6 +6,6 @@ export default defineConfig({
   base: '/',
   resolve: { dedupe: ['react', 'react-dom'] },
   optimizeDeps: { include: ['streamdown'] },
-  build: { sourcemap: true },
+  build: { sourcemap: true, manifest: true },
   server: { port: 4173 },
 });

@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { defaultRemarkPlugins } from 'streamdown';
-import typography from '@typograph/chat';
+import typography from '@calebduren/typograph';
 import { MessageResponse, type MessageResponseProps } from './components/ai-elements/message';
 
 export const TypographyResponse = memo(function TypographyResponse({

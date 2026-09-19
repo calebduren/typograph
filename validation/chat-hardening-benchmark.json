@@ -5,8 +5,8 @@
   "warmups": 3,
   "samples": 40,
   "bundle": {
-    "minifiedBytes": 9927,
-    "gzipBytes": 4042,
+    "minifiedBytes": 10446,
+    "gzipBytes": 4250,
     "includesTypehug": true
   },
   "results": [
@@ -14,127 +14,211 @@
       "scenario": "dense-apostrophes",
       "spacing": false,
       "characters": 4002,
-      "medianMs": 0.346,
-      "p95Ms": 0.674
+      "medianMs": 0.359,
+      "p95Ms": 0.716
     },
     {
       "scenario": "dense-apostrophes",
       "spacing": false,
       "characters": 16002,
-      "medianMs": 1.301,
-      "p95Ms": 1.502
+      "medianMs": 1.311,
+      "p95Ms": 1.431
     },
     {
       "scenario": "dense-apostrophes",
       "spacing": false,
       "characters": 64002,
-      "medianMs": 5.274,
-      "p95Ms": 6.159
+      "medianMs": 5.547,
+      "p95Ms": 6.128
     },
     {
       "scenario": "dense-apostrophes",
       "spacing": true,
       "characters": 4002,
-      "medianMs": 0.777,
-      "p95Ms": 1.089
+      "medianMs": 0.799,
+      "p95Ms": 1.075
     },
     {
       "scenario": "dense-apostrophes",
       "spacing": true,
       "characters": 16002,
-      "medianMs": 2.596,
-      "p95Ms": 2.806
+      "medianMs": 2.676,
+      "p95Ms": 2.942
     },
     {
       "scenario": "dense-apostrophes",
       "spacing": true,
       "characters": 64002,
-      "medianMs": 10.997,
-      "p95Ms": 11.787
+      "medianMs": 11.31,
+      "p95Ms": 13.463
+    },
+    {
+      "scenario": "dense-elisions",
+      "spacing": false,
+      "characters": 4004,
+      "medianMs": 0.297,
+      "p95Ms": 0.735
+    },
+    {
+      "scenario": "dense-elisions",
+      "spacing": false,
+      "characters": 16016,
+      "medianMs": 1.149,
+      "p95Ms": 1.347
+    },
+    {
+      "scenario": "dense-elisions",
+      "spacing": false,
+      "characters": 64012,
+      "medianMs": 5.057,
+      "p95Ms": 5.942
+    },
+    {
+      "scenario": "dense-elisions",
+      "spacing": true,
+      "characters": 4004,
+      "medianMs": 0.73,
+      "p95Ms": 0.922
+    },
+    {
+      "scenario": "dense-elisions",
+      "spacing": true,
+      "characters": 16016,
+      "medianMs": 2.661,
+      "p95Ms": 2.862
+    },
+    {
+      "scenario": "dense-elisions",
+      "spacing": true,
+      "characters": 64012,
+      "medianMs": 11.25,
+      "p95Ms": 12.058
+    },
+    {
+      "scenario": "dense-code-spans",
+      "spacing": false,
+      "characters": 4000,
+      "medianMs": 0.386,
+      "p95Ms": 0.628
+    },
+    {
+      "scenario": "dense-code-spans",
+      "spacing": false,
+      "characters": 16000,
+      "medianMs": 0.793,
+      "p95Ms": 0.968
+    },
+    {
+      "scenario": "dense-code-spans",
+      "spacing": false,
+      "characters": 64000,
+      "medianMs": 3.456,
+      "p95Ms": 3.71
+    },
+    {
+      "scenario": "dense-code-spans",
+      "spacing": true,
+      "characters": 4000,
+      "medianMs": 0.475,
+      "p95Ms": 0.618
+    },
+    {
+      "scenario": "dense-code-spans",
+      "spacing": true,
+      "characters": 16000,
+      "medianMs": 1.904,
+      "p95Ms": 2.13
+    },
+    {
+      "scenario": "dense-code-spans",
+      "spacing": true,
+      "characters": 64000,
+      "medianMs": 8.089,
+      "p95Ms": 8.604
     },
     {
       "scenario": "long-word",
       "spacing": false,
       "characters": 4000,
-      "medianMs": 0.092,
-      "p95Ms": 0.108
+      "medianMs": 0.097,
+      "p95Ms": 0.109
     },
     {
       "scenario": "long-word",
       "spacing": false,
       "characters": 16000,
-      "medianMs": 0.343,
-      "p95Ms": 0.432
+      "medianMs": 0.392,
+      "p95Ms": 0.527
     },
     {
       "scenario": "long-word",
       "spacing": false,
       "characters": 64000,
-      "medianMs": 1.452,
-      "p95Ms": 1.618
+      "medianMs": 1.679,
+      "p95Ms": 1.887
     },
     {
       "scenario": "long-word",
       "spacing": true,
       "characters": 4000,
-      "medianMs": 0.102,
-      "p95Ms": 0.113
+      "medianMs": 0.111,
+      "p95Ms": 0.126
     },
     {
       "scenario": "long-word",
       "spacing": true,
       "characters": 16000,
-      "medianMs": 0.356,
-      "p95Ms": 0.511
+      "medianMs": 0.395,
+      "p95Ms": 0.528
     },
     {
       "scenario": "long-word",
       "spacing": true,
       "characters": 64000,
-      "medianMs": 1.499,
-      "p95Ms": 1.676
+      "medianMs": 1.636,
+      "p95Ms": 1.854
     },
     {
       "scenario": "ordinary-prose",
       "spacing": false,
       "characters": 4056,
-      "medianMs": 0.214,
-      "p95Ms": 0.402
+      "medianMs": 0.251,
+      "p95Ms": 0.344
     },
     {
       "scenario": "ordinary-prose",
       "spacing": false,
       "characters": 16068,
-      "medianMs": 0.749,
-      "p95Ms": 0.872
+      "medianMs": 1.006,
+      "p95Ms": 1.187
     },
     {
       "scenario": "ordinary-prose",
       "spacing": false,
       "characters": 64038,
-      "medianMs": 3.411,
-      "p95Ms": 3.621
+      "medianMs": 4.392,
+      "p95Ms": 4.722
     },
     {
       "scenario": "ordinary-prose",
       "spacing": true,
       "characters": 4056,
-      "medianMs": 0.794,
-      "p95Ms": 0.909
+      "medianMs": 0.882,
+      "p95Ms": 1.151
     },
     {
       "scenario": "ordinary-prose",
       "spacing": true,
       "characters": 16068,
-      "medianMs": 2.603,
-      "p95Ms": 2.925
+      "medianMs": 3.035,
+      "p95Ms": 3.237
     },
     {
       "scenario": "ordinary-prose",
       "spacing": true,
       "characters": 64038,
-      "medianMs": 11.133,
-      "p95Ms": 11.709
+      "medianMs": 12.82,
+      "p95Ms": 14.225
     }
   ]
 }

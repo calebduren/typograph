@@ -1,5 +1,6 @@
 import { analyze } from '@typehug/en';
 import type { Root, Nodes } from 'mdast';
+import { elisions, openingContext, closingContext } from './quote-context';
 
 type Phase = 'streaming' | 'complete';
 
@@ -33,9 +34,7 @@ type Node = { type: string; value?: string; children?: Node[] };
 const letter = /[\p{L}\p{M}]/u;
 const word = /[\p{L}\p{M}\p{N}]/u;
 const digit = /\p{N}/u;
-const openingContext = /[\s([{—–]/u;
-const closingContext = /[\s)\]},.!?;:—–]/u;
-const elisions = ['em', 'twas', 'tis', 'cause', 'bout', 'round', 'til', 'n'];
+const blankLine = /\r?\n[ \t]*\r?\n/g;
 type QuoteState = { doubleOpen: boolean; singleOpen: boolean };
 
 function before(source: string, index: number): string {
@@ -49,8 +48,7 @@ function after(source: string, index: number): string {
   return index >= source.length ? '' : String.fromCodePoint(source.codePointAt(index)!);
 }
 
-function protectionMask(source: string): Uint8Array {
-  const mask = new Uint8Array(source.length);
+function protectionMask(source: string, mask = new Uint8Array(source.length)): Uint8Array {
   const protect = (start: number, end: number) => mask.fill(1, start, end);
   // Bare URLs and email addresses may still be prose nodes without remark-gfm.
   // Inspect each whitespace-delimited token once. An unanchored email regex can
@@ -74,32 +72,41 @@ function protectionMask(source: string): Uint8Array {
     }
   }
   // An unfinished inline code span is plain text until its closing backtick arrives.
+  // Scan each paragraph boundary once, even when it contains many code spans.
+  let paragraphEnd = 0;
   for (let index = 0; index < source.length;) {
     if (source[index] !== '`' || mask[index]) {
       index++;
       continue;
     }
     let end = index + 1;
-    while (source[end] === '`') end++;
+    while (source[end] === '`' && !mask[end]) end++;
+    if (index >= paragraphEnd) {
+      blankLine.lastIndex = end;
+      paragraphEnd = blankLine.exec(source)?.index ?? source.length;
+    }
     const width = end - index;
     let close = end;
-    while (close < source.length) {
-      if (source[close] !== '`') {
+    while (close < paragraphEnd) {
+      if (source[close] !== '`' || mask[close]) {
         close++;
         continue;
       }
       let next = close + 1;
-      while (source[next] === '`') next++;
+      while (source[next] === '`' && !mask[next]) next++;
       if (next - close === width) {
         close = next;
         break;
       }
       close = next;
     }
-    protect(index, close < source.length ? close : source.length);
+    protect(index, close);
     index = close;
   }
-  const destination = source.lastIndexOf('](');
+  let destination = source.lastIndexOf('](');
+  while (destination >= 0 && mask[destination]) {
+    destination = destination === 0 ? -1 : source.lastIndexOf('](', destination - 1);
+  }
   if (destination >= 0) {
     const tail = source.slice(destination + 2);
     if (!/[\n)]/.test(tail)) protect(destination + 1, source.length);
@@ -197,6 +204,8 @@ function smartPunctuation(
   const apostrophes =
     punctuation !== false &&
     (punctuation === true || punctuation == null || punctuation.apostrophes !== false);
+  // Advance this lookahead only forwards, including in elision-heavy paragraphs.
+  let nextSingleQuote = 0;
   for (let index = 0; index < source.length; index++) {
     const current = source[index];
     if (mask[index] || !/['"“”‘’]/u.test(current)) continue;
@@ -271,11 +280,41 @@ function smartPunctuation(
     }
     const elision = /^\d{2}s$/i.test(token) || (token === 'n' ? rock : elisions.includes(token));
     if (elision) {
+      if (!rock) {
+        if (nextSingleQuote <= index) {
+          nextSingleQuote = index + 1;
+          while (nextSingleQuote < source.length) {
+            if (!mask[nextSingleQuote] && /['’]/u.test(source[nextSingleQuote])) {
+              const preceding = before(source, nextSingleQuote);
+              const following = after(source, nextSingleQuote + 1);
+              // Contractions, likely plural possessives, and measurements do not close the phrase.
+              if (
+                !(letter.test(preceding) && letter.test(following)) &&
+                !(preceding.toLowerCase() === 's' && /\s/u.test(following)) &&
+                !digit.test(preceding)
+              )
+                break;
+            }
+            nextSingleQuote++;
+          }
+        }
+        const following = after(source, nextSingleQuote + 1);
+        if (
+          nextSingleQuote < source.length &&
+          !openingContext.test(before(source, nextSingleQuote)) &&
+          (!following || closingContext.test(following))
+        ) {
+          if (quotes) chars[index] = '‘';
+          state.singleOpen = true;
+          continue;
+        }
+      }
       const boundary = after(source, end) || (terminalBoundary ? ' ' : '');
       if (apostrophes && (settings.phase === 'complete' || boundary)) chars[index] = '’';
     } else if (
-      !(/^\d{0,2}$/.test(token) || elisions.some((candidate) => candidate.startsWith(token))) &&
-      word.test(next)
+      (!(/^\d{0,2}$/.test(token) || elisions.some((candidate) => candidate.startsWith(token))) &&
+        word.test(next)) ||
+      (/["“]/u.test(next) && word.test(after(source, index + 2)))
     ) {
       if (quotes) chars[index] = '‘';
       state.singleOpen = true;
@@ -372,14 +411,15 @@ function formatInline(
     const end = nodes.at(-1)?.position?.end?.offset;
     return original != null && end != null && /\s/u.test(original[end] ?? '');
   };
-  const mask = protectionMask(source);
-  protectSourceSyntax(mask, nodes, original, sourceMask);
+  const mask = new Uint8Array(source.length);
   let offset = 0;
   for (const part of runs) {
     const length = part.nodes.reduce((total, node) => total + node.value.length, 0);
     if (part.literal) mask.fill(1, offset, offset + length);
     offset += length;
   }
+  protectionMask(source, mask);
+  protectSourceSyntax(mask, nodes, original, sourceMask);
   const punctuated = smartPunctuation(source, mask, settings, boundary(nodes), {
     doubleOpen: false,
     singleOpen: false,

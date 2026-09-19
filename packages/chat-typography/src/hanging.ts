@@ -1,4 +1,5 @@
 import type { Root, Nodes, Parent, Element } from 'hast';
+import { elisions } from './quote-context';
 
 export interface HangingPunctuationOptions {
   /** Only known English, left-to-right prose is supported. */
@@ -8,10 +9,10 @@ export interface HangingPunctuationOptions {
 }
 
 const containers = new Set(['div', 'section', 'article', 'blockquote', 'ul', 'ol', 'li']);
-const blocks = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+const blocks = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li']);
 const inline = new Set(['em', 'strong', 'del', 'a', 'mark']);
 
-/** Opt-in opening-quote layout. Pair with @typograph/chat/hanging.css. */
+/** Opt-in opening-quote layout. Pair with @calebduren/typograph/hanging.css. */
 export default function rehypeHangingPunctuation(options: HangingPunctuationOptions = {}) {
   let english = false;
   try {
@@ -32,6 +33,11 @@ export default function rehypeHangingPunctuation(options: HangingPunctuationOpti
     while (stack.length) {
       const node = stack.pop()!;
       if (skip(node)) continue;
+      if (node.type === 'root' || (node.type === 'element' && containers.has(node.tagName))) {
+        // List items can contain both direct prose and nested paragraphs/lists.
+        // Do not enter code, raw HTML, tables, math, or unknown custom elements.
+        for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]);
+      }
       if (node.type === 'element' && blocks.has(node.tagName)) {
         let parent: Parent = node;
         let first = parent.children[0];
@@ -46,6 +52,12 @@ export default function rehypeHangingPunctuation(options: HangingPunctuationOpti
           !/^["'“‘]/.test(first.value)
         )
           continue;
+        if (first.value[0] === "'") {
+          const token = /^[\p{L}\p{M}\p{N}]*/u.exec(first.value.slice(1, 8))![0].toLowerCase();
+          // Without punctuation conversion, a leading apostrophe can be an elision.
+          if (/^\d{0,2}s?$/i.test(token) || elisions.some((value) => value.startsWith(token)))
+            continue;
+        }
         const offset = first.position?.start.offset;
         if (source != null && offset != null && source[offset] === '\\') continue;
         const quote: Element = {
@@ -63,13 +75,7 @@ export default function rehypeHangingPunctuation(options: HangingPunctuationOpti
         };
         first.value = first.value.slice(1);
         parent.children.splice(0, 1, quote, ...(first.value ? [first] : []));
-        node.properties['data-typograph-hanging'] = '';
-      } else if (
-        node.type === 'root' ||
-        (node.type === 'element' && containers.has(node.tagName))
-      ) {
-        // Do not enter code, raw HTML, tables, math, or unknown custom elements.
-        for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]);
+        (node.properties ??= {})['data-typograph-hanging'] = '';
       }
     }
   };

@@ -24,7 +24,7 @@ const [pack] = JSON.parse(
       '--pack-destination',
       dir,
       '-w',
-      '@typograph/chat',
+      '@calebduren/typograph',
     ],
     root,
   ),
@@ -54,8 +54,8 @@ writeFileSync(
 import assert from 'node:assert/strict';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography from '@typograph/chat';
-import hanging from '@typograph/chat/hanging';
+import typography from '@calebduren/typograph';
+import hanging from '@calebduren/typograph/hanging';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const source = ${JSON.stringify('"Read [the guide](https://example.com/it\'s-here) today." Wait 30 min.')};
@@ -67,7 +67,7 @@ assert.equal(tree.children[0].children[1].url, "https://example.com/it's-here");
 const htmlTree = { type: 'root', children: [{ type: 'element', tagName: 'p', properties: {}, children: [{ type: 'text', value: '“Hello.”' }] }] };
 hanging({ locale: 'en' })(htmlTree);
 assert.equal(htmlTree.children[0].children[0].properties.className[0], 'typograph-opening');
-assert.ok(existsSync(fileURLToPath(import.meta.resolve('@typograph/chat/hanging.css'))));
+assert.ok(existsSync(fileURLToPath(import.meta.resolve('@calebduren/typograph/hanging.css'))));
 console.log('Packed chat plugin + generic Remark pipeline: passed');
 `,
 );
@@ -76,8 +76,8 @@ writeFileSync(
   `
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography, { type ChatTypographyOptions } from '@typograph/chat';
-import hanging, { type HangingPunctuationOptions } from '@typograph/chat/hanging';
+import typography, { type ChatTypographyOptions } from '@calebduren/typograph';
+import hanging, { type HangingPunctuationOptions } from '@calebduren/typograph/hanging';
 const options: ChatTypographyOptions = { locale: 'en-GB', skip: node => node.type === 'link' };
 unified().use(remarkParse).use(typography, options);
 const hangingOptions: HangingPunctuationOptions = { locale: 'en', skip: node => node.type === 'element' && node.tagName === 'code' };
@@ -98,7 +98,7 @@ exec(process.execPath, [
   'consumer.mts',
 ]);
 const manifest = JSON.parse(
-  readFileSync(join(dir, 'node_modules/@typograph/chat/package.json'), 'utf8'),
+  readFileSync(join(dir, 'node_modules/@calebduren/typograph/package.json'), 'utf8'),
 );
 assert.deepEqual(Object.keys(manifest.dependencies).sort(), [
   '@typehug/en',

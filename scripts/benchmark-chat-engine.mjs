@@ -6,6 +6,8 @@ import typography from '../packages/chat-typography/dist/index.js';
 
 const scenarios = {
   'dense-apostrophes': "'zzzz ",
+  'dense-elisions': "Give 'em the cats' bowls. ",
+  'dense-code-spans': '`code` "After." ',
   'long-word': 'x',
   'ordinary-prose':
     '"Hello," she said. Give \'em a chance. Wait 30 min; Dr. Smith reviewed Fig. 2. ',

@@ -4,6 +4,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
+import type { Root } from 'mdast';
 import remarkChatTypography, {
   type ChatTypographyOptions,
 } from '../packages/chat-typography/src/index';
@@ -33,7 +34,7 @@ function render(input: string, options: ChatTypographyOptions) {
     for (const child of node.children ?? []) collect(child, urls, html);
   };
   collect(source, originalLinks, originalHtml);
-  const tree = processor.runSync(source, input);
+  const tree = processor.runSync(source, input) as Root;
   const transformedLinks: string[] = [];
   const transformedHtml: string[] = [];
   collect(tree, transformedLinks, transformedHtml);
@@ -106,6 +107,88 @@ describe('chat typography candidate', () => {
     expect(render('Read ["the guide"](https://example.com/it\'s', { locale: 'en' }).text).toContain(
       "https://example.com/it's",
     );
+  });
+
+  it.each(['\n\n', '\n \t\n', '\r\n\r\n'])(
+    'limits unfinished code protection to its paragraph: %j',
+    (separator) => {
+      for (const phase of ['streaming', 'complete'] as const) {
+        expect(
+          render('Press the ` key.' + separator + '"Hello," she said.', { locale: 'en', phase })
+            .text,
+        ).toBe('Press the ` key.\n\n“Hello,” she said.');
+        expect(
+          render('Type ``` to start.' + separator + '"Hello," she said.', { locale: 'en', phase })
+            .text,
+        ).toBe('Type ``` to start.\n\n“Hello,” she said.');
+      }
+      expect(render('`a\nb` "After."', { locale: 'en' }).text).toBe('a\nb “After.”');
+      expect(render('`a` `b` "After."', { locale: 'en' }).text).toBe('a b “After.”');
+    },
+  );
+
+  it('closes quotes before a footnote without changing its content', () => {
+    expect(render('Say "hi"[^1].\n\n[^1]: "Note" here.', { locale: 'en' }).text).toBe(
+      'Say “hi”.\n\n“Note” here.',
+    );
+  });
+
+  it.each([
+    ["Back in the '90s, a 6' fence was normal.", "Back in the ’90s, a 6' fence was normal."],
+    ["It's 'bout 12' wide.", "It’s ’bout 12' wide."],
+    ["Wait 'til the 40' mark.", "Wait ’til the 40' mark."],
+  ])('preserves a measurement after an elision: %s', (input, expected) => {
+    for (const phase of ['streaming', 'complete'] as const) {
+      expect(render(input, { locale: 'en', phase }).text).toBe(expected);
+    }
+  });
+
+  it.each([
+    [`"'Hi,' she said."`, '“‘Hi,’ she said.”'],
+    [`'"Hi," she said.'`, '‘“Hi,” she said.’'],
+    [`"'Tis the season"`, '“’Tis the season”'],
+    [`'Round the corner.'`, '‘Round the corner.’'],
+    [`'Round the reader's desk.'`, '‘Round the reader’s desk.’'],
+    [`'Tis the season.'`, '‘Tis the season.’'],
+    [`Give 'em the 'blue ones'.`, 'Give ’em the ‘blue ones’.'],
+    ['`` a ` b `` "After."', 'a ` b “After.”'],
+    ['`` a ` b `` "After." `unfinished "code', 'a ` b “After.” `unfinished "code'],
+    ['`` ](literal `` "After."', '](literal “After.”'],
+  ])('handles adjacent quotes and literal delimiters: %s', (input, expected) => {
+    for (const phase of ['streaming', 'complete'] as const) {
+      const result = render(input, { locale: 'en', phase });
+      expect(result.text).toBe(expected);
+      const once = JSON.stringify(result.tree);
+      remarkChatTypography({ locale: 'en', phase })(result.tree, { value: input });
+      expect(JSON.stringify(result.tree)).toBe(once);
+    }
+  });
+
+  it('keeps quote and apostrophe switches independent in quoted elisions', () => {
+    expect(
+      render("'Round the reader's desk.'", {
+        locale: 'en',
+        punctuation: { quotes: false },
+      }).text,
+    ).toBe("'Round the reader’s desk.'");
+    expect(
+      render("'Round the reader's desk.'", {
+        locale: 'en',
+        punctuation: { apostrophes: false },
+      }).text,
+    ).toBe("‘Round the reader's desk.’");
+  });
+
+  it.each([
+    [`'"`, `'"`],
+    [`'"H`, '‘“H'],
+    [`"'`, `“'`],
+    [`"'H`, '“‘H'],
+    [`'Round`, `'Round`],
+    [`'Round the corner.`, '’Round the corner.'],
+    [`'Round the corner.'`, '‘Round the corner.’'],
+  ])('keeps a deliberate interpretation of the stream prefix: %s', (input, expected) => {
+    expect(render(input, { locale: 'en' }).text).toBe(expected);
   });
 
   it('has switchable rule families and only applies paragraph endings after completion', () => {

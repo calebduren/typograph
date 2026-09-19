@@ -1,6 +1,14 @@
 # Typograph: integration guide
 
-English-only typography for streaming AI responses. Pre-release: `@typograph/chat` is a private workspace package, not a published npm package. This guide describes the local candidate.
+English-only typography for streaming AI responses. Typograph refines rendered prose while your app keeps the original messages.
+
+## Install
+
+```sh
+npm install @calebduren/typograph
+```
+
+Use your app's package manager. The package is ESM and requires Node 22+ for server use; it also runs in the browser. It adds no React or chat SDK dependency.
 
 ## Run from source
 
@@ -12,12 +20,12 @@ npm run build:chat
 npm run dev -w @typograph/playground
 ```
 
-These commands require a checkout containing `packages/chat-typography` and Node 22+. The chat candidate may be ahead of the public repository during development; verify the checkout contains it. No API key is needed for the comparison. To generate a local installable archive, run `npm pack -w @typograph/chat`, then install that archive in your app.
+Use Node 22.12+ for repository development. No API key is needed for the comparison. To test local package changes in another app, run `npm pack -w @calebduren/typograph` after building, then install the resulting archive in that app.
 
 ## Add the plugin where assistant text is rendered
 
 ```tsx
-import typography from '@typograph/chat';
+import typography from '@calebduren/typograph';
 import { Streamdown, defaultRemarkPlugins, type StreamdownProps } from 'streamdown';
 
 const remarkPlugins: StreamdownProps['remarkPlugins'] = [
@@ -81,7 +89,7 @@ Open http://127.0.0.1:4175 and select either backend. No model calls or cloud ac
 ```ts
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography from '@typograph/chat';
+import typography from '@calebduren/typograph';
 
 const processor = unified().use(remarkParse).use(typography, { locale: 'en' });
 
@@ -93,11 +101,11 @@ Passing the original source lets the plugin protect escaped punctuation and unfi
 
 ## Optional hanging punctuation
 
-Native CSS `hanging-punctuation` is still unavailable in Chrome and Firefox according to [MDN's compatibility data](https://github.com/mdn/browser-compat-data/blob/main/css/properties/hanging-punctuation.json). The optional `@typograph/chat/hanging` Rehype helper uses ordinary inline layout and transforms instead. It hangs the opening quote at the beginning of a paragraph or heading in English, left-aligned, left-to-right prose. It does **not** hang punctuation at every wrapped line ending or implement full optical margin alignment.
+Native CSS `hanging-punctuation` is still unavailable in Chrome and Firefox according to [MDN's compatibility data](https://github.com/mdn/browser-compat-data/blob/main/css/properties/hanging-punctuation.json). The optional `@calebduren/typograph/hanging` Rehype helper uses ordinary inline layout and transforms instead. It hangs the opening quote at the beginning of a paragraph, heading, or list item in English, left-aligned, left-to-right prose. It does **not** hang punctuation at every wrapped line ending or implement full optical margin alignment.
 
 ```tsx
-import hangingPunctuation from '@typograph/chat/hanging';
-import '@typograph/chat/hanging.css';
+import hangingPunctuation from '@calebduren/typograph/hanging';
+import '@calebduren/typograph/hanging.css';
 import { Streamdown, defaultRehypePlugins, type StreamdownProps } from 'streamdown';
 
 const rehypePlugins: StreamdownProps['rehypePlugins'] = [
@@ -118,9 +126,7 @@ Leave enough space in the left gutter and avoid clipping overflow. Custom render
 
 ## Instructions for your coding agent
 
-The landing page's Integration section has copyable, self-contained prompts for AI Elements/shadcn, Cloudflare Agents, and other Remark renderers. Set the three typography switches above the preview, choose your stack, leave **Agent prompt** selected, and use **Copy prompt**. Paste it into the agent working in your app's repository. The prompt covers setup from source, the exact selected settings, preservation of your app's design and raw messages, and verification. **Code** shows the shorter manual configuration for the same settings.
-
-The prompts describe this pre-release accurately. They require an available candidate checkout and tell the agent to report missing source rather than substitute the older package or assume an npm release exists.
+The landing page's Integration section has copyable, self-contained prompts for AI Elements/shadcn, Cloudflare Agents, and other Remark renderers. Set the three typography switches above the preview, choose your stack, leave **Agent prompt** selected, and use **Copy prompt**. Paste it into the agent working in your app's repository. The prompt covers package installation, the exact selected settings, preservation of your app's design and raw messages, and verification. **Code** shows the shorter manual configuration for the same settings.
 
 ## Paragraph endings: CSS first
 

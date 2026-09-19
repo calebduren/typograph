@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Copy, Check } from 'lucide-react';
-import { ChatComparison } from './ChatComparison';
 import { agentPrompt } from './agent-prompts';
 import { useScrollFade } from './use-scroll-fade';
 import {
@@ -12,9 +11,14 @@ import {
   type IntegrationStack,
   type TypographySettings,
 } from './integration-settings';
-import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url';
+import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url&no-inline';
+import '@calebduren/typograph/hanging.css';
 import './fonts.css';
 import './landing.css';
+
+const ChatComparison = lazy(() =>
+  import('./ChatComparison').then((module) => ({ default: module.ChatComparison })),
+);
 
 function Integration({ settings }: { settings: TypographySettings }) {
   const [recipe, setRecipe] = useState<IntegrationStack>('AI Elements');
@@ -64,8 +68,7 @@ function Integration({ settings }: { settings: TypographySettings }) {
           Read the integration guide <ArrowUpRight size={15} aria-hidden="true" />
         </a>
         <p className="release-note">
-          Pre-release preview. The chat package is not yet on npm. The guide includes local setup
-          from source.
+          <code>npm install @calebduren/typograph</code>
         </p>
       </div>
       <div className="recipe">
@@ -223,7 +226,19 @@ function Landing() {
               </div>
             </figure>
           </section>
-          <ChatComparison settings={settings} onSettingsChange={setSettings} />
+          <section className="comparison" aria-labelledby="comparison-title">
+            <div className="section-heading">
+              <div>
+                <h2 id="comparison-title">Small changes. A better read.</h2>
+                <p>The same words, with a little more care. Open Markdown to try your own.</p>
+              </div>
+            </div>
+            <div id="demo" className="comparison-workspace">
+              <Suspense fallback={<p role="status">Loading the comparison…</p>}>
+                <ChatComparison settings={settings} onSettingsChange={setSettings} />
+              </Suspense>
+            </div>
+          </section>
           <Integration settings={settings} />
           <section className="principles section-rule" aria-labelledby="care-title">
             <h2 id="care-title">Careful where it counts.</h2>
@@ -249,7 +264,7 @@ function Landing() {
               <h3>{settings.hanging ? 'An even reading edge.' : 'A stream has room to finish.'}</h3>
               <p>
                 {settings.hanging
-                  ? 'Opening quotes sit just outside the first line of paragraphs and headings. The helper uses real text, keeps copying intact, and needs no native browser support for hanging punctuation.'
+                  ? 'Opening quotes sit just outside the first line of paragraphs, headings, and list items. The helper uses real text, keeps copying intact, and needs no native browser support for hanging punctuation.'
                   : 'An opening quote can wait for its words. A partial “30 m” can still become “30 million.” Conservative choices come first.'}
               </p>
             </div>
@@ -294,8 +309,14 @@ function Landing() {
                 <div>
                   <dt>Status</dt>
                   <dd>
-                    A tested, unpublished candidate. Browser profiling and reading evaluations
-                    continue before release.
+                    <a
+                      href="https://www.npmjs.com/package/@calebduren/typograph"
+                      className="underlined"
+                    >
+                      Version 0.1.0 on npm
+                    </a>
+                    . Tested with recorded streams; browser profiling and reading evaluations
+                    continue.
                   </dd>
                 </div>
               </dl>

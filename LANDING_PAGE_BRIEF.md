@@ -27,7 +27,7 @@ Both references were inspected in Chrome on 17 September 2026. They are inspirat
 
 ## Interaction and implementation
 
-The homepage uses `@typograph/chat` through the tested Streamdown renderer. Keep the real transport/reconnect fixture separate from the public comparison: recorded text streams locally through the same plugin. This keeps the landing page easy to host as static assets.
+The homepage uses `@calebduren/typograph` through the tested Streamdown renderer. Keep the real transport/reconnect fixture separate from the public comparison: recorded text streams locally through the same plugin. This keeps the landing page easy to host as static assets. The comparison renderer loads in a separate bundle after the page shell; the comparison heading, viewport, and fragment target remain mounted to preserve layout and navigation.
 
 Desktop uses equal reading widths for a fair side-by-side comparison, with a shared maximum of 48ch initially and a 28–64ch measure control. The ch unit follows the font’s zero glyph, not a literal character count, and each pane clamps to its available width. At 800px and below, an Original/With Typograph switch selects one pane in the same reading area, retaining playback position and width. The framed page caps at 78rem; gutters reduce at 1100px and 800px, and the hero stacks at 520px. These composition choices belong to this route within Typograph's established identity.
 
