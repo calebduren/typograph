@@ -30,22 +30,19 @@ describe('optional hanging punctuation', () => {
     expect(JSON.stringify(tree)).toBe(once);
   });
 
-  it('supports tight, loose, and nested list items without wrapping twice', () => {
+  it.each(['ul', 'ol'])('leaves tight, loose, and nested items in %s unchanged', (tagName) => {
     const tree = root(
-      element('ul', [
-        element('li', [text('“Tight.”'), element('ul', [element('li', [text('“Nested.”')])])]),
+      element(tagName, [
+        element('li', [text('“Tight.”'), element('ol', [element('li', [text('“Nested.”')])])]),
         element('li', [text('\n'), element('p', [text('“Loose.”')])]),
         element('li', [element('em', [text('“Emphasized.”')])]),
+        element('li', [element('h2', [text('“Heading.”')])]),
+        element('li', [element('blockquote', [element('p', [text('“Nested paragraph.”')])])]),
       ]),
     );
-    const before = content(tree);
-    const transform = hanging({ locale: 'en' });
-    transform(tree);
-    expect(content(tree)).toBe(before);
-    expect(JSON.stringify(tree).match(/typograph-opening/g)).toHaveLength(4);
-    const once = JSON.stringify(tree);
-    transform(tree);
-    expect(JSON.stringify(tree)).toBe(once);
+    const before = JSON.stringify(tree);
+    hanging({ locale: 'en' })(tree);
+    expect(JSON.stringify(tree)).toBe(before);
   });
 
   it.each(["'em all", "'Tis the season", "'Round the corner", "'90s", "'t", "'"])(

@@ -22,10 +22,12 @@ colors:
   dark-accent: '#fcfcfc'
   dark-accent-soft: '#424242'
   change-punctuation: '#f0a8a8'
-  change-spacing: '#e6b3b3'
+  change-spacing: '#f9e2e2'
+  change-spacing-stripe: '#df6868'
   change-hanging: '#e8e8e8'
   dark-change-punctuation: '#723131'
-  dark-change-spacing: '#683b3b'
+  dark-change-spacing: '#4f3030'
+  dark-change-spacing-stripe: '#d86464'
   dark-change-hanging: '#424242'
 typography:
   wordmark:
@@ -144,7 +146,7 @@ The interface uses a clear sans serif voice. The current homepage applies this e
 
 ## Colors
 
-The palette is anchored by #242424 ink, #8d8d8d gray, and #fcfcfc paper. Structural surfaces and supporting text remain neutral grays. The annotation colors are the sole functional exception: dusty rose for smart punctuation, a quieter rose for non-breaking spaces, and neutral gray for hanging quotes. Dark mode keeps the same hue family, lifting those washes off paper instead of introducing a separate blue/amber/lilac palette. Paper is the page, sheet is the reading surface, soft is the inset panel, muted is supporting text, and line is the fine boundary. The homepage uses muted for supporting text. Ink carries the complete hero heading. The soft neutral accent remains the selection color, named `--selected` on the homepage. The hero and both preview columns use faint dashed guides that extend 40px above and below the text and fade to transparent across each extension. Preview padding reserves that space even when guides are hidden, so Show changes cannot alter layout. The homepage proof and optional preview highlights use the dedicated `change-*` tokens; hanging gray takes precedence on a hanging quote. Text-bearing highlights use backgrounds on negative-layer pseudo-elements within an isolated prose/proof container, preserving the neighboring glyphs even with close letter-spacing. Legend swatches retain ordinary backgrounds. Preview annotation markup stays mounted; Show changes only reveals its backgrounds and absolute rulers. The legend always reserves its layout space, becoming invisible and hidden from accessibility when disabled, so highlighting cannot change glyph geometry, reading height, or scroll position. Dark-prefixed tokens are the automatic dark-mode values, activated by `prefers-color-scheme`.
+The palette is anchored by #242424 ink, #8d8d8d gray, and #fcfcfc paper. Structural surfaces and supporting text remain neutral grays. The annotation colors are the sole functional exception: dusty rose for smart punctuation, a pale red background with diagonal red stripes for non-breaking spaces, and neutral gray for hanging quotes. Dark mode keeps the same hue family, lifting those washes off paper instead of introducing a separate blue/amber/lilac palette. Paper is the page, sheet is the reading surface, soft is the inset panel, muted is supporting text, and line is the fine boundary. The homepage uses muted for supporting text. Ink carries the complete hero heading. The soft neutral accent remains the selection color, named `--selected` on the homepage. The hero and both preview columns use faint dashed guides that extend 40px above and below the text and fade to transparent across each extension. Preview padding reserves that space even when guides are hidden, so Show changes cannot alter layout. The homepage proof and optional preview highlights use the dedicated `change-*` tokens; hanging gray takes precedence on a hanging quote. Text-bearing highlights use backgrounds on negative-layer pseudo-elements within an isolated prose/proof container, preserving the neighboring glyphs even with close letter-spacing. Legend swatches retain ordinary backgrounds. Preview annotation markup stays mounted; Show changes only reveals its backgrounds and absolute rulers. The legend always reserves its layout space, becoming invisible and hidden from accessibility when disabled, so highlighting cannot change glyph geometry, reading height, or scroll position. Dark-prefixed tokens are the automatic dark-mode values, activated by `prefers-color-scheme`.
 
 **The Monochrome Rule.** Use neutral tones derived from the three palette anchors. Avoid pure black, pure white, and decorative colored accents. The documented functional change annotations are permitted in the homepage proof, preview, and legend. Use ink for reading and active states; reserve middle gray for large type and accents.
 
@@ -176,7 +178,7 @@ Keep repeated role spacing consistent while allowing each reading context its ow
 
 **The Flat Surface Rule.** Use tonal surfaces and fine boundaries to group content. The implemented system has no box shadows.
 
-The homepage comparison, source editor, and recipe panel establish grouping through tone and fine rules. Its static punctuation proof highlights smart punctuation and the hanging opening quote, with faint vertical reading guides. The sample reads “The quick brown fox says, ‘Oh, that’s better.’” with no before-state or caption. Preview guides appear only with both Show changes and Hanging punctuation enabled; they use ink at 12% opacity in light mode and paper at 14% in dark mode.
+The homepage comparison, source editor, and recipe panel establish grouping through tone and fine rules. Its static punctuation proof shows a pale red fill for smart punctuation, a red diagonal stripe pattern behind the non-breaking space in 30 min, and a gray hanging opening quote, with faint vertical reading guides. The preview and its legend reuse those distinct textures; highlights are absolute decoration and never affect text geometry. The sample reads “The quick brown fox says, ‘I’ll be back in 30 min.’” with no before-state or caption. Preview guides appear only with both Show changes and Hanging punctuation enabled; they use ink at 12% opacity in light mode and paper at 14% in dark mode.
 
 ## Shapes
 

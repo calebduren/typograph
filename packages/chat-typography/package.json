@@ -1,6 +1,6 @@
 {
   "name": "@calebduren/typograph",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Conservative typography for streamed Markdown chat responses",
   "type": "module",
   "license": "MIT",

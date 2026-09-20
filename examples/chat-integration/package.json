@@ -17,7 +17,7 @@
     "@streamdown/code": "^1.1.1",
     "@streamdown/math": "^1.0.2",
     "@streamdown/mermaid": "^1.0.2",
-    "@calebduren/typograph": "0.1.0",
+    "@calebduren/typograph": "0.1.1",
     "agents": "0.23.0",
     "ai": "7.0.100",
     "class-variance-authority": "0.7.1",

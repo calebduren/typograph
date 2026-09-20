@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — 2026-09-20
+
+- Keep opening quotes inline throughout bulleted and numbered lists, including nested paragraphs and headings, so hanging punctuation cannot overlap list markers.
+- Clarify the hanging helper's list exclusions and its effect on quote kerning in the package documentation.
+- Update the website's hero to demonstrate a non-breaking space and distinguish spacing highlights with diagonal red stripes.
+
 ## 0.1.0 — 2026-09-19
 
 - Focus Typograph on English typography for streaming Markdown chat responses.

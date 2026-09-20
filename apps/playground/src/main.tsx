@@ -183,9 +183,12 @@ function Landing() {
       </a>
       <div className="page-frame">
         <header className="site-header" id="top">
-          <a className="wordmark" href="#top" aria-label="Typograph home">
-            typograph
-          </a>
+          <div className="wordmark-container">
+            <a className="wordmark" href="#top" aria-label="Typograph home">
+              Typograph
+            </a>
+            <p className="version">V0.1.1</p>
+          </div>
           <nav aria-label="Main navigation">
             <a href="#demo">Try it</a>
             <a href="#integrate">Integration</a>
@@ -213,18 +216,18 @@ function Landing() {
             </div>
             <figure
               className="punctuation-proof"
-              aria-label="The quick brown fox says, ‘Oh, that’s better.’ Opening quotation mark hangs in gray; smart punctuation is highlighted in rose."
+              aria-label="The quick brown fox says, ‘I’ll be back in 30 min.’ Opening quotation mark hangs in gray; smart punctuation is highlighted in pale red; the non-breaking space has a red diagonal stripe pattern."
             >
               <div className="proof-result" data-rulers="true" aria-hidden="true">
                 <span className="typograph-opening">
                   <span data-change="hanging">“</span>
                 </span>
-                The quick
+                The quick brown
                 <br />
-                brown fox says,
+                fox says, <mark data-change="punctuation">‘</mark>I
+                <mark data-change="punctuation">’</mark>ll be
                 <br />
-                <mark data-change="punctuation">‘</mark>Oh, that
-                <mark data-change="punctuation">’</mark>s better.
+                back in 30<mark data-change="spacing">{'\u00a0'}</mark>min.
                 <mark data-change="punctuation">’”</mark>
               </div>
             </figure>
@@ -266,7 +269,7 @@ function Landing() {
               <h3>{settings.hanging ? 'An even reading edge.' : 'A stream has room to finish.'}</h3>
               <p>
                 {settings.hanging
-                  ? 'Opening quotes sit just outside the first line of paragraphs, headings, and list items. The helper uses real text, keeps copying intact, and needs no native browser support for hanging punctuation.'
+                  ? 'Opening quotes sit just outside the first line of paragraphs and headings outside lists. Quotes in bulleted and numbered lists stay inline. The helper uses real text, keeps copying intact, and needs no native browser support for hanging punctuation.'
                   : 'An opening quote can wait for its words. A partial “30 m” can still become “30 million.” Conservative choices come first.'}
               </p>
             </div>
@@ -328,7 +331,7 @@ function Landing() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Version 0.1.0 on npm
+                      Version 0.1.1 on npm
                     </a>
                     . Tested with recorded streams; browser profiling and reading evaluations
                     continue.
@@ -353,9 +356,12 @@ function Landing() {
           </section>
         </main>
         <footer className="site-footer">
-          <a className="wordmark" href="#top">
-            typograph
-          </a>
+          <div className="wordmark-container">
+            <a className="wordmark" href="#top">
+              Typograph
+            </a>
+            <p className="version">V0.1.1</p>
+          </div>
           <div>
             <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
               Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />

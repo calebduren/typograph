@@ -15,7 +15,8 @@
   --soft: hsl(0, 0%, 82%);
   --selected: hsl(0, 0%, 87%);
   --change-punctuation: hsl(0, 70%, 80%);
-  --change-spacing: hsl(0, 50%, 80%);
+  --change-spacing: hsl(0, 65%, 93%);
+  --change-spacing-stripe: hsl(0, 65%, 64%);
   --change-hanging: hsl(0, 0%, 91%);
   --ruler: rgba(2, 1, 1, 0.12);
   color: var(--ink);
@@ -40,7 +41,8 @@
     --soft: hsl(0, 0%, 31%);
     --selected: hsl(0, 0%, 26%);
     --change-punctuation: hsl(0, 40%, 32%);
-    --change-spacing: hsl(0, 28%, 32%);
+    --change-spacing: hsl(0, 24%, 25%);
+    --change-spacing-stripe: hsl(0, 60%, 62%);
     --change-hanging: hsl(0, 0%, 26%);
     --ruler: hsl(0 1% 99% / 0.14);
   }
@@ -204,11 +206,24 @@ textarea {
   border-bottom: 1px solid var(--line);
 }
 
+.wordmark-container {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
 .wordmark {
+  text-transform: lowercase;
   font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: -0.025em;
   color: var(--brand);
+}
+
+.version {
+  color: var(--muted);
+  opacity: 0.5;
+  font-size: 0.875rem;
 }
 
 .brand {
@@ -1101,6 +1116,17 @@ mark[data-typograph-change='spacing'] {
 
 .change-key i {
   background: var(--annotation-color);
+}
+
+/* Stripes distinguish joined spaces from solid punctuation highlights. */
+.proof-result [data-change='spacing']::before,
+mark[data-typograph-change='spacing']::before,
+.change-key i[data-change='spacing'] {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    var(--change-spacing-stripe) 3px 4px
+  );
 }
 
 [data-rulers='true']::before,

@@ -8,8 +8,8 @@ export interface HangingPunctuationOptions {
   skip?: (node: Readonly<Nodes>) => boolean;
 }
 
-const containers = new Set(['div', 'section', 'article', 'blockquote', 'ul', 'ol', 'li']);
-const blocks = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li']);
+const containers = new Set(['div', 'section', 'article', 'blockquote']);
+const blocks = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 const inline = new Set(['em', 'strong', 'del', 'a', 'mark']);
 
 /** Opt-in opening-quote layout. Pair with @calebduren/typograph/hanging.css. */
@@ -34,8 +34,8 @@ export default function rehypeHangingPunctuation(options: HangingPunctuationOpti
       const node = stack.pop()!;
       if (skip(node)) continue;
       if (node.type === 'root' || (node.type === 'element' && containers.has(node.tagName))) {
-        // List items can contain both direct prose and nested paragraphs/lists.
-        // Do not enter code, raw HTML, tables, math, or unknown custom elements.
+        // Skip whole lists, including nested paragraphs, to keep quotes clear of markers.
+        // Also leave code, raw HTML, tables, math, and unknown custom elements alone.
         for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]);
       }
       if (node.type === 'element' && blocks.has(node.tagName)) {

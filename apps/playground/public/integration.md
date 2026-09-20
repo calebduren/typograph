@@ -103,7 +103,7 @@ Passing the original source lets the plugin protect escaped punctuation and unfi
 
 ## Optional hanging punctuation
 
-Native CSS `hanging-punctuation` is still unavailable in Chrome and Firefox according to [MDN's compatibility data](https://github.com/mdn/browser-compat-data/blob/main/css/properties/hanging-punctuation.json). The optional `@calebduren/typograph/hanging` Rehype helper uses ordinary inline layout and transforms instead. It hangs the opening quote at the beginning of a paragraph, heading, or list item in English, left-aligned, left-to-right prose. It does **not** hang punctuation at every wrapped line ending or implement full optical margin alignment.
+Native CSS `hanging-punctuation` is still unavailable in Chrome and Firefox according to [MDN's compatibility data](https://github.com/mdn/browser-compat-data/blob/main/css/properties/hanging-punctuation.json). The optional `@calebduren/typograph/hanging` Rehype helper uses ordinary inline layout and transforms instead. It hangs the opening quote at the beginning of a paragraph or heading outside lists in English, left-aligned, left-to-right prose. Bulleted and numbered lists are skipped, including paragraphs and headings nested inside them, to keep quotes clear of their markers. It does **not** hang punctuation at every wrapped line ending or implement full optical margin alignment.
 
 ```tsx
 import hangingPunctuation from '@calebduren/typograph/hanging';

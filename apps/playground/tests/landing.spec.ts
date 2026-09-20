@@ -461,6 +461,10 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByTestId('playback-state')).toHaveText('Complete');
   expect(await formatted.locator('.typograph-opening').count()).toBeGreaterThan(2);
+  await expect(formatted.locator('li .typograph-opening')).toHaveCount(0);
+  await expect(formatted.locator('ol li').last()).toHaveText(
+    '“Leave a little room for the next idea.”',
+  );
   await page.getByRole('switch', { name: 'Show changes' }).click();
   const hangingColor = await page
     .locator('.punctuation-proof [data-change="hanging"]')
