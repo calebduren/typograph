@@ -230,12 +230,307 @@ textarea {
   color: var(--brand);
 }
 
-.site-header nav,
-.site-footer > div {
+.site-header nav {
   display: flex;
   align-items: center;
   gap: 2rem;
   font-size: 0.875rem;
+}
+
+/* The specimen is a true desktop reading surface: its paper fills the window,
+   while narrow screens intentionally return to ordinary document flow. */
+.specimen-page {
+  --specimen-page-gutter: clamp(1rem, 2.4vw, 3rem);
+  min-height: 100dvh;
+  padding: 1.25rem var(--specimen-page-gutter);
+}
+
+.specimen-sheet {
+  --specimen-size: 18px;
+  --specimen-leading: 1.7;
+  --specimen-column-gap: clamp(1.25rem, 2vw, 2.8rem);
+  height: calc(100dvh - 5rem);
+  display: grid;
+  grid-template-columns: 13.5rem minmax(0, 1fr);
+}
+
+.specimen-controls {
+  padding: 1.5rem 1.25rem 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  font-size: 0.75rem;
+}
+
+.specimen-wordmark {
+  align-self: flex-start;
+  margin-bottom: 0.35rem;
+}
+
+.specimen-control-title p {
+  font-weight: 600;
+}
+.specimen-control-title span {
+  color: var(--muted);
+  display: block;
+  margin-top: 0.2rem;
+}
+.specimen-controls .typography-settings-switches {
+  display: grid;
+  gap: 0.38rem;
+}
+.specimen-controls .toggle {
+  min-height: 1.45rem;
+  font-size: 0.75rem;
+}
+.specimen-controls .toggle-track {
+  transform: scale(0.82);
+  transform-origin: left center;
+  margin-right: -0.18rem;
+}
+
+.specimen-field {
+  display: grid;
+  gap: 0.26rem;
+  color: var(--muted);
+}
+.specimen-field output {
+  color: var(--ink);
+  justify-self: end;
+  margin-top: -1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.specimen-field select {
+  width: 100%;
+  border: 0.5px solid var(--line);
+  background: var(--paper);
+  padding: 0.3rem;
+  border-radius: var(--control-radius, 0.125rem);
+}
+.specimen-controls .segmented-control {
+  width: 100%;
+}
+.specimen-controls .segmented-control button {
+  flex: 1;
+  padding-inline: 0.4rem;
+}
+.specimen-controls .slider {
+  height: 1.5rem;
+}
+.specimen-controls .slider-track {
+  height: 0.25rem;
+}
+.specimen-controls .slider:has(input:focus-visible) .slider-track,
+.specimen-controls .slider-visual[data-dragging='true'] .slider-track {
+  height: 0.375rem;
+}
+@media (hover: hover) {
+  .specimen-controls .slider:not([data-disabled='true']):hover .slider-track {
+    height: 0.375rem;
+  }
+}
+.specimen-key {
+  margin-top: auto;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.specimen-key i {
+  display: inline-block;
+  width: 0.65em;
+  height: 0.65em;
+  margin-left: 0.25em;
+}
+
+.specimen-reading {
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem 0 0 1.35rem;
+}
+
+.specimen-guides {
+  position: fixed;
+  z-index: 0;
+  inset-block: 0;
+  left: calc(var(--specimen-page-gutter) + 13.5rem + 1.35rem);
+  right: var(--specimen-page-gutter);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--specimen-column-gap);
+  pointer-events: none;
+}
+
+.specimen-guides span {
+  border-inline: 1px dashed var(--ruler);
+}
+
+.specimen-prose {
+  height: 100%;
+  column-count: 3;
+  position: relative;
+  z-index: 1;
+  column-gap: var(--specimen-column-gap);
+  font-size: var(--specimen-size);
+  line-height: var(--specimen-leading);
+  column-fill: auto;
+}
+
+.specimen-serif .specimen-prose {
+  font-family:
+    Iowan Old Style,
+    Baskerville,
+    'Times New Roman',
+    serif;
+}
+.specimen-sans .specimen-prose {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', Helvetica, sans-serif;
+}
+.specimen-prose > :first-child {
+  margin-top: 0;
+}
+.specimen-prose h1,
+.specimen-prose h2,
+.specimen-prose h3,
+.specimen-prose h4,
+.specimen-prose h5,
+.specimen-prose h6 {
+  break-after: avoid;
+  font-family: inherit;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  margin: 1.3em 0 0.55em;
+}
+.specimen-prose h1 {
+  font-size: 2.1em;
+  font-weight: 600;
+}
+.specimen-prose h1:first-child {
+  margin-top: 0;
+}
+.specimen-prose h2 {
+  font-size: 1.45em;
+}
+.specimen-prose h3 {
+  font-size: 1.2em;
+}
+.specimen-prose h4,
+.specimen-prose h5,
+.specimen-prose h6 {
+  font-size: 1em;
+}
+.specimen-prose p,
+.specimen-prose blockquote,
+.specimen-prose ul,
+.specimen-prose ol,
+.specimen-prose table,
+.specimen-prose details,
+.specimen-prose address {
+  margin: 0 0 0.9em;
+}
+.specimen-prose blockquote {
+  margin: 1.1em 0 1.2em;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 1px solid var(--ink);
+  font-style: italic;
+}
+.specimen-prose ul,
+.specimen-prose ol {
+  margin: 0.2em 0 1.1em;
+  padding-left: 1.2em;
+}
+.specimen-prose ul + ol {
+  margin-top: 0.7em;
+}
+.specimen-prose li + li {
+  margin-top: 0.35em;
+}
+.specimen-prose table {
+  margin: 1.15em 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+.specimen-prose th,
+.specimen-prose td {
+  padding: 0.4em 0.25em;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.specimen-prose hr {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  margin: 1.2em 0;
+}
+.specimen-prose code,
+.specimen-prose kbd,
+.specimen-prose samp {
+  font-size: 0.88em;
+  background: var(--softer);
+  padding: 0.06em 0.2em;
+}
+.specimen-prose dl {
+  margin: 1em 0 1.1em;
+}
+.specimen-prose dt {
+  font-weight: 600;
+}
+.specimen-prose dd {
+  margin: 0.12em 0 0.5em;
+}
+.specimen-prose address {
+  font-style: italic;
+}
+.specimen-key i {
+  background: var(--annotation-color);
+}
+.specimen-key i[data-change='spacing'] {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    var(--change-spacing-stripe) 3px 4px
+  );
+}
+
+@media (max-width: 800px) {
+  .specimen-page {
+    padding: 1rem;
+  }
+  .specimen-masthead {
+    grid-template-columns: 1fr auto;
+  }
+  .specimen-masthead p {
+    display: none;
+  }
+  .specimen-sheet {
+    height: auto;
+    min-height: calc(100dvh - 4.5rem);
+    grid-template-columns: 1fr;
+  }
+  .specimen-controls {
+    border-right: 0;
+
+    padding-right: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .specimen-control-title,
+  .specimen-key {
+    grid-column: 1 / -1;
+  }
+  .specimen-key {
+    margin-top: 0;
+  }
+  .specimen-reading {
+    overflow: visible;
+    padding: 1.5rem 0;
+  }
+  .specimen-guides {
+    display: none;
+  }
+  .specimen-prose {
+    height: auto;
+    column-count: 1;
+  }
 }
 
 .site-header nav a,
@@ -325,17 +620,16 @@ textarea {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 2px;
   width: fit-content;
   max-width: 100%;
-  border-radius: 3px;
+  border-radius: 2px;
   background: var(--softer);
 }
 
 .segmented-control button {
   padding: 4px 12px;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 2px;
   color: var(--muted);
 }
 
@@ -1086,17 +1380,12 @@ mark::before,
   border-top: 1px solid var(--line);
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: 1rem;
 }
 
 .site-footer > span {
   color: var(--muted);
-  font-size: 0.8125rem;
-}
-
-.site-footer > div {
-  margin-left: auto;
-  gap: 1.5rem;
   font-size: 0.8125rem;
 }
 
@@ -1319,7 +1608,7 @@ mark[data-typograph-change='spacing']::before,
 
   .site-header a,
   .segmented-control button {
-    min-height: 44px;
+    min-height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

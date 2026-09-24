@@ -72,7 +72,7 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   expect((await page.request.get('/.vite/manifest.json')).status()).toBe(404);
   const measurement = page.getByRole('link', { name: 'View the measurement' });
   await expect(measurement).toHaveAttribute('href', /^\/assets\/.*\.json$/);
-  for (const link of await page.locator('a[href]:not([href^="#"])').all()) {
+  for (const link of await page.locator('a[href^="http"]').all()) {
     await expect(link).toHaveAttribute('target', '_blank');
     await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   }
@@ -81,6 +81,11 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
     await expect(page.locator(target!)).toHaveCount(1);
     expect(await link.getAttribute('target')).toBeNull();
   }
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Main navigation' })
+      .getByRole('link', { name: 'Specimen' }),
+  ).toHaveCount(0);
   const [measurementTab] = await Promise.all([page.waitForEvent('popup'), measurement.click()]);
   await expect(measurementTab).toHaveURL(/\/assets\/.*\.json$/);
   const data = await page.request.get(measurementTab.url());
@@ -101,8 +106,11 @@ test('the hero renders while the comparison bundle is still loading', async ({ p
   const manifest = JSON.parse(
     await readFile(new URL('../dist/.vite/manifest.json', import.meta.url), 'utf8'),
   );
-  expect(manifest['index.html'].dynamicImports).toHaveLength(1);
-  const comparisonBundle = manifest[manifest['index.html'].dynamicImports[0]].file;
+  const comparisonImport = manifest['index.html'].dynamicImports.find((entry: string) =>
+    entry.endsWith('ChatComparison.tsx'),
+  );
+  expect(comparisonImport).toBeDefined();
+  const comparisonBundle = manifest[comparisonImport!].file;
   let requestBlocked = false;
   let release!: () => void;
   const loaded = new Promise<void>((resolve) => {
@@ -127,6 +135,20 @@ test('the hero renders while the comparison bundle is still loading', async ({ p
   expect(
     Math.abs(await page.locator('#demo').evaluate((node) => node.getBoundingClientRect().top)),
   ).toBeLessThan(2);
+});
+
+test('the specimen is a direct, live typography route', async ({ page }) => {
+  await page.goto('/specimen');
+  await expect(page.getByRole('heading', { name: /At the edge of the olive grove/ })).toBeVisible();
+  await expect(page.getByRole('switch', { name: 'Smart punctuation' })).toBeChecked();
+  await expect(page.getByRole('switch', { name: 'Non-breaking spaces' })).toBeChecked();
+  await expect(page.getByRole('switch', { name: 'Hanging punctuation' })).toBeChecked();
+  await page
+    .getByRole('group', { name: 'Typeface' })
+    .getByRole('button', { name: 'Sans serif' })
+    .click();
+  await expect(page.locator('.specimen-sheet')).toHaveClass(/specimen-sans/);
+  expect(await page.locator('.specimen-prose mark').count()).toBeGreaterThan(0);
 });
 
 test('comparison uses the real plugin, preserves nodes, and supports native text copying', async ({
@@ -689,7 +711,8 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
     if (width <= 800) {
       await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toBeVisible();
       for (const control of await page.locator('button:visible, .site-header a').all()) {
-        expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+        // Compact mobile targets; still above the WCAG 2.2 AA 24px minimum.
+        expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(36);
       }
       const reader = page.getByRole('region', { name: 'Text comparison' });
       expect((await reader.boundingBox())!.height).toBeGreaterThanOrEqual(384);

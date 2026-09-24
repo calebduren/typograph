@@ -19,6 +19,7 @@ import './landing.css';
 const ChatComparison = lazy(() =>
   import('./ChatComparison').then((module) => ({ default: module.ChatComparison })),
 );
+const Specimen = lazy(() => import('./Specimen').then((module) => ({ default: module.Specimen })));
 
 function Integration({
   settings,
@@ -362,15 +363,21 @@ function Landing() {
             </a>
             <p className="version">V0.1.1</p>
           </div>
-          <div>
-            <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
-              Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
-            </a>
-          </div>
+          <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
+            Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
+          </a>
         </footer>
       </div>
     </>
   );
 }
 
-createRoot(document.getElementById('root')!).render(<Landing />);
+createRoot(document.getElementById('root')!).render(
+  window.location.pathname === '/specimen' ? (
+    <Suspense fallback={<p role="status">Loading the specimen…</p>}>
+      <Specimen />
+    </Suspense>
+  ) : (
+    <Landing />
+  ),
+);
