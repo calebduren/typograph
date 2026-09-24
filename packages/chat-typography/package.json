@@ -25,15 +25,47 @@
       "types": "./dist/hanging.d.ts",
       "import": "./dist/hanging.js"
     },
+    "./static": {
+      "types": "./dist/static.d.ts",
+      "import": "./dist/static.js"
+    },
     "./hanging.css": "./dist/hanging.css"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/hanging.ts --format esm --dts --minify --clean && cp src/hanging.css dist/hanging.css"
+    "build": "tsup src/index.ts src/hanging.ts src/static.ts --format esm --dts --minify --clean && cp src/hanging.css dist/hanging.css"
   },
   "dependencies": {
     "@typehug/en": "0.2.0",
     "@types/hast": "3.0.4",
     "@types/mdast": "4.0.4"
+  },
+  "peerDependencies": {
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
+  },
+  "peerDependenciesMeta": {
+    "rehype-stringify": {
+      "optional": true
+    },
+    "remark-gfm": {
+      "optional": true
+    },
+    "remark-math": {
+      "optional": true
+    },
+    "remark-parse": {
+      "optional": true
+    },
+    "remark-rehype": {
+      "optional": true
+    },
+    "unified": {
+      "optional": true
+    }
   },
   "homepage": "https://typograph.dev",
   "repository": {

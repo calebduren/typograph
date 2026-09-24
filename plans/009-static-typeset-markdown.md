@@ -2,7 +2,7 @@
 
 | Field           | Value                                                                                                   |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
-| Status          | not started                                                                                             |
+| Status          | done                                                                                                    |
 | Written against | commit `504cc20` plus the uncommitted landing-page work, 2026-09-23                                     |
 | Effort          | M–L (new entry ~200 lines, splice aligner, tests, package check, docs)                                  |
 | Risk of change  | medium; new public API and package manifest changes. The core engine and existing entries do not change |
@@ -192,6 +192,12 @@ Write `src/static-core.ts` (`createTypeset`, peer loading, pipelines, splice) an
 - Protected-content test 3 finds a changed byte outside `" ' space` → a splice or alignment bug; report it.
 - Making the package check pass requires changing `dependencies` → stop; that contradicts brief 007's decision 1.
 - `remark-rehype` output differs by version in a way that breaks exact `web` assertions → assert on parsed structure (with `hast-util-from-html`) rather than widening the peer range.
+
+## Implementation notes (2026-09-24)
+
+- The worked example is the `brief` fixture in `tests/chat-static.test.ts`, which is checked for all three targets, rather than a separate directory under `examples/`.
+- The tsup build now emits shared chunks (`dist/chunk-*.js`). Only `static.js` references the peers, and only through dynamic `import()`.
+- Adding the two devDependencies made npm 11 rewrite dev/peer metadata flags in `package-lock.json`. Those lockfile changes are mechanical.
 
 ## Maintenance notes
 

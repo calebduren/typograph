@@ -75,7 +75,7 @@ Quote state resets at each block. A quotation that spans paragraphs can leave it
 
 To bound known expensive Typehug recognition, spacing passes through an entire prose run if any token exceeds **256 UTF-16 code units**. Punctuation still runs. A run is a contiguous span of prose that may include emphasis; links and protected content delimit it. This fallback deliberately forgoes some optional joins.
 
-The core plugin's edits are length-preserving character substitutions in existing text nodes. The plugin is stateless between transformations; it does not mutate the SDK message, manage transport, throttle chunks, sanitize HTML, or replace the Markdown parser. Incomplete Markdown can still change interpretation as more text arrives. Dashes, ellipses, primes, hyphenation, automatic language detection, and arbitrary-language typography are outside this package's scope. Running the plugin twice on the same parsed tree leaves it unchanged, and so does running it on text that already contains curly quotes and nonbreaking spaces. Serializing the tree back to Markdown can drop escapes, so a reparsed result is not covered by this guarantee.
+The core plugin's edits are length-preserving character substitutions in existing text nodes. The plugin is stateless between transformations; it does not mutate the SDK message, manage transport, throttle chunks, sanitize HTML, or replace the Markdown parser. The static `typeset` entry uses your installed unified and remark packages rather than bundling a parser. Incomplete Markdown can still change interpretation as more text arrives. Dashes, ellipses, primes, hyphenation, automatic language detection, and arbitrary-language typography are outside this package's scope. Running the plugin twice on the same parsed tree leaves it unchanged, and so does running it on text that already contains curly quotes and nonbreaking spaces. Serializing the tree back to Markdown can drop escapes, so a reparsed result is not covered by this guarantee.
 
 ## Plain strings
 
@@ -89,6 +89,36 @@ typesetText(`Bob's "weekly" brief takes 30 min`, { locale: 'en', spacing: true }
 ```
 
 It accepts `locale`, `punctuation`, `spacing`, and `phase`, with the same meanings as above. `phase` defaults to `complete`; pass `streaming` for a string that is still arriving. Markdown syntax has no meaning here: `*`, `_`, `#`, and list markers are ordinary characters. Blank lines separate blocks, so quote state resets at each one. URLs, email addresses, backtick spans, and tag-like `<…>` runs keep their straight marks. Output length always equals input length in UTF-16 code units, so offsets computed on the input remain valid.
+
+## Finished Markdown: web, email, and Markdown output
+
+For text that is complete before anyone reads it, such as a daily brief written overnight by an agent, use `typeset` from `@calebduren/typograph/static`. It parses, typesets, and serializes in one call.
+
+```sh
+npm install @calebduren/typograph unified remark-parse remark-gfm remark-rehype rehype-stringify
+```
+
+```ts
+import { typeset } from '@calebduren/typograph/static';
+
+const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true });
+```
+
+| `target`   | Returns                           | Hanging markup                        | Peers needed                                                                 |
+| ---------- | --------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
+| `web`      | HTML fragment                     | on by default (`hanging: false` off)  | `unified`, `remark-parse`, `remark-gfm`, `remark-rehype`, `rehype-stringify` |
+| `email`    | HTML fragment                     | never; email clients are not verified | same as `web`                                                                |
+| `markdown` | typeset Markdown, same formatting | not applicable                        | `unified`, `remark-parse`, `remark-gfm`                                      |
+
+`target` is required. Options otherwise match the plugin (`locale`, `punctuation`, `spacing`, `skip`), except that `phase` is always `complete`. The parser packages are optional peer dependencies, loaded only when `typeset` runs. If one is missing, `typeset` rejects with an error naming every package to install.
+
+- **Syntax:** CommonMark plus GFM (tables, strikethrough, autolink literals, footnotes, task lists). Math is off by default because `remark-math` reads single dollars, which are usually currency, as inline math. Pass `math: true` (and install `remark-math`) to parse `$…$` and `$$…$$`; math is rendered as `remark-rehype`'s default `<code class="language-math">` markup, so bring your own TeX renderer.
+- **Raw HTML** is dropped from `web` and `email` output, following `remark-rehype`'s defaults; sanitize and add it yourself if you need it. `markdown` output keeps it as written.
+- **Hanging CSS:** `web` output with hanging markup needs `@calebduren/typograph/hanging.css`. `typeset` returns markup only.
+- **`markdown` output** writes each change back into your original text, so emphasis markers, bullets, line wrapping, and escapes stay as they were. Backslash-escaped quotes stay straight. Quotes written as entities (`&quot;`) stay as entities, although `web` output curls them. Text containing a named entity other than `&amp; &lt; &gt; &quot; &apos; &nbsp;` keeps its original characters.
+- **Idempotent:** typesetting the `markdown` output again returns it unchanged.
+
+If your pipeline already has a Markdown renderer, the simplest option is to typeset the Markdown before it enters your HTML or email template. That covers text the model wrote, but not prose the template adds itself.
 
 ## Optional opening-quote hanging
 

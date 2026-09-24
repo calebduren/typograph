@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add `typesetText` for plain AI-generated strings such as titles and notifications. It is synchronous, parses no Markdown, and preserves string length.
+- Add `@calebduren/typograph/static` with `typeset(markdown, { target })` for finished text: `web` and `email` HTML, or `markdown` that keeps the original formatting. Parser packages are optional peer dependencies, loaded on demand.
+- Test idempotency across the whole corpus, including after serializing and reparsing.
+
 ## 0.1.1 — 2026-09-20
 
 - Keep opening quotes inline throughout bulleted and numbered lists, including nested paragraphs and headings, so hanging punctuation cannot overlap list markers.

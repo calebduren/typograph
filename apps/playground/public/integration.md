@@ -132,6 +132,16 @@ The quote's separate inline block does not preserve pair kerning with the next l
 
 The landing page's Integration section has one copyable, self-contained agent prompt. Set the three typography switches above the preview or in Integration, leave **Agent prompt** selected, and use **Copy prompt**. Paste it into the agent working in your app's repository. The prompt asks the agent to inspect the existing renderer and choose the appropriate integration, including guidance for AI Elements/shadcn, Cloudflare Agents, and other Remark renderers. It covers package installation, the exact selected settings, preservation of your app's design and raw messages, and verification. Select **Code** to reveal the stack buttons and choose a shorter manual configuration for the same settings.
 
+## Finished text: briefs, email, and plain strings
+
+Not every AI response streams. For text that is complete before it is shown, such as a daily brief an agent writes overnight, typeset once at the end of the job and store or send the result.
+
+- **Markdown you render yourself:** run your usual pipeline with the plugin and `phase: 'complete'`, or call `typeset(markdown, { target: 'web' | 'email' | 'markdown', locale: 'en' })` from `@calebduren/typograph/static`. See the package README for the peers each target needs.
+- **HTML or email templates:** typeset the Markdown _before_ it enters the template. This covers the text the model wrote, not prose the template adds itself.
+- **Plain strings** (titles, notifications, subject lines): `typesetText(text, { locale: 'en' })` from `@calebduren/typograph`. It is synchronous, parses no Markdown, and returns a string of the same length.
+
+Email output never includes hanging-punctuation markup; client support has not been verified.
+
 ## Paragraph endings: CSS first
 
 For short final lines, prefer CSS `text-wrap: pretty` on completed prose. This lets the browser choose line breaks for the actual font and available width without inserting characters into the text. It is a progressive enhancement: support and wrapping choices vary by browser, and it does not guarantee a particular number of words on the last line.
