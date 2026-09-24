@@ -203,4 +203,4 @@ Write `src/static-core.ts` (`createTypeset`, peer loading, pipelines, splice) an
 
 - Adding syntax (for example directives) means adding a peer, a row in the syntax table, and a protected-content test. Never enable syntax implicitly.
 - The alignment rules in "Source splice" are the contract for `markdown` output. If `remark-parse` changes how it strips container prefixes, the reparse-parity test is the tripwire.
-- Brief 007 M3 (email spike) is the only thing that may turn on hanging for `email`. M4 (HTML input) adds `input: 'html'` to the same function.
+- Brief 007 M3 (email spike) closed without a working variant, so `email` never emits hanging markup. M4 (HTML input) adds `input: 'html'` to the same function.

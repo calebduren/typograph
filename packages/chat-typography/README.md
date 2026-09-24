@@ -113,7 +113,7 @@ const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true }
 | `target`   | Returns                           | Hanging markup                        | Peers needed                                                                 |
 | ---------- | --------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
 | `web`      | HTML fragment                     | on by default (`hanging: false` off)  | `unified`, `remark-parse`, `remark-gfm`, `remark-rehype`, `rehype-stringify` |
-| `email`    | HTML fragment                     | never; email clients are not verified | same as `web`                                                                |
+| `email`    | HTML fragment                     | never; email clients do not render it | same as `web`                                                                |
 | `markdown` | typeset Markdown, same formatting | not applicable                        | `unified`, `remark-parse`, `remark-gfm`                                      |
 
 `target` is required. Options otherwise match the plugin (`locale`, `punctuation`, `spacing`, `skip`), except that `phase` is always `complete`. The parser packages are optional peer dependencies, loaded only when `typeset` runs. If one is missing, `typeset` rejects with an error naming every package to install.

@@ -140,7 +140,7 @@ Not every AI response streams. For text that is complete before it is shown, suc
 - **HTML or email templates:** typeset the Markdown _before_ it enters the template. This covers the text the model wrote, not prose the template adds itself.
 - **Plain strings** (titles, notifications, subject lines): `typesetText(text, { locale: 'en' })` from `@calebduren/typograph`. It is synchronous, parses no Markdown, and returns a string of the same length.
 
-Email output never includes hanging-punctuation markup; client support has not been verified.
+Email output never includes hanging-punctuation markup: Gmail and Apple Mail on iOS do not render it. Quotes and nonbreaking spaces work in every client, because they are ordinary characters.
 
 ## Paragraph endings: CSS first
 

@@ -113,6 +113,8 @@ const html = await typeset(markdown, {
 
 ### M3. Email rendering spike
 
+**Outcome (2026-09-24): abandoned.** No variant hung in Gmail web or Apple Mail on iOS. Email output keeps quotes and nonbreaking spaces and never emits hanging markup. See `validation/email-spike/README.md`.
+
 Test the current hanging markup and at least one alternative (negative `margin-left` on the quote span; `text-indent` on the block) across Apple Mail, Gmail web/iOS/Android, and Outlook desktop/web, using a rendering service or real accounts. Record the matrix and screenshots in `validation/`.
 
 Decision rule: turn on an email hanging variant only if it degrades to an unshifted quote (never a clipped or overlapping glyph) in every client that does not support it. Otherwise `target: 'email'` keeps ignoring `hanging`. Docs make no claims about email hanging support until this matrix exists.

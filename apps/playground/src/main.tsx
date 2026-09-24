@@ -337,8 +337,8 @@ function Landing() {
                     >
                       Version 0.2.0 on npm
                     </a>
-                    . Tested with recorded streams and finished Markdown; browser profiling, email
-                    clients, and reading evaluations continue.
+                    . Tested with recorded streams and finished Markdown; browser profiling and
+                    reading evaluations continue.
                   </dd>
                 </div>
               </dl>
@@ -348,8 +348,8 @@ function Landing() {
                   No language detection, regional quote styles, hyphenation, or automatic rewriting
                   of your content. The package keeps no-break spacing opt-in; this demo starts with
                   all three refinements on. Very long tokens skip optional spacing to avoid
-                  expensive processing. Email output leaves out hanging punctuation until email
-                  clients are verified.
+                  expensive processing. Email output leaves out hanging punctuation, which email
+                  clients do not render.
                 </p>
                 <p>
                   Paste English prose into the demo. For mixed-language replies, the host app must
