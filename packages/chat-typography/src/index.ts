@@ -483,3 +483,23 @@ export default function remarkChatTypography(options: ChatTypographyOptions = {}
     );
   };
 }
+
+export type TypesetTextOptions = Pick<
+  ChatTypographyOptions,
+  'locale' | 'phase' | 'punctuation' | 'spacing'
+>;
+
+/** Typeset a plain string (no Markdown syntax). Output length always equals input length. */
+export function typesetText(text: string, options: TypesetTextOptions = {}): string {
+  // Blank lines separate blocks, so quote state resets as it does between paragraphs.
+  const parts = text.split(/(\r?\n[ \t]*\r?\n)/);
+  const blocks = parts.map((value): TextNode => ({ type: 'text', value }));
+  const root = {
+    type: 'root',
+    children: blocks
+      .filter((_, i) => i % 2 === 0)
+      .map((node) => ({ type: 'paragraph', children: [node] })),
+  };
+  remarkChatTypography({ phase: 'complete', ...options })(root as unknown as Root);
+  return blocks.map((node) => node.value).join('');
+}

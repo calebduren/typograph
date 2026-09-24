@@ -54,7 +54,7 @@ writeFileSync(
 import assert from 'node:assert/strict';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography from '@calebduren/typograph';
+import typography, { typesetText } from '@calebduren/typograph';
 import hanging from '@calebduren/typograph/hanging';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -68,6 +68,7 @@ const htmlTree = { type: 'root', children: [{ type: 'element', tagName: 'p', pro
 hanging({ locale: 'en' })(htmlTree);
 assert.equal(htmlTree.children[0].children[0].properties.className[0], 'typograph-opening');
 assert.ok(existsSync(fileURLToPath(import.meta.resolve('@calebduren/typograph/hanging.css'))));
+assert.equal(typesetText("Bob's \\"brief\\" takes 30 min", { locale: 'en', spacing: true }), 'Bob’s “brief” takes 30\\u00a0min');
 console.log('Packed chat plugin + generic Remark pipeline: passed');
 `,
 );
@@ -76,12 +77,14 @@ writeFileSync(
   `
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography, { type ChatTypographyOptions } from '@calebduren/typograph';
+import typography, { typesetText, type ChatTypographyOptions, type TypesetTextOptions } from '@calebduren/typograph';
 import hanging, { type HangingPunctuationOptions } from '@calebduren/typograph/hanging';
 const options: ChatTypographyOptions = { locale: 'en-GB', skip: node => node.type === 'link' };
 unified().use(remarkParse).use(typography, options);
 const hangingOptions: HangingPunctuationOptions = { locale: 'en', skip: node => node.type === 'element' && node.tagName === 'code' };
 unified().use(hanging, hangingOptions);
+const textOptions: TypesetTextOptions = { locale: 'en', phase: 'complete', spacing: true };
+const typeset: string = typesetText('"Hi"', textOptions);
 `,
 );
 console.log(exec(process.execPath, ['consumer.mjs']).trim());
@@ -124,6 +127,7 @@ writeFileSync(
         'public TypeScript without skipLibCheck',
         'declared dependencies',
         'package file allowlist',
+        'plain-string API',
       ],
     },
     null,

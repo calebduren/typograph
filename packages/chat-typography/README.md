@@ -77,6 +77,19 @@ To bound known expensive Typehug recognition, spacing passes through an entire p
 
 The core plugin's edits are length-preserving character substitutions in existing text nodes. The plugin is stateless between transformations; it does not mutate the SDK message, manage transport, throttle chunks, sanitize HTML, or replace the Markdown parser. Incomplete Markdown can still change interpretation as more text arrives. Dashes, ellipses, primes, hyphenation, automatic language detection, and arbitrary-language typography are outside this package's scope. Running the plugin twice on the same parsed tree leaves it unchanged, and so does running it on text that already contains curly quotes and nonbreaking spaces. Serializing the tree back to Markdown can drop escapes, so a reparsed result is not covered by this guarantee.
 
+## Plain strings
+
+For AI-generated text that is not Markdown (titles, notifications, email subject lines, summaries stored in JSON), use the synchronous `typesetText` export. It needs no parser and adds no dependencies.
+
+```ts
+import { typesetText } from '@calebduren/typograph';
+
+typesetText(`Bob's "weekly" brief takes 30 min`, { locale: 'en', spacing: true });
+// → Bob’s “weekly” brief takes 30 min (with a nonbreaking space before “min”)
+```
+
+It accepts `locale`, `punctuation`, `spacing`, and `phase`, with the same meanings as above. `phase` defaults to `complete`; pass `streaming` for a string that is still arriving. Markdown syntax has no meaning here: `*`, `_`, `#`, and list markers are ordinary characters. Blank lines separate blocks, so quote state resets at each one. URLs, email addresses, backtick spans, and tag-like `<…>` runs keep their straight marks. Output length always equals input length in UTF-16 code units, so offsets computed on the input remain valid.
+
 ## Optional opening-quote hanging
 
 Import `hangingPunctuation` from `@calebduren/typograph/hanging` and load `@calebduren/typograph/hanging.css` in your app's stylesheet/bundler entry. Add `[hangingPunctuation, { locale: 'en' }]` to your Rehype plugins **after existing sanitization**, retaining the renderer's defaults. See the [full integration example](https://typograph.dev/integration.md#optional-hanging-punctuation).
