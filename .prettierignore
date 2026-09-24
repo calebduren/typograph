@@ -7,3 +7,4 @@ release
 coverage
 playwright-report
 test-results
+validation/email-spike/spike.html
