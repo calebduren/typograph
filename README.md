@@ -1,6 +1,6 @@
 # Typograph
 
-Careful English typography for streaming AI responses. A small Remark plugin refines punctuation in rendered Markdown while preserving the original messages. Optional non-breaking spaces keep related words together; a separate Rehype helper hangs opening quotes.
+Careful English typography for AI-generated text. A small Remark plugin refines punctuation in streamed chat while preserving the original messages; `typeset()` handles finished Markdown for the web, email, or Markdown output; and `typesetText()` handles plain strings. Optional non-breaking spaces keep related words together, and a separate Rehype helper hangs opening quotes.
 
 Try the comparison at [typograph.dev](https://typograph.dev). Install the package from [npm](https://www.npmjs.com/package/@calebduren/typograph).
 

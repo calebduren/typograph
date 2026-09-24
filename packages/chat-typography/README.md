@@ -1,6 +1,12 @@
 # @calebduren/typograph
 
-Conservative English typography for streamed Markdown. This Remark plugin changes rendered prose while the app keeps the original model text. It adds no React, chat SDK, network service, or hosting requirement.
+Conservative English typography for AI-generated text: smart quotes and apostrophes, optional nonbreaking spaces, and optional hanging opening quotes. One engine powers three entry points:
+
+- **Streaming chat:** a Remark plugin (the default export) that refines rendered prose as tokens arrive, while the app keeps the original model text.
+- **Finished Markdown:** `typeset()` from `@calebduren/typograph/static` returns web HTML, email HTML, or typeset Markdown for artifacts such as a daily brief.
+- **Plain strings:** `typesetText()` for titles, notifications, and other text that is not Markdown.
+
+It adds no React, chat SDK, network service, or hosting requirement.
 
 **English only, by design.** Multilingual typography is outside this product's scope. English locale variants share one house style; they do not select regional quotation conventions. Use the plugin only on responses known to be English.
 
