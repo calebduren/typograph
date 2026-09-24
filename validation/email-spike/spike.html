@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Typograph email spike</title>
+  </head>
+  <body style="margin: 0; padding: 24px; background: #fff">
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="max-width: 600px; margin: 0 auto"
+    >
+      <tr>
+        <td
+          style="font-family: Arial, sans-serif; font-size: 15px; color: #111; padding-bottom: 8px"
+        >
+          <strong>Typograph email spike.</strong> In each section, a hanging quote should sit just
+          left of the dashed red line, with the words starting on the line. A pass also requires
+          that a variant which does not hang shows an ordinary, unclipped quote at the line.
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            padding: 24px 0 6px 0;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #666;
+          "
+        >
+          <strong style="color: #c00">A</strong> — Control: email target, no hanging markup
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 0 0 0 32px">
+          <div
+            style="
+              border-left: 1px dashed #e33;
+              padding: 0;
+              font-family: Georgia, 'Times New Roman', serif;
+              font-size: 20px;
+              line-height: 1.45;
+              color: #111;
+            "
+          >
+            <p style="margin: 0 0 12px 0">“Good morning.” Here’s your brief for Thursday.</p>
+            <p style="margin: 0 0 12px 0">
+              “Acme” signed the renewal; it’s worth 12 % more than last year and closes in 30 days.
+            </p>
+            <p style="margin: 0 0 12px 0">
+              A plain paragraph without an opening quote, for comparison with the edge.
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            padding: 24px 0 6px 0;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #666;
+          "
+        >
+          <strong style="color: #c00">B</strong> — Current web markup with hanging.css inlined
+          (inline-block, zero width, translateX)
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 0 0 0 32px">
+          <div
+            style="
+              border-left: 1px dashed #e33;
+              padding: 0;
+              font-family: Georgia, 'Times New Roman', serif;
+              font-size: 20px;
+              line-height: 1.45;
+              color: #111;
+            "
+          >
+            <p style="margin: 0 0 12px 0">
+              <span style="display: inline-block; width: 0; white-space: nowrap"
+                ><span style="display: inline-block; transform: translateX(-100%)">“</span></span
+              >Good morning.” Here’s your brief for Thursday.
+            </p>
+            <p style="margin: 0 0 12px 0">
+              <span style="display: inline-block; width: 0; white-space: nowrap"
+                ><span style="display: inline-block; transform: translateX(-100%)">“</span></span
+              >Acme” signed the renewal; it’s worth 12 % more than last year and closes in 30 days.
+            </p>
+            <p style="margin: 0 0 12px 0">
+              A plain paragraph without an opening quote, for comparison with the edge.
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            padding: 24px 0 6px 0;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #666;
+          "
+        >
+          <strong style="color: #c00">C</strong> — Negative margin on the quote (margin-left:
+          -0.42em)
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 0 0 0 32px">
+          <div
+            style="
+              border-left: 1px dashed #e33;
+              padding: 0;
+              font-family: Georgia, 'Times New Roman', serif;
+              font-size: 20px;
+              line-height: 1.45;
+              color: #111;
+            "
+          >
+            <p style="margin: 0 0 12px 0">
+              <span style="margin-left: -0.42em">“</span>Good morning.” Here’s your brief for
+              Thursday.
+            </p>
+            <p style="margin: 0 0 12px 0">
+              <span style="margin-left: -0.42em">“</span>Acme” signed the renewal; it’s worth 12 %
+              more than last year and closes in 30 days.
+            </p>
+            <p style="margin: 0 0 12px 0">
+              A plain paragraph without an opening quote, for comparison with the edge.
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            padding: 24px 0 6px 0;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #666;
+          "
+        >
+          <strong style="color: #c00">D</strong> — Negative text-indent on the paragraph
+          (text-indent: -0.42em)
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 0 0 0 32px">
+          <div
+            style="
+              border-left: 1px dashed #e33;
+              padding: 0;
+              font-family: Georgia, 'Times New Roman', serif;
+              font-size: 20px;
+              line-height: 1.45;
+              color: #111;
+            "
+          >
+            <p style="margin: 0 0 12px 0; text-indent: -0.42em">
+              “Good morning.” Here’s your brief for Thursday.
+            </p>
+            <p style="margin: 0 0 12px 0; text-indent: -0.42em">
+              “Acme” signed the renewal; it’s worth 12 % more than last year and closes in 30 days.
+            </p>
+            <p style="margin: 0 0 12px 0">
+              A plain paragraph without an opening quote, for comparison with the edge.
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            padding: 24px 0 6px 0;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #666;
+          "
+        >
+          <strong style="color: #c00">E</strong> — Native CSS (hanging-punctuation: first), WebKit
+          only
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 0 0 0 32px">
+          <div
+            style="
+              border-left: 1px dashed #e33;
+              padding: 0;
+              font-family: Georgia, 'Times New Roman', serif;
+              font-size: 20px;
+              line-height: 1.45;
+              color: #111;
+            "
+          >
+            <p style="margin: 0 0 12px 0; hanging-punctuation: first">
+              “Good morning.” Here’s your brief for Thursday.
+            </p>
+            <p style="margin: 0 0 12px 0; hanging-punctuation: first">
+              “Acme” signed the renewal; it’s worth 12 % more than last year and closes in 30 days.
+            </p>
+            <p style="margin: 0 0 12px 0; hanging-punctuation: first">
+              A plain paragraph without an opening quote, for comparison with the edge.
+            </p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
