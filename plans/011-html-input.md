@@ -2,7 +2,7 @@
 
 | Field           | Value                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------- |
-| Status          | reviewed (2026-09-25); revised; ready to execute                                                              |
+| Status          | reviewed twice (2026-09-25); revised; ready to execute                                                        |
 | Written against | commit `3a452cf` (0.2.0 published and deployed), 2026-09-25                                                   |
 | Effort          | L (engine refactor, hast collector, HTML aligner and splice, hanging option, tests, package check, docs)      |
 | Risk of change  | medium. The engine refactor touches every existing path, gated by the unchanged 219-test suite                |
@@ -26,16 +26,16 @@ The prototypes adapted `hast-util-from-html` output to mdast shapes so the curre
 
 ## Decisions (including revisions to brief 007 M4)
 
-| #   | Topic            | Decision                                                                                                                                                                                                                                                       |
-| --- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| H1  | Output mechanism | Splice into the source; never re-serialize. **Revises M4**, which assumed a rehype round trip.                                                                                                                                                                 |
-| H2  | Entity quotes    | In HTML mode, replace the whole reference span with the typographic character. **Diverges from the Markdown target on purpose:** rendered Markdown `web` output already curls entity quotes (`tests/chat-static.test.ts:180`), and HTML text is rendered text. |
-| H3  | Element policy   | An explicit content policy (below). Unknown elements, including custom elements, are **blocks**: a block boundary can only cause a miss (a quote left straight), never a wrong curl. **Revises M4's** narrower block list.                                     |
-| H4  | Inheritance      | `lang` and `translate` resolve while descending, with nested overrides. `data-typograph="off"` and `skip` are hard subtree stops.                                                                                                                              |
-| H5  | Parse mode       | Explicit: `html: 'fragment'` (default) or `'document'`. No detection heuristic.                                                                                                                                                                                |
-| H6  | Trust            | HTML input is trusted and returned unsanitized, byte for byte outside edits. (Markdown input drops raw HTML; HTML input cannot.)                                                                                                                               |
-| H7  | Hanging          | Not available through `typeset({ input: 'html' })`: it needs markup insertion. Available through `rehypeTypography` plus `rehypeHangingPunctuation({ source: 'html' })`, which honors the same policy.                                                         |
-| H8  | Markdown splice  | Untouched. HTML gets its own aligner.                                                                                                                                                                                                                          |
+| #   | Topic            | Decision                                                                                                                                                                                                                                                                                                                                                                                     |
+| --- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| H1  | Output mechanism | Splice into the source; never re-serialize. **Revises M4**, which assumed a rehype round trip.                                                                                                                                                                                                                                                                                               |
+| H2  | Entity quotes    | In HTML mode, replace the whole reference span with the typographic character. **Diverges from the Markdown target on purpose:** rendered Markdown `web` output already curls entity quotes (`tests/chat-static.test.ts:180`), and HTML text is rendered text.                                                                                                                               |
+| H3  | Element policy   | An explicit content policy (below). Unknown elements, including custom elements, are **blocks**. This is a conservative fallback: resetting quote state at a boundary is intended to produce misses (a quote left straight) rather than wrong curls, but the quote-state algorithm does not prove that, so a cross-boundary fixture pins the behavior. **Revises M4's** narrower block list. |
+| H4  | Inheritance      | `lang` and `translate` resolve while descending, with nested overrides. `data-typograph="off"` and `skip` are hard subtree stops.                                                                                                                                                                                                                                                            |
+| H5  | Parse mode       | Explicit: `html: 'fragment'` (default) or `'document'`. No detection heuristic.                                                                                                                                                                                                                                                                                                              |
+| H6  | Trust            | HTML input is trusted and returned unsanitized, byte for byte outside edits. (Markdown input drops raw HTML; HTML input cannot.)                                                                                                                                                                                                                                                             |
+| H7  | Hanging          | Not available through `typeset({ input: 'html' })`: it needs markup insertion. Available through `rehypeTypography` plus `rehypeHangingPunctuation({ source: 'html' })`, which honors the same policy.                                                                                                                                                                                       |
+| H8  | Markdown splice  | Untouched. HTML gets its own aligner.                                                                                                                                                                                                                                                                                                                                                        |
 
 ## Design
 
@@ -107,19 +107,41 @@ Types become a discriminated union:
 
 ```ts
 type MarkdownTypesetOptions = { input?: 'markdown'; target: 'web' | 'email' | 'markdown'; math?: boolean; hanging?: boolean; skip?: (node: MdastNodes) => boolean; … };
-type HtmlTypesetOptions = { input: 'html'; target: 'web' | 'email'; html?: 'fragment' | 'document'; skip?: (node: HastNodes) => boolean; … };
+type HtmlTypesetOptions = { input: 'html'; target: 'web' | 'email'; html?: 'fragment' | 'document'; hanging?: false; skip?: (node: HastNodes) => boolean; … };
 export type TypesetOptions = MarkdownTypesetOptions | HtmlTypesetOptions; // shared: locale, punctuation, spacing
 ```
 
-- For HTML input, `target: 'markdown'`, `math`, and `hanging` are compile-time errors, and also throw a `TypeError` at runtime. `hanging: false` is accepted as a no-op. `web` and `email` return identical output; document that HTML input makes character edits only.
+- For HTML input, `target: 'markdown'`, `math`, and `hanging: true` are compile-time errors and also throw a `TypeError` at runtime. `hanging` is typed `false` and is accepted only as an explicit no-op. `web` and `email` return identical output; document that HTML input makes character edits only.
 - Peers: `unified` and `rehype-parse` (new optional peer, `^9.0.1`), lazy-loaded with missing-peer errors as in plan 009.
 
 **HTML aligner** (new, separate from the Markdown `align`). For each text node with a start and end offset, walk the source span and the original value together:
 
 - A source char equal to the value char maps 1:1.
 - A source `\r\n` maps to one value `\n`, and a lone `\r` to `\n`.
-- A source `&` begins a character reference. Decode it **with the loaded parser**, which is parser-equivalent by construction and adds no decoder dependency. Take the longest `&[#A-Za-z0-9]+;?` token, parse it alone as fragment text, and derive how many source characters were consumed: literal characters after the reference pass through unchanged. The decoded code units map to the whole consumed span, marked as a span.
-- A token that decodes to itself (not a reference) maps character by character. `&amp;quot;` decodes to `&` plus the literal `quot;`, so it is never a quote. There is no recursive decoding.
+- A source `&` begins a character reference. Take the token matching `&[#A-Za-z0-9]+;?` at that position. Let `D(x)` be the text the loaded parser produces for `x` alone as a fragment, so decoding is parser-equivalent by construction and needs no decoder dependency. Then:
+  - If `D(token) === token`, the `&` is literal: map the token character by character (`&nosuch;`, a bare `&`, `&#;`).
+  - Otherwise, if the token is longer than 40 characters, abort the node.
+  - Otherwise find every `k` from 2 to `token.length` such that, with `head = token.slice(0, k)` and `d = D(head)`: `d !== head`; `d` is one or two code points; `d` does not end with `head`'s last character (which would mean that character passed through literally); and `d + token.slice(k) === D(token)`. **Exactly one** such `k` is the consumed length. Zero or several abort the node.
+  - If `d` contains U+FFFD (null, surrogate, or out-of-range numeric references), abort the node.
+  - The decoded code units must equal the value at the current position, or the node aborts. They map to the consumed span `[i, i + k)`, marked as a span; the rest of the token is then aligned as ordinary characters.
+  - Verified against the parser on 2026-09-25:
+
+    | Token                                                 | `D(token)`      | Consumed          |
+    | ----------------------------------------------------- | --------------- | ----------------- |
+    | `&quot;` `&#34;`                                      | `"`             | 6, 5              |
+    | `&#39;` `&#x27;`                                      | `'`             | 5, 6              |
+    | `&amp;` (so `&amp;quot;` is `&` plus literal `quot;`) | `&`             | 5                 |
+    | `&notin;`                                             | `∉`             | 7                 |
+    | `&notit;`                                             | `¬it;`          | 4 (legacy `&not`) |
+    | `&ampamp;`                                            | `&amp;`         | 4                 |
+    | `&#39x`                                               | `'x`            | 4                 |
+    | `&copyright`                                          | `©right`        | 5                 |
+    | `&#128512;`                                           | `😀`            | 9                 |
+    | `&NotEqualTilde;`                                     | two code points | 15                |
+    | `&nosuch;`, `&`, `&#;`                                | unchanged       | literal           |
+    | `&#0;`, `&#x110000;`                                  | U+FFFD          | abort             |
+
+  - There is no recursive decoding: a decoded `&` is never re-read.
 - Any other mismatch (a `<` inside the span, as with foster parenting, or leftover source) **aborts the node**: none of its edits apply.
 - Record `[start, end)` source ranges claimed by each node. If two nodes' ranges overlap, abort both.
 
@@ -134,12 +156,12 @@ export type TypesetOptions = MarkdownTypesetOptions | HtmlTypesetOptions; // sha
 4. **HTML input (D):** union types, the aligner, the splice, parse modes, the peer, errors. Leave the Markdown splice untouched.
 5. **Tests** (`tests/chat-html.test.ts`):
    - The finding-1 template, with an exact expected output and byte-identity outside edited spans.
-   - **References:** `&quot;` `&#34;` `&#39;` `&#x27;` curl; `&amp;quot;` is unchanged; legacy `&amp` without a semicolon is consumed as the parser does; numeric references outside the BMP; references next to links, code, and skipped nodes.
+   - **References:** every row of the consumption table; `&quot;` `&#34;` `&#39;` `&#x27;` curl; `&amp;quot;` is unchanged; references next to links, code, and skipped nodes; an ambiguous or U+FFFD reference aborts only its node.
    - **Alignment aborts:** foster-parented `before`/`after` text around a table row; malformed and misplaced `html`/`head`/`body` tokens; overlapping spans.
    - **CR:** lone CR and CRLF in text.
    - **Policy:**
      - Every table row in section B.
-     - `display:block` and `display:none` spans; a custom element breaking a quoted phrase (a documented miss).
+     - `display:block` and `display:none` spans; a quoted phrase spanning a custom element, pinned as a fixture with its observed output (review it: a wrong curl there is a finding, not an expected value).
      - Nested `lang="fr"` inside `lang="en"`, and `lang="en"` inside `lang="fr"`.
      - `translate="no"` / `translate="yes"`; `lang=""`; `data-typograph="off"` with a nested `lang="en"` staying off.
    - **Content policy, not a splice failure:** attribute-like text in prose (`title="it's"` written as text) is typeset like any prose.
@@ -147,11 +169,11 @@ export type TypesetOptions = MarkdownTypesetOptions | HtmlTypesetOptions; // sha
    - **Parity:** for every corpus case, compare the sequence of `“ ” ‘ ’ U+00A0` in document order between the Markdown engine's `web` output and HTML-input output on remark-rehype's rendering of the same Markdown. The difference list is exactly `['escaped-after-entity', 'escaped-quote']`. **Changing it requires review.**
    - **Idempotency** over the corpus-as-HTML.
    - **Pipeline:** `rehypeTypography` with `rehypeHangingPunctuation({ source: 'html' })` in unified.
-   - **Errors:** `target: 'markdown'`, `math`, or `hanging: true` with HTML input throw; a missing `rehype-parse` is named.
+   - **Errors:** `target: 'markdown'`, `math`, or `hanging: true` with HTML input throw; `hanging: false` is accepted; a missing `rehype-parse` is named.
 6. **Package check:**
    - Add `rehype-parse@9.0.1` to the exact install list.
    - Smoke-test `rehypeTypography` and `typeset({ input: 'html' })`.
-   - Extend the strict TypeScript sample (`check-chat-package.mjs:93`) with `HtmlTypesetOptions`, including a `// @ts-expect-error` for `hanging` with HTML input.
+   - Extend the strict TypeScript sample (`check-chat-package.mjs:93`) with `HtmlTypesetOptions`, including `hanging: false` (accepted) and a `// @ts-expect-error` for `hanging: true` with HTML input.
    - Extend the peerless consumer (`:145`) with the HTML branch's error message.
    - Assert the new optional peer.
 7. **Docs:**
@@ -174,7 +196,7 @@ export type TypesetOptions = MarkdownTypesetOptions | HtmlTypesetOptions; // sha
 - The refactor changes any existing test result.
 - The parity list changes.
 - Byte-identity fails outside an edited span.
-- Parser-based reference decoding cannot determine the consumed length for some token class. Report the class; do not add a heuristic decoder.
+- A reference class produces zero or multiple consumed lengths where the parser is unambiguous. Report the class; do not add a heuristic decoder.
 
 ## Out of scope
 
