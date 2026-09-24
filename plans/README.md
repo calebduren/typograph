@@ -23,6 +23,7 @@ The audit ran non-interactively (no maintainer available to pick findings), so p
 | 008 | [Idempotency across the corpus and serialized output](008-idempotency-across-corpus.md) — brief 007 M1; tests only; pins the `remark-stringify` escape loss                                                                                    | S       | low    | —                    | done (e9599dc)                                             |
 | 009 | [`typeset()` static entry for Markdown](009-static-typeset-markdown.md) — brief 007 M2; web/email/markdown targets, GFM syntax, opt-in math, lazy optional peers, source splice                                                                | M–L     | medium | 008                  | done                                                       |
 | 010 | [`typesetText()` for plain strings](010-typeset-text-plain-strings.md) — sync, dependency-free root export for titles, notifications, and other non-Markdown AI text                                                                           | S       | low    | —                    | done (d16c390)                                             |
+| 011 | [HTML input](011-html-input.md) — brief 007 M4; neutral engine core, `rehypeTypography`, byte-preserving HTML splice with entity replacement, hanging `source: 'html'`                                                                         | L       | medium | —                    | proposed                                                   |
 
 Dependency graph:
 

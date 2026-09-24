@@ -121,6 +121,8 @@ Decision rule: turn on an email hanging variant only if it degrades to an unshif
 
 ### M4. HTML input (`rehypeTypography`)
 
+**Planned in [011](011-html-input.md) (2026-09-25).** A prototype changed two points below: HTML output is spliced into the source rather than re-serialized, and template-escaped entity quotes are replaced.
+
 For briefs whose prose lives in HTML templates, not Markdown.
 
 - **Engine refactor first.** Extract a neutral inline-run abstraction from `formatInline`: a run of text segments with protected placeholders and block boundaries, independent of mdast or hast. The remark plugin and the new rehype plugin both feed it. The existing test suite must pass unchanged before any HTML work lands.
