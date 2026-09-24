@@ -50,7 +50,7 @@ type Writable = {
 };
 type Run =
   | { kind: 'prose'; nodes: Writable[] } // real text nodes; the core writes results back
-  | { kind: 'literal'; value: string }; // synthetic: '￼' placeholder, '\n' break, or '' for inline HTML
+  | { kind: 'literal'; value: string }; // synthetic: '\ufffc' placeholder, '\n' break, or '' for inline HTML
 type Segment = Run | { kind: 'boundary' }; // flushes the spacing run; punctuation context continues (mdast links)
 
 interface CoreHooks {
@@ -66,7 +66,7 @@ function typesetSegments(
 ): void;
 ```
 
-- `collectMdastRuns(parent, settings)` keeps today's traversal exactly: `skip` checked in the inline walk (the outer `visit` keeps its own check), emphasis/strong/delete transparent, `link`/`linkReference` as a `boundary` before and after, `html` as literal `''`, `break` as literal `'\n'`, others as literal node value or `'￼'`.
+- `collectMdastRuns(parent, settings)` keeps today's traversal exactly: `skip` checked in the inline walk (the outer `visit` keeps its own check), emphasis/strong/delete transparent, `link`/`linkReference` as a `boundary` before and after, `html` as literal `''`, `break` as literal `'\n'`, others as literal node value or `'\ufffc'`.
 - `typesetSegments` holds everything after collection: joined source, literal mask, `protectionMask`, `hooks.protect`, whole-block punctuation, per-prose-run spacing with `hooks.boundary`, and write-back to `Writable` nodes only.
 - **Gate:** step 1 lands alone. The 219 existing tests pass with no test edits.
 
@@ -78,8 +78,8 @@ Content policy (`collectHastRuns`), evaluated per element:
 
 | Kind                 | Rule                                                                                                       | Treatment                                                                                                                                                   |
 | -------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hard stop            | `skip(node)` true, or `data-typograph="off"`                                                               | literal `'￼'`; no nested override                                                                                                                           |
-| Non-prose subtree    | `code kbd samp var pre script style textarea template svg math head title noscript rt rp`                  | literal `'￼'`                                                                                                                                               |
+| Hard stop            | `skip(node)` true, or `data-typograph="off"`                                                               | literal `'\ufffc'`; no nested override                                                                                                                           |
+| Non-prose subtree    | `code kbd samp var pre script style textarea template svg math head title noscript rt rp`                  | literal `'\ufffc'`                                                                                                                                               |
 | Language / translate | effective `lang` not English, or effective `translate="no"`                                                | subtree not typeset, but descend: a nested `lang="en…"` or `translate="yes"` re-enables prose                                                               |
 | Literal inline       | `img input button select iframe object embed video audio canvas wbr`                                       | literal (`wbr` as `''`)                                                                                                                                     |
 | Line break           | `br`                                                                                                       | literal `'\n'`                                                                                                                                              |
