@@ -1,6 +1,6 @@
 # Typograph: integration guide
 
-English-only typography for streaming AI responses. Typograph refines rendered prose while your app keeps the original messages.
+English-only typography for AI-generated text, streamed or finished. Typograph refines rendered prose while your app keeps the original messages. For briefs, email, and plain strings, see [Finished text](#finished-text-briefs-email-and-plain-strings).
 
 ## Install
 

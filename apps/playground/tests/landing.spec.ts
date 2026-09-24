@@ -9,7 +9,7 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   const csp = response!.headers()['content-security-policy'];
   expect(csp).toContain("style-src 'self';");
   expect(csp).toContain("style-src-attr 'unsafe-inline'");
-  await expect(page).toHaveTitle('Typograph — Nicer typography for streaming AI.');
+  await expect(page).toHaveTitle('Typograph — Better typography for AI-generated text.');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
     'content',
     await page.title(),
@@ -125,7 +125,7 @@ test('the hero renders while the comparison bundle is still loading', async ({ p
     await page.goto('/#demo', { waitUntil: 'domcontentloaded' });
     await expect.poll(() => requestBlocked).toBe(true);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Nicer typography for streaming AI.',
+      'Better typography for AI-generated text.',
     );
     await expect(page.getByRole('status')).toHaveText('Loading the comparison…');
   } finally {
@@ -160,7 +160,7 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Nicer typography for streaming AI.',
+    'Better typography for AI-generated text.',
   );
   const original = page.getByTestId('original-response');
   const formatted = page.getByTestId('formatted-response');
@@ -325,7 +325,7 @@ test('one agent prompt covers every stack and code alone exposes stack selection
   const examples = page.getByRole('group', { name: 'Integration examples' });
   const prompt = page.getByRole('region', { name: 'Typography agent prompt' });
   await expect(examples).toHaveCount(0);
-  for (const expected of ['MessageResponse', 'useAgentChat', 'processor.runSync']) {
+  for (const expected of ['MessageResponse', 'useAgentChat', 'processor.runSync', 'typesetText(']) {
     await expect(prompt).toContainText(expected);
   }
   const originalPrompt = await prompt.textContent();
@@ -346,6 +346,7 @@ test('one agent prompt covers every stack and code alone exposes stack selection
     ['AI Elements', 'MessageResponse'],
     ['Cloudflare', 'useAgentChat'],
     ['Remark', 'processor.runSync'],
+    ['Finished text', 'typesetText(generatedTitle'],
   ]) {
     await examples.getByRole('button', { name: stack, exact: true }).click();
     const code = page.getByLabel(`${stack} code example`);
@@ -359,10 +360,9 @@ test('one agent prompt covers every stack and code alone exposes stack selection
   await expect(examples).toHaveCount(0);
   expect(await prompt.textContent()).toBe(originalPrompt);
   await page.getByRole('button', { name: 'Code', exact: true }).click();
-  await expect(examples.getByRole('button', { name: 'Remark', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
+  await expect(
+    examples.getByRole('button', { name: 'Finished text', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
   await page.evaluate(() => {
     Object.defineProperty(navigator.clipboard, 'writeText', {
@@ -703,7 +703,7 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Nicer typography for streaming AI.',
+      'Better typography for AI-generated text.',
     );
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),

@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Typograph",
   "short_name": "Typograph",
-  "description": "English-only typography for streaming AI responses.",
+  "description": "English-only typography for AI-generated text.",
   "lang": "en",
   "start_url": "/",
   "scope": "/",

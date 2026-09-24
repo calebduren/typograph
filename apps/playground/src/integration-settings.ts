@@ -4,7 +4,7 @@ export const defaultSettings: TypographySettings = {
   spacing: true,
   hanging: true,
 };
-export const integrationStacks = ['AI Elements', 'Cloudflare', 'Remark'] as const;
+export const integrationStacks = ['AI Elements', 'Cloudflare', 'Remark', 'Finished text'] as const;
 export type IntegrationStack = (typeof integrationStacks)[number];
 
 export function settingsSummary(settings: TypographySettings): string {
@@ -25,6 +25,19 @@ export function pluginOptions(settings: TypographySettings): string {
 
 export function integrationCode(stack: IntegrationStack, settings: TypographySettings): string {
   const imports = `import typography from '@calebduren/typograph';${settings.hanging ? "\nimport hangingPunctuation from '@calebduren/typograph/hanging';\nimport '@calebduren/typograph/hanging.css';" : ''}`;
+  if (stack === 'Finished text') {
+    const rules = `locale: 'en', punctuation: ${settings.punctuation}, spacing: ${settings.spacing}`;
+    return `// npm install unified remark-parse remark-gfm remark-rehype rehype-stringify
+import { typesetText } from '@calebduren/typograph';
+import { typeset } from '@calebduren/typograph/static';${settings.hanging ? "\nimport '@calebduren/typograph/hanging.css';" : ''}
+
+// A finished Markdown brief: 'web' or 'email' HTML, or 'markdown' with formatting kept.
+const html = await typeset(brief, { target: 'web', ${rules}, hanging: ${settings.hanging} });
+const email = await typeset(brief, { target: 'email', ${rules} });
+
+// A plain string, such as a title or notification. Synchronous; no parser.
+const title = typesetText(generatedTitle, { ${rules} });`;
+  }
   if (stack === 'Remark') {
     return `import { unified } from 'unified';
 import remarkParse from 'remark-parse';${settings.hanging ? "\nimport remarkRehype from 'remark-rehype';" : ''}

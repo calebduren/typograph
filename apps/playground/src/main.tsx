@@ -160,7 +160,9 @@ function Integration({
         <p className="recipe-note">
           {mode === 'prompt'
             ? 'Includes installation, English-only defaults, streaming behavior, and checks for your app.'
-            : 'A fixed English preset needs no finish callback. Changing rules at runtime? The guide includes the tested Streamdown wrapper.'}
+            : recipe === 'Finished text'
+              ? 'Typeset once when the text is complete, then store or send the result. Email output leaves out hanging markup.'
+              : 'A fixed English preset needs no finish callback. Changing rules at runtime? The guide includes the tested Streamdown wrapper.'}
         </p>
         <p role="alert" className="recipe-error" hidden={!error}>
           {error}
@@ -188,7 +190,7 @@ function Landing() {
             <a className="wordmark" href="#top" aria-label="Typograph home">
               Typograph
             </a>
-            <p className="version">V0.1.1</p>
+            <p className="version">V0.2.0</p>
           </div>
           <nav aria-label="Main navigation">
             <a href="#demo">Try it</a>
@@ -206,12 +208,12 @@ function Landing() {
           <section className="hero" aria-labelledby="hero-title">
             <div className="hero-copy">
               <h1 id="hero-title">
-                Nicer typography <br />
-                for streaming AI.
+                Better typography <br />
+                for AI-generated text.
               </h1>
               <p>
-                Careful English punctuation for AI responses, with optional spacing that keeps
-                related words together.
+                Careful English punctuation for everything your AI writes: streaming chat, finished
+                briefs, and plain strings. Optional spacing keeps related words together.
               </p>
               <p className="scope-line">Open source, runs locally.</p>
             </div>
@@ -296,7 +298,8 @@ function Landing() {
                   <dt>Size</dt>
                   <dd>
                     About 4 KB gzip for the core, including the spacing engine. Hanging punctuation
-                    adds a separate small helper and stylesheet.{' '}
+                    adds a separate small helper and stylesheet. The finished-text entry uses your
+                    own Markdown packages.{' '}
                     <a
                       href={benchmarkUrl}
                       className="underlined"
@@ -332,10 +335,10 @@ function Landing() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Version 0.1.1 on npm
+                      Version 0.2.0 on npm
                     </a>
-                    . Tested with recorded streams; browser profiling and reading evaluations
-                    continue.
+                    . Tested with recorded streams and finished Markdown; browser profiling, email
+                    clients, and reading evaluations continue.
                   </dd>
                 </div>
               </dl>
@@ -345,7 +348,8 @@ function Landing() {
                   No language detection, regional quote styles, hyphenation, or automatic rewriting
                   of your content. The package keeps no-break spacing opt-in; this demo starts with
                   all three refinements on. Very long tokens skip optional spacing to avoid
-                  expensive processing.
+                  expensive processing. Email output leaves out hanging punctuation until email
+                  clients are verified.
                 </p>
                 <p>
                   Paste English prose into the demo. For mixed-language replies, the host app must
@@ -361,7 +365,7 @@ function Landing() {
             <a className="wordmark" href="#top">
               Typograph
             </a>
-            <p className="version">V0.1.1</p>
+            <p className="version">V0.2.0</p>
           </div>
           <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
             Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />

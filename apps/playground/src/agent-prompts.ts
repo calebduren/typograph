@@ -28,6 +28,9 @@ ${settings.hanging ? "Import hangingPunctuation from '@calebduren/typograph/hang
 
 Preserve raw SDK messages for storage, tool execution, and Copy original. Transform rendered prose only. Keep code, math, HTML, URLs, link destinations, and escaped punctuation protected. Retain the existing renderer's security settings; this plugin is not a sanitizer.
 
+FINISHED TEXT
+If the app also shows AI text that is complete before display (scheduled briefs, email, summaries, titles, notifications), typeset it once when it is finished. For Markdown, use typeset(markdown, { target, locale: 'en', punctuation: ${settings.punctuation}, spacing: ${settings.spacing} }) from '@calebduren/typograph/static'. Target 'web' returns HTML${settings.hanging ? ' with hanging markup that needs the same hanging.css' : ''}, 'email' returns HTML without hanging markup, and 'markdown' returns typeset Markdown with its formatting kept. Install the peers the README lists for the chosen target. For plain strings that are not Markdown, use the synchronous typesetText(text, { locale: 'en', punctuation: ${settings.punctuation}, spacing: ${settings.spacing} }) from '@calebduren/typograph'. Skip this section if the app has no such text.
+
 PARAGRAPH ENDINGS
 For orphan control, prefer progressive-enhancement CSS text-wrap: pretty on completed assistant prose paragraphs, leaving normal wrapping during streaming. Do not force nonbreaking spaces between the final two words. Keep spacing.lastWords off unless explicitly requested; it requires phase: 'complete' after a verified successful finish for that message, never simply status === 'ready'. Unsupported CSS should fall back to normal wrapping.
 
