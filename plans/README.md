@@ -10,21 +10,25 @@ The audit ran non-interactively (no maintainer available to pick findings), so p
 
 ## Recommended execution order
 
-| #   | Plan                                                                                                                                                                                                                                           | Effort  | Risk   | Depends on           | Status      |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------ | -------------------- | ----------- |
-| P0  | Track `quote-context.ts` (see above)                                                                                                                                                                                                           | trivial | none   | —                    | not started |
-| 001 | [Fix three punctuation-engine defects](001-engine-protection-and-quote-context-fixes.md) — stray backtick silences the rest of a reply; quote before footnote/inline literal stays straight; uncommitted lookahead regresses `6'`-style primes | S–M     | low    | P0                   | not started |
-| 002 | [Hanging helper tolerates missing `properties`](002-hanging-helper-missing-properties.md) — one-line crash fix                                                                                                                                 | S       | low    | P0                   | not started |
-| 003 | [Broaden engine regression coverage](003-broaden-engine-regression-coverage.md) — corpus under the shipped default; headings/breaks/lists/blockquotes/HTML; block-level `skip`; spacing sub-rules; Worker URL normalisation                    | M       | low    | 001 (same test file) | not started |
-| 004 | [Three small landing-page fixes](004-landing-page-small-fixes.md) — dead `aria-label`s on `<div>`s, stale hanging-scope caption, untyped view state                                                                                            | S       | low    | —                    | not started |
-| 005 | [Dev server resolves the package from source](005-dev-server-resolves-package-source.md) — no more manual `build:chat` while editing the engine                                                                                                | M       | medium | —                    | not started |
-| 006 | [Fail-fast `check` and CI hygiene](006-fail-fast-check-and-ci-hygiene.md) — lint/format first, Node pins, Playwright cache, Wrangler timeout, keep `.vite/` off the site                                                                       | S       | low    | —                    | not started |
+| #   | Plan                                                                                                                                                                                                                                           | Effort  | Risk   | Depends on           | Status                         |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------ | -------------------- | ------------------------------ |
+| P0  | Track `quote-context.ts` (see above)                                                                                                                                                                                                           | trivial | none   | —                    | not started                    |
+| 001 | [Fix three punctuation-engine defects](001-engine-protection-and-quote-context-fixes.md) — stray backtick silences the rest of a reply; quote before footnote/inline literal stays straight; uncommitted lookahead regresses `6'`-style primes | S–M     | low    | P0                   | not started                    |
+| 002 | [Hanging helper tolerates missing `properties`](002-hanging-helper-missing-properties.md) — one-line crash fix                                                                                                                                 | S       | low    | P0                   | not started                    |
+| 003 | [Broaden engine regression coverage](003-broaden-engine-regression-coverage.md) — corpus under the shipped default; headings/breaks/lists/blockquotes/HTML; block-level `skip`; spacing sub-rules; Worker URL normalisation                    | M       | low    | 001 (same test file) | not started                    |
+| 004 | [Three small landing-page fixes](004-landing-page-small-fixes.md) — dead `aria-label`s on `<div>`s, stale hanging-scope caption, untyped view state                                                                                            | S       | low    | —                    | not started                    |
+| 005 | [Dev server resolves the package from source](005-dev-server-resolves-package-source.md) — no more manual `build:chat` while editing the engine                                                                                                | M       | medium | —                    | not started                    |
+| 006 | [Fail-fast `check` and CI hygiene](006-fail-fast-check-and-ci-hygiene.md) — lint/format first, Node pins, Playwright cache, Wrangler timeout, keep `.vite/` off the site                                                                       | S       | low    | —                    | not started                    |
+| 007 | [Brief: typography for static AI artifacts](007-static-artifact-typography.md) — Markdown `typeset()` first, email spike, HTML input, CLI; reviewed                                                                                            | M–L     | medium | —                    | reviewed; questions closed     |
+| 008 | [Idempotency across the corpus and serialized output](008-idempotency-across-corpus.md) — brief 007 M1; tests only; pins the `remark-stringify` escape loss                                                                                    | S       | low    | —                    | done (uncommitted, 2026-09-24) |
+| 009 | [`typeset()` static entry for Markdown](009-static-typeset-markdown.md) — brief 007 M2; web/email/markdown targets, GFM syntax, opt-in math, lazy optional peers, source splice                                                                | M–L     | medium | 008                  | not started                    |
 
 Dependency graph:
 
 ```
 P0 ──► 001 ──► 003
   └──► 002
+007 (brief) ──► 008 ──► 009
 004, 005, 006 are independent (005 and 006 both edit CONTRIBUTING.md; trivial merge)
 ```
 
