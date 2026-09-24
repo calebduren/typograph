@@ -213,7 +213,7 @@ function Landing() {
               </h1>
               <p>
                 Careful English punctuation for everything your AI writes: streaming chat, finished
-                briefs, and plain strings. Optional spacing keeps related words together.
+                briefs, and plain strings.
               </p>
               <p className="scope-line">Open source, runs locally.</p>
             </div>
