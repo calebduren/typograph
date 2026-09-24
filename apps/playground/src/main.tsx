@@ -12,12 +12,19 @@ import {
   type TypographySettings,
 } from './integration-settings';
 import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url&no-inline';
+import benchmark from '../../../validation/chat-hardening-benchmark.json';
+import { version } from '../../../packages/chat-typography/package.json';
+import { HeroProof } from './HeroProof';
 import '@calebduren/typograph/hanging.css';
 import './fonts.css';
 import './landing.css';
+import './site.css';
 
 const ChatComparison = lazy(() =>
   import('./ChatComparison').then((module) => ({ default: module.ChatComparison })),
+);
+const FinishedDemo = lazy(() =>
+  import('./FinishedDemo').then((module) => ({ default: module.FinishedDemo })),
 );
 const Specimen = lazy(() => import('./Specimen').then((module) => ({ default: module.Specimen })));
 
@@ -47,11 +54,7 @@ function Integration({
     return () => window.clearTimeout(timer);
   }, [copiedContent]);
   return (
-    <section
-      id="integrate"
-      className="integration section-rule"
-      aria-labelledby="integration-title"
-    >
+    <section id="integrate" className="section integration" aria-labelledby="integration-title">
       <div className="section-intro">
         <h2 id="integration-title">
           A small addition.
@@ -172,6 +175,135 @@ function Integration({
   );
 }
 
+const kb = (benchmark.bundle.gzipBytes / 1024).toFixed(1);
+
+function CopyCommand({ command }: { command: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  useEffect(() => {
+    if (state === 'idle') return;
+    const timer = window.setTimeout(() => setState('idle'), 2500);
+    return () => window.clearTimeout(timer);
+  }, [state]);
+  return (
+    <div className="command">
+      <code>
+        <span className="command-prompt" aria-hidden="true">
+          $
+        </span>
+        {command}
+      </code>
+      <button
+        aria-label="Copy install command"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(command);
+            setState('copied');
+          } catch {
+            setState('failed');
+          }
+        }}
+      >
+        <span aria-live="polite">
+          {state === 'copied' ? 'Copied' : state === 'failed' ? 'Select to copy' : 'Copy'}
+        </span>
+      </button>
+    </div>
+  );
+}
+
+const entries = [
+  {
+    name: 'Streaming chat',
+    call: `import typography from '@calebduren/typograph';
+
+remarkPlugins={[[typography, { locale: 'en' }]]}`,
+    note: 'A Remark plugin for text that is still arriving. It holds back at the right edge until a quote or unit settles.',
+    meta: 'Remark · streaming-safe',
+  },
+  {
+    name: 'Finished Markdown',
+    call: `import { typeset } from '@calebduren/typograph/static';
+
+await typeset(brief, { target: 'email', locale: 'en' });`,
+    note: 'One call for text that is complete before anyone reads it. Returns web HTML, email HTML, or Markdown with its formatting kept.',
+    meta: 'web · email · markdown',
+  },
+  {
+    name: 'HTML',
+    call: `await typeset(template, {
+  input: 'html', target: 'email', locale: 'en',
+});`,
+    note: 'For prose that is already HTML. Only typographic characters change; markup, attributes, and comments stay byte for byte.',
+    meta: 'escaped quotes included',
+  },
+  {
+    name: 'Plain strings',
+    call: `import { typesetText } from '@calebduren/typograph';
+
+typesetText(title, { locale: 'en' });`,
+    note: 'Titles, notifications, subject lines. Synchronous, parses nothing, and returns a string of the same length.',
+    meta: 'sync · length-preserving',
+  },
+];
+
+const changes = [
+  {
+    from: '"Hi"',
+    to: '“Hi”',
+    title: 'Quotes',
+    text: 'Paired by context, across emphasis and links.',
+  },
+  {
+    from: "it's",
+    to: 'it’s',
+    title: 'Apostrophes',
+    text: 'Contractions and elisions, including ’90s and rock ’n’ roll.',
+  },
+  {
+    from: '30 min',
+    to: '30\u00a0min',
+    title: 'No-break spaces',
+    text: 'Units, initials, and abbreviations stay on one line. Opt-in.',
+  },
+  {
+    from: '“Hi”',
+    to: '“Hi”',
+    title: 'Hanging quotes',
+    text: 'Opening quotes sit outside the text edge on the web. Opt-in.',
+    hanging: true,
+  },
+];
+
+/** Mark the characters that differ, and draw no-break spaces so they are visible. */
+function Changed({ from, to }: { from: string; to: string }) {
+  return [...to].map((char, index) =>
+    char === '\u00a0' ? (
+      <span key={index} className="pair-space" aria-label="no-break space" />
+    ) : char !== from[index] ? (
+      <span key={index} className="pair-hit">
+        {char}
+      </span>
+    ) : (
+      char
+    ),
+  );
+}
+
+const untouched = [
+  'Code, math, URLs, and link destinations',
+  'HTML markup, attributes, and comments',
+  'Backslash-escaped quotes in Markdown',
+  'Text marked as another language, or with translate="no"',
+  'The message you store: typography is presentation only',
+];
+
+const limits = [
+  'English only, with one house style. Other languages pass through.',
+  'No dashes, ellipses, primes, or hyphenation.',
+  'An inch mark inside an open quotation can read as its closing quote.',
+  'Email output never hangs punctuation; mail clients do not render it.',
+];
+
 function Landing() {
   const [settings, setSettings] = useState(defaultSettings);
   useEffect(() => {
@@ -181,8 +313,8 @@ function Landing() {
   }, []);
   return (
     <>
-      <a className="skip-link" href="#demo">
-        Skip to the comparison
+      <a className="skip-link" href="#finished">
+        Skip to the demo
       </a>
       <div className="page-frame">
         <header className="site-header" id="top">
@@ -190,10 +322,11 @@ function Landing() {
             <a className="wordmark" href="#top" aria-label="Typograph home">
               Typograph
             </a>
-            <p className="version">V0.3.0</p>
+            <p className="version">v{version}</p>
           </div>
           <nav aria-label="Main navigation">
-            <a href="#demo">Try it</a>
+            <a href="#finished">Try it</a>
+            <a href="#demo">Streaming</a>
             <a href="#integrate">Integration</a>
             <a
               href="https://github.com/calebduren/typograph"
@@ -206,40 +339,49 @@ function Landing() {
         </header>
         <main>
           <section className="hero" aria-labelledby="hero-title">
-            <div className="hero-copy">
+            <div className="hero-head">
               <h1 id="hero-title">
                 Better typography <br />
                 for AI-generated text.
               </h1>
-              <p>
-                Careful English punctuation for everything your AI writes: streaming chat, finished
-                briefs, and plain strings.
-              </p>
-              <p className="scope-line">Open source, runs locally.</p>
+              <div className="hero-aside">
+                <p>
+                  Typograph turns the straight quotes, apostrophes, and loose spaces in model output
+                  into real typography, wherever you render it. It changes characters only, and
+                  never code, links, or the text you store.
+                </p>
+                <CopyCommand command="npm install @calebduren/typograph" />
+                <ul className="facts" aria-label="Package facts">
+                  <li>MIT</li>
+                  <li>{kb} KB gzip</li>
+                  <li>1 dependency</li>
+                  <li>No network</li>
+                </ul>
+              </div>
             </div>
-            <figure
-              className="punctuation-proof"
-              aria-label="The quick brown fox says, ‘I’ll be back in 30 min.’ Opening quotation mark hangs in gray; smart punctuation is highlighted in pale red; the non-breaking space has a red diagonal stripe pattern."
-            >
-              <div className="proof-result" data-rulers="true" aria-hidden="true">
-                <span className="typograph-opening">
-                  <span data-change="hanging">“</span>
-                </span>
-                The quick brown
-                <br />
-                fox says, <mark data-change="punctuation">‘</mark>I
-                <mark data-change="punctuation">’</mark>ll be
-                <br />
-                back in 30<mark data-change="spacing">{'\u00a0'}</mark>min.
-                <mark data-change="punctuation">’”</mark>
-              </div>
-            </figure>
+            <HeroProof />
           </section>
-          <section className="comparison" aria-labelledby="comparison-title">
-            <div className="section-heading">
-              <div>
-                <h2 id="comparison-title">Small changes. A better read.</h2>
-              </div>
+
+          <section id="finished" className="section" aria-labelledby="finished-title">
+            <div className="section-head">
+              <h2 id="finished-title">Try it on your own text.</h2>
+              <p>
+                This is the published package, running in your browser. Paste a brief, an email
+                template, or a notification. Nothing leaves the page.
+              </p>
+            </div>
+            <Suspense fallback={<p role="status">Loading the workbench…</p>}>
+              <FinishedDemo settings={settings} onSettingsChange={setSettings} />
+            </Suspense>
+          </section>
+
+          <section className="section comparison" aria-labelledby="comparison-title">
+            <div className="section-head">
+              <h2 id="comparison-title">Streaming, token by token.</h2>
+              <p>
+                Chat text arrives unfinished. An opening quote may not have closed, and “30 m” may
+                become “30 million.” Replay a recorded stream through the real plugin, or edit it.
+              </p>
             </div>
             <div id="demo" className="comparison-workspace">
               <Suspense fallback={<p role="status">Loading the comparison…</p>}>
@@ -247,117 +389,159 @@ function Landing() {
               </Suspense>
             </div>
           </section>
-          <Integration settings={settings} onSettingsChange={setSettings} />
-          <section className="principles section-rule" aria-labelledby="care-title">
-            <h2 id="care-title">Careful where it counts.</h2>
-            <div className="principle-row">
-              <h3>Prose gets the polish.</h3>
+
+          <section className="section" aria-labelledby="entries-title">
+            <div className="section-head">
+              <h2 id="entries-title">Four entry points, one engine.</h2>
               <p>
-                {settings.punctuation
-                  ? 'Quotes and apostrophes follow their context, even across emphasis and links.'
-                  : 'Smart punctuation is off. Original quote marks and apostrophes stay as written.'}{' '}
-                {settings.spacing
-                  ? 'Non-breaking spaces keep pairs like 30 min together.'
-                  : 'Non-breaking spaces are off. Your original word spacing stays intact.'}
+                Every entry point runs the same rules, so a quote is curled the same way in a chat
+                reply, an email, and a push notification.
               </p>
             </div>
-            <div className="principle-row">
-              <h3>Literal stays literal.</h3>
-              <p>
-                Code, math, URLs, and link destinations keep their original characters. Your app
-                retains the original message for storage and copying.
-              </p>
-            </div>
-            <div className="principle-row">
-              <h3>{settings.hanging ? 'An even reading edge.' : 'A stream has room to finish.'}</h3>
-              <p>
-                {settings.hanging
-                  ? 'Opening quotes sit just outside the first line of paragraphs and headings outside lists. Quotes in bulleted and numbered lists stay inline. The helper uses real text, keeps copying intact, and needs no native browser support for hanging punctuation.'
-                  : 'An opening quote can wait for its words. A partial “30 m” can still become “30 million.” Conservative choices come first.'}
-              </p>
-            </div>
+            <ul className="entries">
+              {entries.map((entry) => (
+                <li key={entry.name}>
+                  <div className="entry-head">
+                    <h3>{entry.name}</h3>
+                    <span>{entry.meta}</span>
+                  </div>
+                  <pre>
+                    <code>{entry.call}</code>
+                  </pre>
+                  <p>{entry.note}</p>
+                </li>
+              ))}
+            </ul>
           </section>
-          <section id="scope" className="scope-section section-rule" aria-labelledby="scope-title">
-            <div>
-              <h2 id="scope-title">Small, by intention.</h2>
+
+          <Integration settings={settings} onSettingsChange={setSettings} />
+
+          <section className="section" aria-labelledby="care-title">
+            <div className="section-head">
+              <h2 id="care-title">What changes, and what never does.</h2>
               <p>
-                English only is the scope. A focused set of rules, with explicit limits and room for
-                your app’s own choices.
+                Apart from the optional hanging quote, every edit swaps a character in prose for its
+                typographic form. Everything else passes through exactly as it arrived.
               </p>
             </div>
-            <div className="scope-details">
-              <dl>
-                <div>
-                  <dt>Language</dt>
-                  <dd>
-                    One English house style. Set the response language explicitly; other or unknown
-                    languages pass through.
-                  </dd>
-                </div>
-                <div>
-                  <dt>Size</dt>
-                  <dd>
-                    About 4 KB gzip for the core, including the spacing engine. Hanging punctuation
-                    adds a separate small helper and stylesheet. The finished-text entry uses your
-                    own Markdown and HTML parser packages.{' '}
-                    <a
-                      href={benchmarkUrl}
-                      className="underlined"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View the measurement
-                    </a>
-                    .
-                  </dd>
-                </div>
-                <div>
-                  <dt>Built on</dt>
-                  <dd>
-                    Remark for Markdown structure.{' '}
-                    <a
-                      href="https://typehug.aliszu.com/"
-                      className="underlined"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Typehug
-                    </a>{' '}
-                    for optional no-break spacing. MIT licensed.
-                  </dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>
-                    <a
-                      href="https://www.npmjs.com/package/@calebduren/typograph"
-                      className="underlined"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Version 0.3.0 on npm
-                    </a>
-                    . Tested with recorded streams, finished Markdown, and HTML; browser profiling
-                    and reading evaluations continue.
-                  </dd>
-                </div>
-              </dl>
-              <div className="scope-limits">
-                <h3>What it doesn’t do</h3>
-                <p>
-                  No language detection, regional quote styles, hyphenation, or automatic rewriting
-                  of your content. The package keeps no-break spacing opt-in; this demo starts with
-                  all three refinements on. Very long tokens skip optional spacing to avoid
-                  expensive processing. Email output leaves out hanging punctuation, which email
-                  clients do not render.
-                </p>
-                <p>
-                  Paste English prose into the demo. For mixed-language replies, the host app must
-                  select English content or opt out. Selecting or copying displayed text includes
-                  its typographic characters.
-                </p>
+            <div className="ledger">
+              <div>
+                <h3>Changes</h3>
+                <ul className="ledger-changes">
+                  {changes.map((change) => (
+                    <li key={change.title}>
+                      <span className="pair" aria-hidden="true">
+                        <span className="from">{change.from}</span>
+                        <span className="arrow">→</span>
+                        <span className="to" data-hanging={change.hanging}>
+                          <Changed from={change.from} to={change.to} />
+                        </span>
+                      </span>
+                      <span className="ledger-text">
+                        <strong>{change.title}.</strong> {change.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Never touched</h3>
+                <ul className="ledger-list">
+                  {untouched.map((item) => (
+                    <li key={item}>
+                      {item.includes('translate="no"') ? (
+                        <>
+                          {item.replace('translate="no"', '')}
+                          <code>translate="no"</code>
+                        </>
+                      ) : (
+                        item
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <h3>Known limits</h3>
+                <ul className="ledger-list">
+                  {limits.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
             </div>
+          </section>
+
+          <section id="scope" className="section" aria-labelledby="scope-title">
+            <div className="section-head">
+              <h2 id="scope-title">Specifications.</h2>
+            </div>
+            <dl className="specs">
+              <div>
+                <dt>Package</dt>
+                <dd>
+                  <a
+                    href="https://www.npmjs.com/package/@calebduren/typograph"
+                    className="underlined"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    @calebduren/typograph
+                  </a>{' '}
+                  {version}
+                </dd>
+              </div>
+              <div>
+                <dt>Size</dt>
+                <dd>
+                  {kb} KB gzip for the core, including the spacing engine.{' '}
+                  <a
+                    href={benchmarkUrl}
+                    className="underlined"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View the measurement
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt>Runtime</dt>
+                <dd>ESM. Node 22+ and modern browsers. No install scripts or telemetry.</dd>
+              </div>
+              <div>
+                <dt>Dependencies</dt>
+                <dd>
+                  One:{' '}
+                  <a
+                    href="https://typehug.aliszu.com/"
+                    className="underlined"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Typehug
+                  </a>{' '}
+                  for no-break spacing. Parsers for <code>typeset</code> are your own, as optional
+                  peers.
+                </dd>
+              </div>
+              <div>
+                <dt>Language</dt>
+                <dd>English, one house style. Set the language explicitly; others pass through.</dd>
+              </div>
+              <div>
+                <dt>License</dt>
+                <dd>
+                  MIT.{' '}
+                  <a
+                    href="https://github.com/calebduren/typograph"
+                    className="underlined"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Source on GitHub
+                  </a>
+                </dd>
+              </div>
+            </dl>
           </section>
         </main>
         <footer className="site-footer">
@@ -365,7 +549,7 @@ function Landing() {
             <a className="wordmark" href="#top">
               Typograph
             </a>
-            <p className="version">V0.3.0</p>
+            <p className="version">v{version}</p>
           </div>
           <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
             Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />

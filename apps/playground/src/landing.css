@@ -192,49 +192,8 @@ textarea {
   top: 1rem;
 }
 
-.page-frame {
-  width: min(100% - 7rem, 78rem);
-  margin-inline: auto;
-}
-
-.site-header {
-  min-height: 6rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.wordmark-container {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.wordmark {
-  text-transform: lowercase;
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  color: var(--brand);
-}
-
-.version {
-  color: var(--muted);
-  opacity: 0.5;
-  font-size: 0.875rem;
-}
-
 .brand {
   color: var(--brand);
-}
-
-.site-header nav {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  font-size: 0.875rem;
 }
 
 /* The specimen is a true desktop reading surface: its paper fills the window,
@@ -532,68 +491,13 @@ textarea {
     column-count: 1;
   }
 }
-
-.site-header nav a,
-.site-footer a,
 .underlined {
   display: inline-flex;
   gap: 0.125rem;
   align-items: center;
 }
-
-.site-header nav a svg,
-.site-footer a svg,
 .underlined svg {
   transform: translateY(0.5px);
-}
-
-.hero {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  min-height: 25rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.hero-copy {
-  padding: 3.75rem 3.5rem 3rem 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.hero-copy > p {
-  max-width: 26rem;
-  margin-top: 1.5rem;
-  color: var(--ink);
-}
-
-.hero-copy .scope-line {
-  margin-top: 0.5rem;
-  color: var(--muted);
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.punctuation-proof {
-  container-type: inline-size;
-  border-left: 1px solid var(--line);
-  padding: 3rem 3rem 3rem 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.proof-result {
-  position: relative;
-  width: fit-content;
-  max-width: 100%;
-  /* Fit the longest authored line to the figure's content box. */
-  font-size: 14cqi;
-  white-space: nowrap;
-  line-height: 1.1;
-  letter-spacing: -0.025em;
-  font-weight: 450;
 }
 
 .comparison {
@@ -645,20 +549,6 @@ textarea {
 
 .segmented-control button:focus-visible {
   outline-offset: 1px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.section-heading p {
-  color: var(--muted);
-  font-size: 0.9375rem;
-  margin-top: 0.6rem;
 }
 
 .typography-settings {
@@ -974,20 +864,15 @@ select {
 }
 
 /* Paint annotations below neighboring glyphs, including tightly kerned punctuation. */
-.proof-result,
 .response-prose {
   isolation: isolate;
 }
-
 mark,
-.proof-result [data-change],
 .show-changes .typograph-opening > span {
   position: relative;
   background: transparent;
 }
-
 mark::before,
-.proof-result [data-change]::before,
 .show-changes .typograph-opening > span::before {
   content: '';
   position: absolute;
@@ -1197,41 +1082,6 @@ mark::before,
   border-radius: 2px;
 }
 
-.section-rule {
-  scroll-margin-top: 1.5rem;
-  border-top: 1px solid var(--line);
-  margin-top: 3.5rem;
-  padding-top: 2.75rem;
-}
-
-.principles {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  column-gap: 4rem;
-  row-gap: 3rem;
-}
-
-.principles > h2 {
-  grid-row: span 3;
-}
-
-.principle-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 2rem;
-  padding-top: 0.5rem;
-}
-
-.principle-row p {
-  color: var(--muted);
-}
-
-.integration {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 4rem;
-}
-
 .section-intro > p {
   margin-top: 1.5rem;
   max-width: 24rem;
@@ -1327,68 +1177,6 @@ mark::before,
   font-size: 0.8125rem;
 }
 
-.scope-section {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 4rem;
-}
-
-.scope-section > div > p {
-  max-width: 24rem;
-  margin-top: 1.25rem;
-  color: var(--muted);
-}
-
-.scope-details {
-  padding-top: 0.5rem;
-}
-
-.scope-details > dl {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
-
-.scope-details dl > div {
-  display: grid;
-  grid-template-columns: 7rem 1fr;
-  gap: 1.25rem;
-}
-
-.scope-details dd {
-  color: var(--muted);
-}
-
-.scope-limits {
-  font-size: 0.75rem;
-  padding-top: 3rem;
-}
-
-.scope-limits h3 {
-  font-size: inherit;
-  margin-bottom: 0.75rem;
-}
-
-.scope-limits p {
-  color: var(--muted);
-  margin-top: 0.75rem;
-}
-
-.site-footer {
-  margin-top: 5rem;
-  padding-block: 1.5rem 2.5rem;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.site-footer > span {
-  color: var(--muted);
-  font-size: 0.8125rem;
-}
-
 [data-change='punctuation'],
 mark[data-typograph-change='punctuation'] {
   --annotation-color: var(--change-punctuation);
@@ -1408,7 +1196,6 @@ mark[data-typograph-change='spacing'] {
 }
 
 /* Stripes distinguish joined spaces from solid punctuation highlights. */
-.proof-result [data-change='spacing']::before,
 mark[data-typograph-change='spacing']::before,
 .change-key i[data-change='spacing'] {
   background-image: repeating-linear-gradient(
@@ -1555,10 +1342,6 @@ mark[data-typograph-change='spacing']::before,
 }
 
 @media (max-width: 1100px) {
-  .page-frame {
-    width: calc(100% - 4rem);
-  }
-
   .demo-toolbar {
     flex-wrap: wrap;
     gap: 0.75rem 1.5rem;
@@ -1569,44 +1352,12 @@ mark[data-typograph-change='spacing']::before,
   .change-key {
     padding-inline: 2rem;
   }
-
-  .principles,
-  .integration,
-  .scope-section {
-    gap: 2.5rem;
-    grid-template-columns: 1fr 1.5fr;
-  }
-
-  .principle-row {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .site-footer {
-    flex-wrap: wrap;
-  }
 }
 
 @media (max-width: 800px) {
   :root {
     font-size: 16px;
   }
-
-  .page-frame {
-    width: calc(100% - 2.5rem);
-  }
-
-  .site-header {
-    min-height: 5rem;
-    gap: 1rem;
-  }
-
-  .site-header nav {
-    gap: 1.2rem;
-    font-size: 0.875rem;
-  }
-
-  .site-header a,
   .segmented-control button {
     min-height: 36px;
     display: inline-flex;
@@ -1614,37 +1365,8 @@ mark[data-typograph-change='spacing']::before,
     justify-content: center;
   }
 
-  .hero {
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .hero-copy {
-    padding: 2rem;
-  }
-
-  .punctuation-proof {
-    border-left: 0;
-    border-top: 1px solid var(--line);
-    padding: 2rem 2rem 2rem 3rem;
-    align-items: start;
-  }
-
-  .hero-copy > p {
-    font-size: 1rem;
-  }
-
-  .scope-line {
-    line-height: 1.7;
-  }
-
   .comparison {
     padding-top: 2rem;
-  }
-
-  .section-heading {
-    align-items: flex-start;
   }
 
   .mobile-comparison-switch {
@@ -1772,31 +1494,8 @@ mark[data-typograph-change='spacing']::before,
     flex-direction: column;
     gap: 0.5rem;
   }
-
-  .principles,
-  .integration,
-  .scope-section {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .principles > h2 {
-    grid-row: auto;
-  }
-
-  .principle-row {
-    margin-bottom: 0;
-    padding-bottom: 1.5rem;
-  }
-
-  .section-intro > p,
-  .scope-section > div > p {
+  .section-intro > p {
     max-width: 36rem;
-  }
-
-  .section-rule {
-    margin-top: 2.5rem;
-    padding-top: 2rem;
   }
 
   .release-note code {
@@ -1830,61 +1529,9 @@ mark[data-typograph-change='spacing']::before,
   .reading {
     font-size: 1rem;
   }
-
-  .site-footer {
-    margin-top: 3.5rem;
-  }
-
-  .site-footer > div {
-    margin-left: 0;
-    flex-basis: 100%;
-    flex-wrap: wrap;
-    gap: 1rem 1.5rem;
-  }
 }
 
 @media (max-width: 520px) {
-  .site-header {
-    flex-wrap: wrap;
-    gap: 0;
-    padding-block: 0.75rem 0.5rem;
-  }
-
-  .site-header nav {
-    width: 100%;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .hero-copy {
-    padding: 2rem 0 1.5rem;
-  }
-
-  .hero-copy h1 br {
-    display: none;
-  }
-
-  .hero-copy > p {
-    max-width: 26rem;
-  }
-
-  .hero-copy .scope-line {
-    margin-top: 1rem;
-  }
-
-  .punctuation-proof {
-    padding: 40px 1rem;
-  }
-
-  .proof-result {
-    font-size: 13.2cqi;
-    letter-spacing: -0.015em;
-  }
-
-  .section-heading h2 {
-    font-size: 1.5rem;
-  }
-
   .comparison-pane,
   .pane-heading,
   .change-key {
@@ -1893,11 +1540,6 @@ mark[data-typograph-change='spacing']::before,
 
   .recipe pre {
     padding-inline: 1rem;
-  }
-
-  .scope-details dl > div {
-    grid-template-columns: 1fr;
-    gap: 0.25rem;
   }
 }
 

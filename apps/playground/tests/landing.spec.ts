@@ -127,7 +127,9 @@ test('the hero renders while the comparison bundle is still loading', async ({ p
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Better typography for AI-generated text.',
     );
-    await expect(page.getByRole('status')).toHaveText('Loading the comparison…');
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Loading the comparison…' }),
+    ).toBeVisible();
   } finally {
     release();
   }
@@ -305,7 +307,7 @@ test('integration recipes, local guide, and keyboard entry work', async ({ page 
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('link', { name: 'Skip to the comparison' })).toBeFocused();
+  await expect(page.getByRole('link', { name: 'Skip to the demo' })).toBeFocused();
   await page.getByRole('button', { name: 'Code', exact: true }).click();
   await page.getByRole('button', { name: 'Cloudflare', exact: true }).click();
   await expect(page.getByLabel('Cloudflare code example')).toContainText('useAgentChat');
@@ -488,13 +490,13 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
     '“Leave a little room for the next idea.”',
   );
   await page.getByRole('switch', { name: 'Highlight changes' }).click();
+  // The legend swatches define each change's color; the marks must match them.
   const hangingColor = await page
-    .locator('.punctuation-proof [data-change="hanging"]')
-    .evaluate((node) => getComputedStyle(node, '::before').backgroundColor);
+    .locator('.change-key [data-change="hanging"]')
+    .evaluate((node) => getComputedStyle(node).backgroundColor);
   const punctuationColor = await page
-    .locator('.punctuation-proof mark[data-change="punctuation"]')
-    .first()
-    .evaluate((node) => getComputedStyle(node, '::before').backgroundColor);
+    .locator('.change-key [data-change="punctuation"]')
+    .evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(hangingColor).not.toBe(punctuationColor);
   expect(
     await formatted
@@ -658,12 +660,13 @@ test('records a browser performance probe under sixfold CPU throttling', async (
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
 });
 
-test('highlight backgrounds sit beneath adjacent glyphs in the hero and response', async ({
+test('highlight backgrounds sit beneath adjacent glyphs in the workbench and response', async ({
   page,
 }) => {
   await page.goto('/');
   await page.getByRole('switch', { name: 'Highlight changes' }).setChecked(true);
-  for (const selector of ['.proof-result', '.formatted-pane .response-prose']) {
+  await expect(page.locator('.bench-preview mark').first()).toBeVisible();
+  for (const selector of ['.bench-preview', '.formatted-pane .response-prose']) {
     await expect(page.locator(selector)).toHaveCSS('isolation', 'isolate');
     const layers = await page.locator(`${selector} mark`).evaluateAll((marks) =>
       marks.map((mark) => ({
@@ -682,7 +685,7 @@ test('highlight backgrounds sit beneath adjacent glyphs in the hero and response
       ),
     ).toBe(true);
   }
-  await page.locator('.proof-result').screenshot({ path: `${review}/hero-highlights.png` });
+  await page.locator('.proof').screenshot({ path: `${review}/hero-specimen.png` });
   const viewport = page.getByRole('region', { name: 'Text comparison' });
   expect(await viewport.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
   await viewport.focus();
@@ -710,7 +713,7 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
     ).toBe(true);
     if (width <= 800) {
       await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toBeVisible();
-      for (const control of await page.locator('button:visible, .site-header a').all()) {
+      for (const control of await page.locator('button:visible, .site-header a:visible').all()) {
         // Compact mobile targets; still above the WCAG 2.2 AA 24px minimum.
         expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(36);
       }
@@ -811,7 +814,7 @@ test('comparison fits the desktop viewport, sticks controls, and preserves edito
     // Settle font substitution before measuring navigation and viewport geometry.
     // Initial fragments during lazy loading are covered by the hero-loading test.
     await page.evaluate(() => document.fonts.ready);
-    await page.getByRole('link', { name: 'Try it', exact: true }).click();
+    await page.getByRole('link', { name: 'Streaming', exact: true }).click();
     await expect
       .poll(async () => Math.abs((await page.locator('#demo').boundingBox())?.y ?? Infinity))
       .toBeLessThan(1);
@@ -844,13 +847,13 @@ test('comparison fits the desktop viewport, sticks controls, and preserves edito
   expect(
     (await page.getByRole('region', { name: 'Text comparison' }).boundingBox())!.height,
   ).toBeGreaterThan(300);
-  await expect(page.getByRole('heading', { name: 'What it doesn’t do' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Known limits' })).toBeVisible();
   await expect(page.locator('.scope-details summary')).toHaveCount(0);
   await page.setViewportSize({ width: 1301, height: 901 });
   await page.goto('/');
   await expect(page.getByTestId('formatted-response')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
-  await page.getByRole('link', { name: 'Try it', exact: true }).click();
+  await page.getByRole('link', { name: 'Streaming', exact: true }).click();
   await expect
     .poll(async () => Math.abs((await page.locator('#demo').boundingBox())?.y ?? Infinity))
     .toBeLessThan(1);
