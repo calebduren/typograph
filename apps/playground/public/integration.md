@@ -43,9 +43,9 @@ Use a known response language, not the interface language. English tags such as 
 
 The default changes quotation marks and apostrophes. Add `spacing: true` to enable conservative no-break pairs such as `30 min`, `Dr. Smith`, and `Fig. 2`. Spacing uses Typehug. All processing is local, and the SDK's original message is unchanged.
 
-The landing-page demo starts with smart punctuation, non-breaking spaces, hanging punctuation, and Show changes enabled. Its generated code and agent prompt include the selected settings; those demo defaults do not change the package defaults above.
+The landing-page demo starts with smart punctuation, non-breaking spaces, hanging punctuation, and Highlight changes enabled. Its generated code and agent prompt include the selected settings; those demo defaults do not change the package defaults above.
 
-The landing page's **Smart punctuation**, **Non-breaking spaces**, and **Hanging punctuation** switches share one configuration. The formatted preview, code recipes, and copied agent prompts all use those settings. The original preview remains a reference. **Show changes** belongs only to the formatted preview and is never installed in your app. You can disable smart punctuation with `punctuation: false` while keeping the other refinements enabled.
+The landing page's **Smart punctuation**, **Non-breaking spaces**, and **Hanging punctuation** switches share one configuration. The formatted preview, code recipes, and copied agent prompts all use those settings. The original preview remains a reference. **Highlight changes** belongs only to the formatted preview and is never installed in your app. You can disable smart punctuation with `punctuation: false` while keeping the other refinements enabled.
 
 Only assistant text parts belong in the prose renderer. Structured tool output should keep its own UI. Persist the original `part.text`, and use it for a clearly labeled Copy original action. Browser selection or copying rendered text includes curly punctuation and nonbreaking spaces.
 

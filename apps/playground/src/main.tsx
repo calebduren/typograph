@@ -59,6 +59,9 @@ function Integration({
           Right where you render.
         </h2>
         <p className="muted">Works in the browser. No model call, API key, or new service.</p>
+        <p className="release-note">
+          <code>npm install @calebduren/typograph</code>
+        </p>
         <div
           className="integration-settings"
           role="group"
@@ -73,9 +76,6 @@ function Integration({
         <a className="underlined" href="/integration.md" target="_blank" rel="noopener noreferrer">
           Read the integration guide <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
         </a>
-        <p className="release-note">
-          <code>npm install @calebduren/typograph</code>
-        </p>
       </div>
       <div className="recipe">
         <div className="recipe-tools">

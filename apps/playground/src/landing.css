@@ -788,7 +788,7 @@ select {
 
 .comparison-pane {
   min-width: 0;
-  /* Always reserve the guide overhang so Show changes cannot shift the text. */
+  /* Always reserve the guide overhang so Highlight changes cannot shift the text. */
   padding: 40px 2rem;
 }
 
@@ -1254,7 +1254,7 @@ mark::before,
 }
 
 .section-intro .release-note {
-  margin-top: 1.75rem;
+  margin-top: 1rem;
   color: var(--muted);
   font-size: 0.8125rem;
 }

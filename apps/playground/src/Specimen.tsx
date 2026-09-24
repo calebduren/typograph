@@ -153,7 +153,7 @@ export function Specimen() {
               checked={settings.hanging}
               onChange={(hanging) => setSettings({ ...settings, hanging })}
             />
-            <Toggle label="Show changes" checked={changes} onChange={setChanges} />
+            <Toggle label="Highlight changes" checked={changes} onChange={setChanges} />
           </div>
           <div className="specimen-field">
             <span>Face</span>

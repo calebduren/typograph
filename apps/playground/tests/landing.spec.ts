@@ -173,7 +173,7 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
     .locator('p')
     .first()
     .evaluate((node) => node.setAttribute('data-retained', 'yes'));
-  const highlightSwitch = page.getByRole('switch', { name: 'Show changes' });
+  const highlightSwitch = page.getByRole('switch', { name: 'Highlight changes' });
   for (const setting of await page.getByRole('switch').all()) await expect(setting).toBeChecked();
   await expect(formatted).toHaveAttribute('data-rulers', 'true');
   await expect(page.getByRole('region', { name: 'Typography agent prompt' })).toContainText(
@@ -386,7 +386,7 @@ test('all typography combinations stay in sync with previews, prompts, and code'
   const settings = page.getByRole('group', { name: 'Typography settings', exact: true });
   await expect(settings.getByRole('switch')).toHaveCount(3);
   await expect(
-    page.locator('.formatted-pane').getByRole('switch', { name: 'Show changes' }),
+    page.locator('.formatted-pane').getByRole('switch', { name: 'Highlight changes' }),
   ).toBeVisible();
   const original = await page.getByTestId('original-response').textContent();
   for (const punctuation of [true, false])
@@ -415,7 +415,7 @@ test('all typography combinations stay in sync with previews, prompts, and code'
       }
   // Highlighting remains a local preview state, never part of a copied setup.
   const before = await page.getByRole('region', { name: 'Typography agent prompt' }).textContent();
-  await page.getByRole('switch', { name: 'Show changes' }).click();
+  await page.getByRole('switch', { name: 'Highlight changes' }).click();
   expect(await page.getByRole('region', { name: 'Typography agent prompt' }).textContent()).toBe(
     before,
   );
@@ -441,7 +441,7 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/');
   const formatted = page.getByTestId('formatted-response');
-  await page.getByRole('switch', { name: 'Show changes' }).setChecked(false);
+  await page.getByRole('switch', { name: 'Highlight changes' }).setChecked(false);
   const text = await formatted.textContent();
   await expect(formatted).toHaveAttribute('data-rulers', 'false');
   await page
@@ -487,7 +487,7 @@ test('hanging uses actual quote width, keeps text intact, and survives streaming
   await expect(formatted.locator('ol li').last()).toHaveText(
     '“Leave a little room for the next idea.”',
   );
-  await page.getByRole('switch', { name: 'Show changes' }).click();
+  await page.getByRole('switch', { name: 'Highlight changes' }).click();
   const hangingColor = await page
     .locator('.punctuation-proof [data-change="hanging"]')
     .evaluate((node) => getComputedStyle(node, '::before').backgroundColor);
@@ -587,7 +587,7 @@ test('conversation replays a user message, pauses thinking, streams, and cancels
     .getByRole('group', { name: 'Typography settings', exact: true })
     .getByRole('switch', { name: 'Hanging punctuation' })
     .setChecked(true);
-  await page.getByRole('switch', { name: 'Show changes' }).setChecked(true);
+  await page.getByRole('switch', { name: 'Highlight changes' }).setChecked(true);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: `${review}/conversation.png`, fullPage: true });
   await page.getByRole('button', { name: 'Replay stream' }).click();
@@ -662,7 +662,7 @@ test('highlight backgrounds sit beneath adjacent glyphs in the hero and response
   page,
 }) => {
   await page.goto('/');
-  await page.getByRole('switch', { name: 'Show changes' }).setChecked(true);
+  await page.getByRole('switch', { name: 'Highlight changes' }).setChecked(true);
   for (const selector of ['.proof-result', '.formatted-pane .response-prose']) {
     await expect(page.locator(selector)).toHaveCSS('isolation', 'isolate');
     const layers = await page.locator(`${selector} mark`).evaluateAll((marks) =>
@@ -688,7 +688,7 @@ test('highlight backgrounds sit beneath adjacent glyphs in the hero and response
   await viewport.focus();
   await page.keyboard.press('ControlOrMeta+End');
   await expect(viewport).toBeFocused();
-  await page.getByRole('switch', { name: 'Show changes' }).click();
+  await page.getByRole('switch', { name: 'Highlight changes' }).click();
   expect(
     await page
       .locator('.response-prose mark')
@@ -920,7 +920,7 @@ test('both columns and the growing editor live in one native scroll container', 
   await page.screenshot({ path: `${review}/shared-scroll-mobile.png` });
 });
 
-test('Show changes only paints annotations without changing glyph positions or the viewport', async ({
+test('Highlight changes only paints annotations without changing glyph positions or the viewport', async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -966,9 +966,9 @@ test('Show changes only paints annotations without changing glyph positions or t
         node.scrollTop = y;
       }, top);
       const before = await geometry();
-      await page.getByRole('switch', { name: 'Show changes', exact: true }).click();
+      await page.getByRole('switch', { name: 'Highlight changes', exact: true }).click();
       expect(await geometry()).toEqual(before);
-      await page.getByRole('switch', { name: 'Show changes', exact: true }).click();
+      await page.getByRole('switch', { name: 'Highlight changes', exact: true }).click();
       expect(await geometry()).toEqual(before);
     }
   }

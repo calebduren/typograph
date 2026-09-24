@@ -43,7 +43,7 @@ const Response = memo(function Response({
   playing: boolean;
 }) {
   const { punctuation, spacing, hanging } = settings;
-  // Keep annotation markup stable; Show changes only reveals its backgrounds.
+  // Keep annotation markup stable; Highlight changes only reveals its backgrounds.
   const remarkPlugins = useMemo<ComponentProps<typeof Streamdown>['remarkPlugins']>(
     () =>
       punctuation || spacing
@@ -234,7 +234,7 @@ export function ChatComparison({
           </div>
           <div className="pane-heading formatted-pane">
             <h3 className="brand">With Typograph</h3>
-            <Toggle label="Show changes" checked={highlight} onChange={setHighlight} />
+            <Toggle label="Highlight changes" checked={highlight} onChange={setHighlight} />
           </div>
         </div>
         <span className="sr-only">{settingsSummary(settings)}</span>

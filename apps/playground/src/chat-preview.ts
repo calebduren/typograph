@@ -32,7 +32,7 @@ export const previewRehypePlugins: Pluggable[] = Object.entries(defaultRehypePlu
 export const example = {
   question:
     'Can you help me write a thoughtful brief for our studio review, with a checklist and a small code example?',
-  note: 'Quotes, apostrophes, related words, and literal details. Use Show changes to follow the refinements.',
+  note: 'Quotes, apostrophes, related words, and literal details. Use Highlight changes to follow the refinements.',
   text: `"It's in the details," she said. "Give 'em a little room." That's a useful starting point for a studio review: make the work easy to read, then give people enough context to respond thoughtfully.
 
 ## "Room to think"
