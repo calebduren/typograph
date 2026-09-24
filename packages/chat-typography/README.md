@@ -5,6 +5,7 @@ Conservative English typography for AI-generated text: smart quotes and apostrop
 - **Streaming chat:** a Remark plugin (the default export) that refines rendered prose as tokens arrive, while the app keeps the original model text.
 - **Finished Markdown:** `typeset()` from `@calebduren/typograph/static` returns web HTML, email HTML, or typeset Markdown for artifacts such as a daily brief.
 - **Plain strings:** `typesetText()` for titles, notifications, and other text that is not Markdown.
+- **HTML:** `typeset(html, { input: 'html' })` or `rehypeTypography` for prose that is already HTML, such as an email template.
 
 It adds no React, chat SDK, network service, or hosting requirement.
 
@@ -125,6 +126,32 @@ const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true }
 - **Idempotent:** typesetting the `markdown` output again returns it unchanged.
 
 If your pipeline already has a Markdown renderer, the simplest option is to typeset the Markdown before it enters your HTML or email template. That covers text the model wrote, but not prose the template adds itself.
+
+## HTML input
+
+For prose that is already HTML, such as an email template with a brief interpolated into it, use one of two entry points:
+
+- **`typeset(html, { input: 'html', target: 'web' | 'email', locale: 'en' })`** from `@calebduren/typograph/static` returns your HTML with only typographic characters changed. Markup, attributes, comments, the doctype, and line endings stay byte for byte. Install `unified` and `rehype-parse`. Pass `html: 'document'` for a full document; the default parses a fragment. Both targets return the same string.
+- **`rehypeTypography`** from `@calebduren/typograph` typesets hast text nodes inside your own rehype pipeline. Pair it with `rehypeHangingPunctuation({ locale: 'en', source: 'html' })` for hanging quotes on the web.
+
+```ts
+import { typeset } from '@calebduren/typograph/static';
+
+const email = await typeset(template, {
+  input: 'html',
+  html: 'document',
+  target: 'email',
+  locale: 'en',
+});
+```
+
+- **Trusted HTML only.** The input is returned unsanitized.
+- **What is prose.** Text inside `code`, `kbd`, `samp`, `var`, `pre`, `script`, `style`, `textarea`, `template`, `svg`, `math`, `head`, `title`, `noscript`, and ruby annotations is never changed. Neither is anything under `data-typograph="off"` or your `skip(node)`. Text under a non-English `lang`, an empty `lang`, or `translate="no"` is left alone, but a nested `lang="en"` or `translate="yes"` turns it back on. Inline elements such as `em`, `b`, `span`, and `font` join the surrounding sentence, so quotes pair across them. Links end a no-break spacing run. Every other element, including custom elements, starts a new block, and quote state resets there. Only inline `style` attributes are read: an inline element styled `display: block` counts as a block.
+- **Escaped quotes.** Template engines escape interpolated text, so quotes often arrive as `&quot;` or `&#39;`. Those references are replaced with curly quotes. Other references, including `&amp;quot;`, are left as written.
+- **Conservative edits.** A text node is edited only when every character lines up with the source. Text the parser moves (such as stray text inside a `<table>`), or text next to a reference it cannot account for, keeps its original characters.
+- **UTF-8.** Edits are written as characters, not entities, so serve or send the result as UTF-8.
+- **Line wrapping.** Words split across source lines (`30\n    min`) are not joined.
+- **No hanging here.** `typeset` with HTML input cannot add hanging punctuation, which needs new markup. It rejects `hanging: true` and `math`.
 
 ## Optional opening-quote hanging
 

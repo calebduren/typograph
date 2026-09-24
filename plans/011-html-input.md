@@ -2,7 +2,7 @@
 
 | Field           | Value                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------- |
-| Status          | reviewed twice (2026-09-25); revised; ready to execute                                                        |
+| Status          | done (2026-09-25)                                                                                             |
 | Written against | commit `3a452cf` (0.2.0 published and deployed), 2026-09-25                                                   |
 | Effort          | L (engine refactor, hast collector, HTML aligner and splice, hanging option, tests, package check, docs)      |
 | Risk of change  | medium. The engine refactor touches every existing path, gated by the unchanged 219-test suite                |
@@ -206,3 +206,11 @@ export type TypesetOptions = MarkdownTypesetOptions | HtmlTypesetOptions; // sha
 - Reading class-based or stylesheet `display` rules.
 - Sanitization.
 - Landing-page copy.
+
+## Implementation notes (2026-09-25)
+
+- The core lives in an internal `src/engine.ts`; `index.ts` keeps the public API. `lang`/`translate` inheritance lives in `src/html-scope.ts` so the hanging entry stays free of the engine and Typehug.
+- The segment type is `text | literal | boundary` rather than the plan's `prose` runs; `typesetSegments` groups adjacent text into runs itself.
+- Overlapping source ranges abort **both** nodes, so a foster-parented table also leaves the cell text it overlaps unchanged.
+- The parity test caught a real bug during implementation: HTML input bypassed the English-locale gate. It now runs through `rehypeTypography`.
+- Attribute-like prose (`title="it's"`) keeps the straight quote after `=`, the same as `typesetText`.

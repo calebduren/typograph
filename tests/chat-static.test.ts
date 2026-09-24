@@ -228,6 +228,7 @@ describe('peer loading', () => {
     'remark-math': () => import('remark-math'),
     'remark-rehype': () => import('remark-rehype'),
     'rehype-stringify': () => import('rehype-stringify'),
+    'rehype-parse': () => import('rehype-parse'),
   };
   const missing = (name: string, from = name) =>
     Object.assign(new Error(`Cannot find package '${from}' imported from /app/static.js`), {

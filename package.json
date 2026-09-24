@@ -37,6 +37,7 @@
     "esbuild": "0.27.7",
     "oxlint": "^1.83.0",
     "prettier": "3.9.6",
+    "rehype-parse": "^9.0.1",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",

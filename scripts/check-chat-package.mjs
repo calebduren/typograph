@@ -58,6 +58,7 @@ exec('npm', [
   'remark-math@6.0.0',
   'remark-rehype@11.1.2',
   'rehype-stringify@10.0.1',
+  'rehype-parse@9.0.1',
 ]);
 writeFileSync(
   join(dir, 'consumer.mjs'),
@@ -65,7 +66,7 @@ writeFileSync(
 import assert from 'node:assert/strict';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography, { typesetText } from '@calebduren/typograph';
+import typography, { rehypeTypography, typesetText } from '@calebduren/typograph';
 import hanging from '@calebduren/typograph/hanging';
 import { typeset } from '@calebduren/typograph/static';
 import { existsSync } from 'node:fs';
@@ -87,7 +88,14 @@ assert.ok(web.startsWith('<p data-typograph-hanging=""><span class="typograph-op
 const email = await typeset(brief, { target: 'email', locale: 'en', spacing: true });
 assert.equal(email, '<p>“Morning” brief: it’s 30\\u00a0min.</p>');
 assert.equal(await typeset('*"Hi"*', { target: 'markdown', locale: 'en' }), '*“Hi”*');
-console.log('Packed chat plugin + generic Remark pipeline + static entry: passed');
+assert.equal(
+  await typeset('<p>&quot;Hi,&quot; it&#39;s <code>"x"</code></p>', { input: 'html', target: 'email', locale: 'en' }),
+  '<p>“Hi,” it’s <code>"x"</code></p>',
+);
+const hastTree = { type: 'root', children: [{ type: 'element', tagName: 'p', properties: {}, children: [{ type: 'text', value: '"Hi"' }] }] };
+rehypeTypography({ locale: 'en' })(hastTree);
+assert.equal(hastTree.children[0].children[0].value, '“Hi”');
+console.log('Packed chat plugin + generic Remark pipeline + static entry + HTML input: passed');
 `,
 );
 writeFileSync(
@@ -97,7 +105,8 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import typography, { typesetText, type ChatTypographyOptions, type TypesetTextOptions } from '@calebduren/typograph';
 import hanging, { type HangingPunctuationOptions } from '@calebduren/typograph/hanging';
-import { typeset as typesetStatic, type TypesetOptions } from '@calebduren/typograph/static';
+import { typeset as typesetStatic, type HtmlTypesetOptions, type TypesetOptions } from '@calebduren/typograph/static';
+import { rehypeTypography, type HtmlTypographyOptions } from '@calebduren/typograph';
 const options: ChatTypographyOptions = { locale: 'en-GB', skip: node => node.type === 'link' };
 unified().use(remarkParse).use(typography, options);
 const hangingOptions: HangingPunctuationOptions = { locale: 'en', skip: node => node.type === 'element' && node.tagName === 'code' };
@@ -106,6 +115,14 @@ const textOptions: TypesetTextOptions = { locale: 'en', phase: 'complete', spaci
 const typeset: string = typesetText('"Hi"', textOptions);
 const staticOptions: TypesetOptions = { target: 'email', locale: 'en', math: false };
 const typesetHtml: Promise<string> = typesetStatic('"Hi"', staticOptions);
+const htmlOptions: HtmlTypesetOptions = { input: 'html', target: 'web', locale: 'en', html: 'document', hanging: false };
+const typesetFromHtml: Promise<string> = typesetStatic('<p>"Hi"</p>', htmlOptions);
+// @ts-expect-error Hanging needs new markup, so HTML input rejects it.
+const htmlHanging: HtmlTypesetOptions = { input: 'html', target: 'web', hanging: true };
+// @ts-expect-error HTML input cannot produce Markdown.
+const htmlMarkdown: HtmlTypesetOptions = { input: 'html', target: 'markdown' };
+const rehypeOptions: HtmlTypographyOptions = { locale: 'en', skip: node => node.type === 'element' && node.tagName === 'aside' };
+rehypeTypography(rehypeOptions);
 `,
 );
 console.log(exec(process.execPath, ['consumer.mjs']).trim());
@@ -132,6 +149,7 @@ assert.deepEqual(Object.keys(manifest.dependencies).sort(), [
 assert.deepEqual(manifest.sideEffects, ['./dist/hanging.css']);
 assert.ok(!manifest.scripts?.postinstall);
 const peers = [
+  'rehype-parse',
   'rehype-stringify',
   'remark-gfm',
   'remark-math',
@@ -174,6 +192,9 @@ assert.equal(typesetText('"Hi"', { locale: 'en' }), '“Hi”');
 await assert.rejects(typeset('"Hi"', { target: 'web', locale: 'en' }), {
   message: '@calebduren/typograph/static needs these packages for target "web": unified, remark-parse, remark-gfm, remark-rehype, rehype-stringify. Install them alongside @calebduren/typograph.',
 });
+await assert.rejects(typeset('<p>"Hi"</p>', { input: 'html', target: 'web', locale: 'en' }), {
+  message: '@calebduren/typograph/static needs these packages for target "web" with input "html": unified, rehype-parse. Install them alongside @calebduren/typograph.',
+});
 console.log('Peerless consumer: entries import; typeset() names missing peers');
 `,
 );
@@ -198,6 +219,7 @@ writeFileSync(
         'plain-string API',
         'static entry',
         'optional peers',
+        'HTML input',
       ],
     },
     null,

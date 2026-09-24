@@ -1,16 +1,23 @@
 import type { Root } from 'mdast';
+import type { Root as HastRoot } from 'hast';
 import remarkChatTypography, { type ChatTypographyOptions } from './index';
 import rehypeHangingPunctuation from './hanging';
+import { rehypeTypography, type HtmlTypographyOptions } from './html';
+import { spliceHtml, type HtmlText } from './html-splice';
 
 export type TypesetTarget = 'web' | 'email' | 'markdown';
 
-export interface TypesetOptions {
-  /** Required. 'web' and 'email' return an HTML fragment; 'markdown' returns typeset Markdown. */
-  target: TypesetTarget;
+interface SharedTypesetOptions {
   /** A valid English language tag enables typography; otherwise text passes through. */
   locale?: string;
   punctuation?: ChatTypographyOptions['punctuation'];
   spacing?: ChatTypographyOptions['spacing'];
+}
+
+export interface MarkdownTypesetOptions extends SharedTypesetOptions {
+  input?: 'markdown';
+  /** Required. 'web' and 'email' return an HTML fragment; 'markdown' returns typeset Markdown. */
+  target: TypesetTarget;
   skip?: ChatTypographyOptions['skip'];
   /** Parse `$…$` and `$$…$$` as math. Off by default: single dollars are usually currency. */
   math?: boolean;
@@ -18,8 +25,28 @@ export interface TypesetOptions {
   hanging?: boolean;
 }
 
+export interface HtmlTypesetOptions extends SharedTypesetOptions {
+  /** Trusted HTML, returned unsanitized with only typographic characters changed. */
+  input: 'html';
+  /** Both targets return the same string: HTML input makes character edits only. */
+  target: 'web' | 'email';
+  /** Parse as a fragment (default) or as a full document. */
+  html?: 'fragment' | 'document';
+  /** Hanging punctuation needs new markup; use rehypeTypography with the hanging helper. */
+  hanging?: false;
+  skip?: HtmlTypographyOptions['skip'];
+}
+
+export type TypesetOptions = MarkdownTypesetOptions | HtmlTypesetOptions;
+
 export type PeerName =
-  'unified' | 'remark-parse' | 'remark-gfm' | 'remark-math' | 'remark-rehype' | 'rehype-stringify';
+  | 'unified'
+  | 'remark-parse'
+  | 'remark-gfm'
+  | 'remark-math'
+  | 'remark-rehype'
+  | 'rehype-stringify'
+  | 'rehype-parse';
 export type Peers = Record<PeerName, () => Promise<unknown>>;
 
 interface Processor {
@@ -149,7 +176,7 @@ export function createTypeset(peers: Peers) {
     return loading;
   };
 
-  async function modules(names: PeerName[], target: TypesetTarget): Promise<Modules> {
+  async function modules(names: PeerName[], target: string): Promise<Modules> {
     const results = await Promise.allSettled(names.map(load));
     const missing = names.filter(
       (name, i) => results[i].status === 'rejected' && isMissing(results[i].reason, name),
@@ -167,8 +194,61 @@ export function createTypeset(peers: Peers) {
     ) as Modules;
   }
 
-  /** Typeset finished Markdown for the web, email, or back into Markdown. */
+  async function typesetHtmlInput(html: string, options: HtmlTypesetOptions): Promise<string> {
+    const invalid = (message: string) => new TypeError(`typeset() with input: 'html' ${message}`);
+    if (options.target !== 'web' && options.target !== 'email') {
+      throw invalid('needs target "web" or "email".');
+    }
+    if ((options as { math?: unknown }).math != null) throw invalid('does not parse math.');
+    if ((options.hanging as unknown) === true) {
+      throw invalid(
+        'cannot add hanging punctuation, which needs new markup. Use rehypeTypography with rehypeHangingPunctuation({ source: "html" }).',
+      );
+    }
+    const mode = options.html ?? 'fragment';
+    if (mode !== 'fragment' && mode !== 'document')
+      throw invalid('needs html: "fragment" or "document".');
+    const loaded = await modules(
+      ['unified', 'rehype-parse'],
+      `${options.target}" with input "html`,
+    );
+    const parser = loaded.unified!.unified!().use(loaded['rehype-parse']!.default, {
+      fragment: mode === 'fragment',
+    });
+    const tree = parser.parse(html) as HastRoot;
+    const nodes = texts(tree as unknown as Node) as HtmlText[];
+    const before = nodes.map((node) => node.value);
+    // The plugin applies the same English-locale gate as every other entry point.
+    rehypeTypography({
+      locale: options.locale,
+      phase: 'complete',
+      punctuation: options.punctuation,
+      spacing: options.spacing,
+      skip: options.skip,
+    })(tree);
+    // Decode with the same parser, so reference handling matches it exactly.
+    const decoder = loaded.unified!.unified!().use(loaded['rehype-parse']!.default, {
+      fragment: true,
+    });
+    const decoded = new Map<string, string>();
+    const decode = (value: string) => {
+      let text = decoded.get(value);
+      if (text == null) {
+        const root = decoder.parse(value) as { children: { value?: string }[] };
+        text = root.children.map((child) => child.value ?? '').join('');
+        decoded.set(value, text);
+      }
+      return text;
+    };
+    return spliceHtml(html, nodes, before, decode);
+  }
+
+  /** Typeset finished Markdown for the web, email, or back into Markdown; or edit trusted HTML. */
   return async function typeset(markdown: string, options: TypesetOptions): Promise<string> {
+    if (options?.input === 'html') return typesetHtmlInput(markdown, options);
+    if (options?.input != null && options.input !== 'markdown') {
+      throw new TypeError('typeset() needs input: "markdown" or "html".');
+    }
     const target = options?.target;
     if (!targets.has(target)) {
       throw new TypeError('typeset() needs a target: "web", "email", or "markdown".');

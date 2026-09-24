@@ -40,6 +40,7 @@
     "@types/mdast": "4.0.4"
   },
   "peerDependencies": {
+    "rehype-parse": "^9.0.1",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
@@ -48,6 +49,9 @@
     "unified": "^11.0.5"
   },
   "peerDependenciesMeta": {
+    "rehype-parse": {
+      "optional": true
+    },
     "rehype-stringify": {
       "optional": true
     },

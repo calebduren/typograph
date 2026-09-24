@@ -137,7 +137,7 @@ The landing page's Integration section has one copyable, self-contained agent pr
 Not every AI response streams. For text that is complete before it is shown, such as a daily brief an agent writes overnight, typeset once at the end of the job and store or send the result.
 
 - **Markdown you render yourself:** run your usual pipeline with the plugin and `phase: 'complete'`, or call `typeset(markdown, { target: 'web' | 'email' | 'markdown', locale: 'en' })` from `@calebduren/typograph/static`. See the package README for the peers each target needs.
-- **HTML or email templates:** typeset the Markdown _before_ it enters the template. This covers the text the model wrote, not prose the template adds itself.
+- **HTML or email templates:** typeset the Markdown _before_ it enters the template, or typeset the finished HTML with `typeset(html, { input: 'html', target: 'email', locale: 'en' })`. The HTML route also covers prose the template adds, and it changes only typographic characters. Template-escaped quotes such as `&quot;` are curled.
 - **Plain strings** (titles, notifications, subject lines): `typesetText(text, { locale: 'en' })` from `@calebduren/typograph`. It is synchronous, parses no Markdown, and returns a string of the same length.
 
 Email output never includes hanging-punctuation markup: Gmail and Apple Mail on iOS do not render it. Quotes and nonbreaking spaces work in every client, because they are ordinary characters.
