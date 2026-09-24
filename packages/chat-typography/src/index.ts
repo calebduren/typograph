@@ -116,7 +116,7 @@ function protectionMask(source: string, mask = new Uint8Array(source.length)): U
 
 function protectSourceSyntax(
   mask: Uint8Array,
-  nodes: TextNode[],
+  nodes: Writable[],
   original?: string,
   sourceMask?: Uint8Array,
 ): void {
@@ -361,45 +361,72 @@ function applySpacing(
   return chars.join('');
 }
 
-function formatInline(
-  parent: Node,
-  settings: ChatTypographyOptions,
-  original?: string,
-  sourceMask?: Uint8Array,
-): void {
-  // Punctuation sees the whole visible block; spacing remains local to prose
-  // runs so a no-break pair cannot cross a link, code, or skipped subtree.
-  const runs: { nodes: TextNode[]; literal?: boolean }[] = [];
-  let run: TextNode[] = [];
-  const flush = () => {
-    if (run.length) runs.push({ nodes: run });
-    run = [];
-  };
+/** A text value the core may rewrite, with its source position when known. */
+type Writable = {
+  value: string;
+  position?: { start?: { offset?: number }; end?: { offset?: number } };
+};
+/**
+ * The core's input: real text in document order, literal stand-ins for protected
+ * content, and boundaries that end a spacing run while punctuation context continues.
+ */
+type Segment =
+  { kind: 'text'; node: Writable } | { kind: 'literal'; value: string } | { kind: 'boundary' };
+interface CoreHooks {
+  /** Extra protection after the string-level mask; receives every node, literals included. */
+  protect?(mask: Uint8Array, nodes: Writable[]): void;
+  /** Whether the text after these nodes is known to end at a word boundary. */
+  boundary(nodes: Writable[]): boolean;
+}
+
+function collectMdastSegments(parent: Node, settings: ChatTypographyOptions): Segment[] {
+  const segments: Segment[] = [];
   const stack: (Node | null)[] = [...(parent.children ?? [])].reverse();
   while (stack.length) {
     const node = stack.pop();
     if (!node) {
-      flush();
-      continue;
-    }
-    if (settings.skip?.(node as Nodes)) {
-      flush();
-      runs.push({ nodes: [{ type: 'text', value: '\ufffc' }], literal: true });
+      segments.push({ kind: 'boundary' });
+    } else if (settings.skip?.(node as Nodes)) {
+      segments.push({ kind: 'literal', value: '\ufffc' });
     } else if (node.type === 'text' && typeof node.value === 'string') {
-      run.push(node as TextNode);
+      segments.push({ kind: 'text', node: node as TextNode });
     } else if (['emphasis', 'strong', 'delete'].includes(node.type)) {
       const children = node.children ?? [];
       for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]);
     } else if (node.type === 'link' || node.type === 'linkReference') {
-      flush();
+      segments.push({ kind: 'boundary' });
       stack.push(null);
       const children = node.children ?? [];
       for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]);
     } else {
-      flush();
       const value =
         node.type === 'html' ? '' : node.type === 'break' ? '\n' : (node.value ?? '\ufffc');
-      runs.push({ nodes: [{ type: 'text', value }], literal: true });
+      segments.push({ kind: 'literal', value });
+    }
+  }
+  return segments;
+}
+
+function typesetSegments(
+  segments: Segment[],
+  settings: ChatTypographyOptions,
+  hooks: CoreHooks,
+): void {
+  // Punctuation sees the whole visible block; spacing remains local to prose
+  // runs so a no-break pair cannot cross a link, code, or skipped subtree.
+  const runs: { nodes: Writable[]; literal?: boolean }[] = [];
+  let run: Writable[] = [];
+  const flush = () => {
+    if (run.length) runs.push({ nodes: run });
+    run = [];
+  };
+  for (const segment of segments) {
+    if (segment.kind === 'text') {
+      run.push(segment.node);
+    } else {
+      flush();
+      if (segment.kind === 'literal')
+        runs.push({ nodes: [{ value: segment.value }], literal: true });
     }
   }
   flush();
@@ -407,10 +434,6 @@ function formatInline(
   const nodes = runs.flatMap((part) => part.nodes);
   const source = nodes.map((node) => node.value).join('');
   if (!source) return;
-  const boundary = (nodes: TextNode[]) => {
-    const end = nodes.at(-1)?.position?.end?.offset;
-    return original != null && end != null && /\s/u.test(original[end] ?? '');
-  };
   const mask = new Uint8Array(source.length);
   let offset = 0;
   for (const part of runs) {
@@ -419,8 +442,8 @@ function formatInline(
     offset += length;
   }
   protectionMask(source, mask);
-  protectSourceSyntax(mask, nodes, original, sourceMask);
-  const punctuated = smartPunctuation(source, mask, settings, boundary(nodes), {
+  hooks.protect?.(mask, nodes);
+  const punctuated = smartPunctuation(source, mask, settings, hooks.boundary(nodes), {
     doubleOpen: false,
     singleOpen: false,
   });
@@ -432,7 +455,7 @@ function formatInline(
         punctuated.slice(offset, offset + length),
         mask.subarray(offset, offset + length),
         settings,
-        boundary(part.nodes),
+        hooks.boundary(part.nodes),
       );
       let local = 0;
       for (const node of part.nodes) {
@@ -442,6 +465,21 @@ function formatInline(
     }
     offset += length;
   }
+}
+
+function formatInline(
+  parent: Node,
+  settings: ChatTypographyOptions,
+  original?: string,
+  sourceMask?: Uint8Array,
+): void {
+  typesetSegments(collectMdastSegments(parent, settings), settings, {
+    protect: (mask, nodes) => protectSourceSyntax(mask, nodes, original, sourceMask),
+    boundary: (nodes) => {
+      const end = nodes.at(-1)?.position?.end?.offset;
+      return original != null && end != null && /\s/u.test(original[end] ?? '');
+    },
+  });
 }
 
 function visit(
