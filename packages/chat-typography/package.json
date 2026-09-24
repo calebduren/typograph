@@ -1,6 +1,6 @@
 {
   "name": "@calebduren/typograph",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Conservative English typography for AI-generated text: streamed chat, finished Markdown, and plain strings",
   "type": "module",
   "license": "MIT",
