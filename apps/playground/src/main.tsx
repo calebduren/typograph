@@ -190,7 +190,7 @@ function Landing() {
             <a className="wordmark" href="#top" aria-label="Typograph home">
               Typograph
             </a>
-            <p className="version">V0.2.0</p>
+            <p className="version">V0.3.0</p>
           </div>
           <nav aria-label="Main navigation">
             <a href="#demo">Try it</a>
@@ -299,7 +299,7 @@ function Landing() {
                   <dd>
                     About 4 KB gzip for the core, including the spacing engine. Hanging punctuation
                     adds a separate small helper and stylesheet. The finished-text entry uses your
-                    own Markdown packages.{' '}
+                    own Markdown and HTML parser packages.{' '}
                     <a
                       href={benchmarkUrl}
                       className="underlined"
@@ -335,10 +335,10 @@ function Landing() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Version 0.2.0 on npm
+                      Version 0.3.0 on npm
                     </a>
-                    . Tested with recorded streams and finished Markdown; browser profiling and
-                    reading evaluations continue.
+                    . Tested with recorded streams, finished Markdown, and HTML; browser profiling
+                    and reading evaluations continue.
                   </dd>
                 </div>
               </dl>
@@ -365,7 +365,7 @@ function Landing() {
             <a className="wordmark" href="#top">
               Typograph
             </a>
-            <p className="version">V0.2.0</p>
+            <p className="version">V0.3.0</p>
           </div>
           <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
             Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
