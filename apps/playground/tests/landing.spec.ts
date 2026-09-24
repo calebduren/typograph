@@ -125,7 +125,7 @@ test('the hero renders while the comparison bundle is still loading', async ({ p
     await page.goto('/#demo', { waitUntil: 'domcontentloaded' });
     await expect.poll(() => requestBlocked).toBe(true);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Better typography for AI-generated text.',
+      'Every word your AI writes, typeset.',
     );
     await expect(
       page.getByRole('status').filter({ hasText: 'Loading the comparison…' }),
@@ -162,7 +162,7 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Better typography for AI-generated text.',
+    'Every word your AI writes, typeset.',
   );
   const original = page.getByTestId('original-response');
   const formatted = page.getByTestId('formatted-response');
@@ -685,7 +685,7 @@ test('highlight backgrounds sit beneath adjacent glyphs in the workbench and res
       ),
     ).toBe(true);
   }
-  await page.locator('.proof').screenshot({ path: `${review}/hero-specimen.png` });
+  await page.locator('.scene').screenshot({ path: `${review}/hero-scene.png` });
   const viewport = page.getByRole('region', { name: 'Text comparison' });
   expect(await viewport.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
   await viewport.focus();
@@ -706,7 +706,7 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Better typography for AI-generated text.',
+      'Every word your AI writes, typeset.',
     );
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),

@@ -17,7 +17,18 @@ The homepage centers the tested chat package.
 
 Both references were inspected in Chrome on 17 September 2026. They are inspiration, not dependencies or endorsement.
 
-## Page sequence (redesign, 25 September 2026)
+## Page sequence (product redesign, 25 September 2026)
+
+1. **Hero.** A “New · HTML input” pill, the headline “Every word your AI writes, _typeset._”, a lede, Get started and Try it buttons, and a copyable install pill. Below, a scene over blurred color panels: an assistant window whose reply streams token by token through `typesetText` in its streaming phase, with each settled change flashing coral and a Typograph switch to compare, plus floating notification, email, and code-point cards typeset live.
+2. **Stats.** Microseconds per call measured in the visitor's browser, gzip size from the committed measurement, zero network requests, one dependency.
+3. **Reveal.** A large serif line with a drag handle: typeset on one side, original on the other, with changed glyphs locked to one measured width so nothing moves.
+4. **One engine, everywhere.** A bento of chat, email, UI strings, and HTML templates, each with a live mini visual and its entry-point call.
+5. **Try it on your own text.** The finished-text workbench.
+6. **Built for text that hasn’t finished arriving.** The streaming comparison.
+7. **Careful where it counts.** Three promises and the known limits.
+8. **Integration**, **Specifications**, and a footer with a large serif wordmark.
+
+## Page sequence (first redesign, 25 September 2026, superseded)
 
 1. **Promise and live specimen.** Headline “Better typography for AI-generated text.” beside a lede, a copyable `npm install` command, and package facts (MIT, measured gzip size, one dependency, no network). Below, a full-width specimen: the `typesetText` call in mono, its result set at display size with each changed glyph numbered in red, a legend of code points and names, the time per call measured in the visitor's browser, and a Show original toggle.
 2. **Try it on your own text.** The finished-text workbench runs the published package on editable input: Plain text (`typesetText`), Markdown (`typeset` to web HTML, email HTML, or Markdown), and HTML email (`typeset` with HTML input). Output views are a sanitized Preview with every change marked, a Changes table (before, after, code point, name, context), and the exact Output string. A status bar shows the exact call, change counts by kind, and the measured time. Samples are starting points only; nothing leaves the page.

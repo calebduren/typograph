@@ -2,28 +2,40 @@ import { expect, test } from '@playwright/test';
 
 const NBSP = String.fromCharCode(0xa0);
 
-test('the hero specimen is computed live by the package', async ({ page }) => {
+test('the hero streams a reply that the package typesets live', async ({ page }) => {
   await page.goto('/');
-  const proof = page.getByRole('figure', { name: 'Live specimen' });
-  await expect(proof.locator('.proof-line')).toHaveAttribute(
-    'aria-label',
-    `“It’s ready in 30${NBSP}min.”`,
-  );
-  await expect(proof.locator('.proof-legend li')).toHaveCount(4);
-  await expect(proof.locator('.proof-legend code')).toHaveText([
-    'U+201C',
-    'U+2019',
-    'U+00A0',
-    'U+201D',
-  ]);
-  await expect(proof.locator('.proof-foot')).toContainText(/4 changes in [\d.]+ µs per call/);
-  await proof.getByRole('button', { name: 'Show original' }).click();
-  await expect(proof.locator('.proof-line')).toHaveAttribute(
-    'aria-label',
-    `"It's ready in 30 min."`,
-  );
-  await proof.getByRole('button', { name: 'Show typeset' }).click();
-  await expect(proof).toHaveAttribute('data-original', 'false');
+  const window = page.getByRole('group', { name: 'Streaming assistant reply' });
+  const bubble = window.locator('.bubble-ai > [aria-hidden="true"]:not(.bubble-sizer)');
+  // The reply streams in, and quotes curl as soon as they settle.
+  await expect(bubble).toContainText('Here’s the recap', { timeout: 10_000 });
+  await expect(bubble.locator('mark.flip').first()).toBeVisible();
+  await expect(bubble).toContainText('then tell everyone.”', { timeout: 15_000 });
+  await expect(window.locator('.window-foot')).toContainText("phase: 'complete'");
+  const typeset = window.getByRole('switch', { name: 'Typograph' });
+  await typeset.click();
+  await expect(typeset).toHaveAttribute('aria-checked', 'false');
+  await expect(bubble).toContainText(`Here's the recap: "Atlas"`);
+  await expect(bubble.locator('mark.flip')).toHaveCount(0);
+});
+
+test('the reveal compares typeset and original without moving any text', async ({ page }) => {
+  await page.goto('/');
+  const slider = page.getByRole('slider', { name: 'Compare typeset and original' });
+  await expect(
+    page.getByLabel('Typeset: “It’s not what you say. It’s how it’s set.”'),
+  ).toBeAttached();
+  await expect(
+    page.getByLabel(`Original: "It's not what you say. It's how it's set."`),
+  ).toBeAttached();
+  const box = (selector: string) =>
+    page.locator(selector).evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      return [Math.round(rect.width), Math.round(rect.height)];
+    });
+  // Both layers occupy the same box, so the clip reveals, rather than shifts, the text.
+  expect(await box('.reveal-after')).toEqual(await box('.reveal-before'));
+  await slider.fill('100');
+  await expect(page.locator('.reveal-stage')).toHaveAttribute('style', /--split: 100%/);
 });
 
 test('the workbench typesets your own text with the real package', async ({ page }) => {
