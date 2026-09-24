@@ -6,7 +6,7 @@ const cases = JSON.parse(
   readFileSync(new URL('../validation/cases.json', import.meta.url), 'utf8'),
 ) as { id: string; input: string; locale?: string }[];
 const options = { locale: 'en', spacing: true } as const;
-const nbsp = ' ';
+const nbsp = '\u00a0';
 
 describe('plain-string typography', () => {
   it.each([

@@ -35,3 +35,39 @@ it('does not turn missing assets into a successful page', async () => {
       .status,
   ).toBe(404);
 });
+
+it('normalises protocol and port when redirecting the secondary domain', async () => {
+  const assets = { fetch: vi.fn<(request: Request) => Promise<Response>>() };
+  const response = await worker.fetch(new Request('http://typograph.ing:8080/a/b?c=1'), {
+    ASSETS: assets,
+  });
+  expect(response.status).toBe(308);
+  expect(response.headers.get('location')).toBe('https://typograph.dev/a/b?c=1');
+  expect(assets.fetch).not.toHaveBeenCalled();
+});
+
+it('leaves other hostnames, including subdomains, to the asset binding', async () => {
+  const assets = {
+    fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('asset')),
+  };
+  for (const url of [
+    'https://www.typograph.ing/',
+    'http://127.0.0.1:4174/',
+    'https://typograph.dev/',
+  ]) {
+    const request = new Request(url);
+    await worker.fetch(request, { ASSETS: assets });
+    expect(assets.fetch).toHaveBeenLastCalledWith(request);
+  }
+});
+
+it('serves the app shell for the specimen route', async () => {
+  const assets = {
+    fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('shell')),
+  };
+  const response = await worker.fetch(new Request('https://typograph.dev/specimen?size=18'), {
+    ASSETS: assets,
+  });
+  expect(await response.text()).toBe('shell');
+  expect(assets.fetch.mock.calls[0][0].url).toBe('https://typograph.dev/?size=18');
+});

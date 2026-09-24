@@ -65,6 +65,57 @@ describe('chat typography candidate', () => {
     expect(result.html).toEqual(result.originalHtml);
   });
 
+  it.each(cases)('$id under the default streaming preset', (fixture) => {
+    const result = render(fixture.input, { locale: fixture.locale ?? 'en' });
+    // Spacing is off by default, so the expected output keeps ordinary spaces.
+    expect(result.text).toBe(fixture.expected.replaceAll('\u00a0', ' '));
+    expect(result.links).toEqual(result.originalLinks);
+    expect(result.html).toEqual(result.originalHtml);
+  });
+
+  it('formats headings, hard breaks, list items, and blockquotes, and passes raw HTML through', () => {
+    expect(render('## "A little room"', { locale: 'en' }).text).toBe('“A little room”');
+    expect(render('Say "hi"  \nthen "bye"', { locale: 'en' }).text).toBe('Say “hi”\nthen “bye”');
+    const html = render('Say "hi" <b>bold</b> "bye"', { locale: 'en' });
+    expect(html.text).toBe('Say “hi” bold “bye”');
+    expect(html.html).toEqual(html.originalHtml);
+    const blocks = render('> "Quoted."\n\n- "Item one"\n- It\'s fine', { locale: 'en' }).text;
+    expect(blocks).toContain('“Quoted.”');
+    expect(blocks).toContain('“Item one”');
+    expect(blocks).toContain('It’s fine');
+  });
+
+  it('skips a whole block when the predicate matches it', () => {
+    const result = render('> "Quoted."\n\n"Prose."', {
+      locale: 'en',
+      skip: (node) => node.type === 'blockquote',
+    });
+    expect(result.text).toBe('"Quoted."\n\n“Prose.”');
+  });
+
+  it('lets each spacing rule be disabled on its own', () => {
+    const sentence = 'Wait 30 min. Dr. Smith and J. R. Park saw Fig. 2.';
+    const joins = {
+      units: ['30 min'],
+      initials: ['J. R.'],
+      abbreviations: ['Dr. Smith', 'Fig. 2'],
+    };
+    const all = Object.values(joins).flat();
+    for (const [rule, owned] of Object.entries(joins)) {
+      const text = render(sentence, { locale: 'en', spacing: { [rule]: false } }).text;
+      const joined = all.filter((pair) => text.includes(pair.replaceAll(' ', '\u00a0')));
+      expect({ rule, joined }).toEqual({
+        rule,
+        joined: all.filter((pair) => !owned.includes(pair)),
+      });
+    }
+    const short = 'It is a test of the rule.';
+    expect(render(short, { locale: 'en', spacing: true }).text).toBe(short);
+    expect(render(short, { locale: 'en', spacing: { shortWords: true } }).text).toContain(
+      'a\u00a0test',
+    );
+  });
+
   it('does nothing without an explicit supported locale', () => {
     expect(render('"Hello"', {}).text).toBe('"Hello"');
     expect(render('"Bonjour"', { locale: 'fr' }).text).toBe('"Bonjour"');
