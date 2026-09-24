@@ -1,4 +1,5 @@
 import type { Root, Nodes, Parent, Element } from 'hast';
+import { inherit, type State } from './html-scope';
 import { elisions } from './quote-context';
 
 export interface HangingPunctuationOptions {
@@ -6,6 +7,11 @@ export interface HangingPunctuationOptions {
   locale?: string;
   /** Leave an application-selected subtree unchanged. */
   skip?: (node: Readonly<Nodes>) => boolean;
+  /**
+   * Where the tree came from. `html` makes elements parsed from HTML eligible and follows
+   * rehypeTypography's language, translate, and opt-out rules. Defaults to `markdown`.
+   */
+  source?: 'markdown' | 'html';
 }
 
 const containers = new Set(['div', 'section', 'article', 'blockquote']);
@@ -23,28 +29,39 @@ export default function rehypeHangingPunctuation(options: HangingPunctuationOpti
   }
   return (tree: Root, file?: { value?: unknown }) => {
     if (!english) return;
+    const html = options.source === 'html';
     const source = typeof file?.value === 'string' ? file.value : undefined;
     const skip = (node: Nodes) =>
       options.skip?.(node) ||
-      (node.type === 'element' &&
-        node.position?.start.offset != null &&
-        source?.[node.position.start.offset] === '<');
-    const stack: Nodes[] = [tree];
+      (html
+        ? node.type === 'element' && node.properties?.dataTypograph === 'off'
+        : node.type === 'element' &&
+          node.position?.start.offset != null &&
+          source?.[node.position.start.offset] === '<');
+    // Markdown trees carry no language attributes, so their state never changes.
+    const scope = (node: Nodes, state: State) =>
+      html && node.type === 'element' ? inherit(node, state) : state;
+    const prose = (state: State) => state.english && state.translate;
+    const stack: [Nodes, State][] = [[tree, { english: true, translate: true }]];
     while (stack.length) {
-      const node = stack.pop()!;
+      const [node, outer] = stack.pop()!;
       if (skip(node)) continue;
+      const state = scope(node, outer);
       if (node.type === 'root' || (node.type === 'element' && containers.has(node.tagName))) {
         // Skip whole lists, including nested paragraphs, to keep quotes clear of markers.
         // Also leave code, raw HTML, tables, math, and unknown custom elements alone.
-        for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]);
+        for (let i = node.children.length - 1; i >= 0; i--) stack.push([node.children[i], state]);
       }
       if (node.type === 'element' && blocks.has(node.tagName)) {
         let parent: Parent = node;
         let first = parent.children[0];
+        let inner = state;
         while (first?.type === 'element' && inline.has(first.tagName) && !skip(first)) {
           parent = first;
+          inner = scope(first, inner);
           first = parent.children[0];
         }
+        if (!prose(inner)) continue;
         if (
           !first ||
           first.type !== 'text' ||
@@ -59,7 +76,7 @@ export default function rehypeHangingPunctuation(options: HangingPunctuationOpti
             continue;
         }
         const offset = first.position?.start.offset;
-        if (source != null && offset != null && source[offset] === '\\') continue;
+        if (!html && source != null && offset != null && source[offset] === '\\') continue;
         const quote: Element = {
           type: 'element',
           tagName: 'span',
