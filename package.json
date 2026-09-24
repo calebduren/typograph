@@ -1,6 +1,9 @@
 {
   "name": "typograph-workspace",
   "private": true,
+  "engines": {
+    "node": ">=22.12"
+  },
   "type": "module",
   "workspaces": [
     "packages/chat-typography",
@@ -16,14 +19,14 @@
     "test:chat-integration": "npm run test:e2e -w @typograph/chat-integration",
     "test:landing": "npm run build && npm run test:e2e -w @typograph/playground",
     "typecheck": "tsc --noEmit && npm run typecheck -w @typograph/chat-integration",
-    "dev": "npm run build:chat && npm run dev -w @typograph/playground",
+    "dev": "npm run dev -w @typograph/playground",
     "bench": "node scripts/benchmark-chat.mjs",
     "bench:chat": "node scripts/benchmark-chat-engine.mjs",
     "check:package": "node scripts/check-chat-package.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "oxlint --deny-warnings .",
-    "check": "npm run build && npm run build:chat-integration && npm run typecheck && npm test && npm run check:package && npm run format:check && npm run lint"
+    "check": "npm run lint && npm run format:check && npm run build:chat && npm run typecheck && npm test && npm run build && npm run build:chat-integration && npm run check:package"
   },
   "devDependencies": {
     "@types/hast": "3.0.4",

@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-The landing page runs at <http://127.0.0.1:4173/>. The dev command builds the chat package before starting Vite. Rebuild package changes with `npm run build:chat`; site changes reload automatically.
+The landing page runs at <http://127.0.0.1:4173/>. The dev server resolves `@calebduren/typograph` from `packages/chat-typography/src`, so engine and site changes both reload automatically. Production builds, tests, and benchmarks use the built package; run `npm run build:chat` before `npm run bench:chat` or `npm run check:package`.
 
 CI runs the checks on Node 22 and 24. The package supports Node 22+ at runtime; the repository tools require Node 22.12+.
 
