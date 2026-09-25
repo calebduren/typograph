@@ -249,7 +249,18 @@ function smartPunctuation(
       continue;
     }
     if (current !== "'") continue;
-    if (digit.test(prev) && !state.singleOpen) continue; // Feet, minutes, and coordinates.
+    if (digit.test(prev)) {
+      // A digit, then 's and a word boundary (Q3's, 2025's, 1990's) is a possessive
+      // or plural, never a prime. The final edge waits, as elisions do, while streaming.
+      if (/[sS]/u.test(next) && !mask[index + 1]) {
+        const following = after(source, index + 2);
+        if (following ? !word.test(following) : terminalBoundary || settings.phase === 'complete') {
+          if (apostrophes) chars[index] = '’';
+          continue;
+        }
+      }
+      if (!state.singleOpen) continue; // Feet, minutes, and coordinates.
+    }
     if (letter.test(prev) && letter.test(next)) {
       if (apostrophes) chars[index] = '’';
       continue;

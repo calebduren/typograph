@@ -30,6 +30,30 @@
     "expected": "The ’90s were loud."
   },
   {
+    "id": "digit-possessive",
+    "family": "quotes",
+    "input": "Q3's close beat 2025's numbers.",
+    "expected": "Q3’s close beat 2025’s numbers."
+  },
+  {
+    "id": "digit-possessive-in-dialogue",
+    "family": "quotes",
+    "input": "\"Q3's numbers,\" she said.",
+    "expected": "“Q3’s numbers,” she said."
+  },
+  {
+    "id": "digit-possessive-across-bold",
+    "family": "quotes",
+    "input": "**Q3**'s close.",
+    "expected": "Q3’s close."
+  },
+  {
+    "id": "decade-plural-possessive",
+    "family": "quotes",
+    "input": "The 1990s' fashion returns.",
+    "expected": "The 1990s’ fashion returns."
+  },
+  {
     "id": "elision-em",
     "family": "quotes",
     "input": "Give 'em a chance.",
@@ -103,6 +127,12 @@
     "family": "preserve",
     "input": "A 24\" monitor.",
     "expected": "A 24\" monitor."
+  },
+  {
+    "id": "feet-marks",
+    "family": "preserve",
+    "input": "The board is 30' long on a 6' rack.",
+    "expected": "The board is 30' long on a 6' rack."
   },
   {
     "id": "derivative",

@@ -195,6 +195,37 @@ describe('chat typography candidate', () => {
   });
 
   it.each([
+    ["Q3's close.", 'Q3’s close.'],
+    ["Beat 2025's numbers.", 'Beat 2025’s numbers.'],
+    ["The 1990s' fashion.", 'The 1990s’ fashion.'],
+    [`She is 5'11" tall.`, `She is 5'11" tall.`],
+    ["It is 30' long.", "It is 30' long."],
+    ["Room 12'Sam.", "Room 12'Sam."],
+    [`"Q3's numbers," she said.`, '“Q3’s numbers,” she said.'],
+    // Punctuation context crosses emphasis, so the digit before the bold boundary counts.
+    ["**Q3**'s close.", 'Q3’s close.'],
+    // An apostrophe before inline code is not followed by prose.
+    ["Q3'`s` close.", "Q3's close."],
+  ])('curls only digit possessives after a digit: %s', (input, expected) => {
+    for (const phase of ['streaming', 'complete'] as const) {
+      expect(render(input, { locale: 'en', phase }).text).toBe(expected);
+      expect(
+        render(input, { locale: 'en', phase, punctuation: { quotes: false, apostrophes: true } })
+          .text,
+      ).toBe(expected.replace(/[“”]/gu, '"'));
+    }
+  });
+
+  it('holds a digit possessive at the streaming edge until its boundary arrives', () => {
+    expect(render("Q3'", { locale: 'en' }).text).toBe("Q3'");
+    expect(render("Q3's", { locale: 'en' }).text).toBe("Q3's");
+    expect(render("Q3's ", { locale: 'en' }).text).toBe('Q3’s');
+    expect(render("Q3's\n\nNext.", { locale: 'en' }).text).toBe('Q3’s\n\nNext.');
+    expect(render("Q3'", { locale: 'en', phase: 'complete' }).text).toBe("Q3'");
+    expect(render("Q3's", { locale: 'en', phase: 'complete' }).text).toBe('Q3’s');
+  });
+
+  it.each([
     [`"'Hi,' she said."`, '“‘Hi,’ she said.”'],
     [`'"Hi," she said.'`, '‘“Hi,” she said.’'],
     [`"'Tis the season"`, '“’Tis the season”'],
