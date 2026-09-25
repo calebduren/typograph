@@ -6,6 +6,7 @@ The site at typograph.dev deploys separately from the same repository. Site chan
 
 ## Unreleased
 
+- Curl the apostrophe in possessives and plurals after a digit, such as `Q3's`, `2025's`, and `5's`, including with the apostrophes-only preset. Only `'s` followed by a space, punctuation, or the end of the text changes; foot and inch marks such as `5'11"`, `30' long`, and `6' rack` stay straight. While a reply streams, `Q3's` at the right edge waits for the next character.
 - Pack release archives with `npm run pack:release`; `npm run check` now packs to `release/check/` and no longer overwrites a published version's tarball.
 
 ## 0.4.0 — 2026-09-25
