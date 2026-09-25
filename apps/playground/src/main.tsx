@@ -372,7 +372,7 @@ function Landing() {
         <section className="hero" aria-labelledby="hero-title">
           <a className="badge" href="#demo">
             <span className="badge-new">New</span>
-            Quotes pair around citations in v{version}
+            Quotes pair around citations since v0.4.0
             <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.75} />
           </a>
           <h1 id="hero-title">
