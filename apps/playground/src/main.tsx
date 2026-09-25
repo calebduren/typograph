@@ -370,9 +370,9 @@ function Landing() {
       </header>
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <a className="badge" href="#finished">
+          <a className="badge" href="#demo">
             <span className="badge-new">New</span>
-            HTML input in v{version}
+            Quotes pair around citations in v{version}
             <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.75} />
           </a>
           <h1 id="hero-title">
