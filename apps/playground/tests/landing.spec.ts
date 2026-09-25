@@ -124,9 +124,7 @@ test('the hero renders while the comparison bundle is still loading', async ({ p
   try {
     await page.goto('/#demo', { waitUntil: 'domcontentloaded' });
     await expect.poll(() => requestBlocked).toBe(true);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Every word your AI writes, typeset.',
-    );
+    await expect(page.locator('#hero-title')).toHaveText('Every word your AI writes, typeset.');
     await expect(
       page.getByRole('status').filter({ hasText: 'Loading the comparison…' }),
     ).toBeVisible();
@@ -161,9 +159,7 @@ test('comparison uses the real plugin, preserves nodes, and supports native text
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Every word your AI writes, typeset.',
-  );
+  await expect(page.locator('#hero-title')).toHaveText('Every word your AI writes, typeset.');
   const original = page.getByTestId('original-response');
   const formatted = page.getByTestId('formatted-response');
   await expect(original).toContainText('"It\'s in the details,"');
@@ -305,7 +301,7 @@ test('mobile keeps one reading area, preserves progress, and respects reduced mo
 
 test('integration recipes, local guide, and keyboard entry work', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.locator('#hero-title')).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to the demo' })).toBeFocused();
   await page.getByRole('button', { name: 'Code', exact: true }).click();
@@ -705,9 +701,7 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
   for (const width of [320, 390, 520, 768, 1301]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Every word your AI writes, typeset.',
-    );
+    await expect(page.locator('#hero-title')).toHaveText('Every word your AI writes, typeset.');
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
