@@ -57,7 +57,6 @@ body {
 }
 
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: 0;
 }
 
@@ -1546,10 +1545,6 @@ mark[data-typograph-change='spacing']::before,
 @media (prefers-reduced-motion: reduce) {
   .slider-visual {
     transform: none !important;
-  }
-
-  html {
-    scroll-behavior: auto;
   }
 
   *,

@@ -320,6 +320,27 @@ function Landing() {
     const target = document.getElementById(window.location.hash.slice(1));
     target?.scrollIntoView({ behavior: 'instant' });
   }, []);
+  useEffect(() => {
+    // Smooth-scroll in-page links here, not with CSS, so programmatic scrolls stay instant.
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
+      if (!link || link.target || event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = document.getElementById(link.hash.slice(1));
+      if (!target) return;
+      event.preventDefault();
+      // Push before scrolling so Back restores the position the link was clicked from.
+      if (window.location.hash !== link.hash) history.pushState(null, '', link.hash);
+      const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+      // The sticky header is always in view, so #top scrolls the page itself.
+      const scrollTarget = target.id === 'top' ? document.documentElement : target;
+      scrollTarget.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      if (target.tabIndex < 0) target.tabIndex = -1;
+      target.focus({ preventScroll: true });
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
   return (
     <>
       <a className="skip-link" href="#finished">
