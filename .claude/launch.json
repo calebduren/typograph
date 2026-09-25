@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "playground",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "-w", "@typograph/playground", "--", "--port", "4180"],
+      "port": 4180
+    },
+    {
+      "name": "playground-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "@typograph/playground",
+        "--",
+        "--port",
+        "4181",
+        "--strictPort"
+      ],
+      "port": 4181
+    }
+  ]
+}
