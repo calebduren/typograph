@@ -232,6 +232,36 @@
     "expected": "Say “hello”."
   },
   {
+    "id": "custom-element-citation",
+    "family": "structure",
+    "input": "Budget \"frozen\"<citation>x9</citation> and \"more.\"",
+    "expected": "Budget “frozen”x9 and “more.”"
+  },
+  {
+    "id": "custom-element-self-closing",
+    "family": "structure",
+    "input": "Budget \"frozen\"<citation value=\"x9\"/>",
+    "expected": "Budget “frozen”"
+  },
+  {
+    "id": "custom-element-inside-quote",
+    "family": "structure",
+    "input": "The CFO said \"we're not renewing<citation>a1b2</citation> this year,\" which matters.",
+    "expected": "The CFO said “we’re not renewinga1b2 this year,” which matters."
+  },
+  {
+    "id": "custom-element-unfinished",
+    "family": "structure",
+    "input": "The CFO said \"we're not renewing<citation>a1b",
+    "expected": "The CFO said “we’re not renewinga1b"
+  },
+  {
+    "id": "custom-element-content",
+    "family": "structure",
+    "input": "<citation>it's \"raw\"</citation>",
+    "expected": "it's \"raw\""
+  },
+  {
     "id": "citation-link",
     "family": "structure",
     "input": "See [Fig. 2](https://example.com/fig-2) and Fig. 3.",

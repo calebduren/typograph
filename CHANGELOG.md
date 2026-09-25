@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Keep quote context across raw HTML elements with their own content, such as `"frozen"<citation>x9</citation>`: the closing quote now curls. Inline formatting tags such as `<b>` still join the surrounding sentence; any other element, including custom ones, is preserved as a unit and its content receives no typography. While a reply streams, an element that has not closed yet stands alone and later text is still typeset.
+- Document an apostrophes-only preset for products with no response-language signal, and note SMS and non-JavaScript email pipelines in the integration guidance.
+
 ## 0.3.0 — 2026-09-25
 
 - Add HTML input: `typeset(html, { input: 'html', target })` returns trusted HTML with only typographic characters changed, including template-escaped quotes such as `&quot;`. `rehypeTypography` typesets hast in your own rehype pipeline, and `rehypeHangingPunctuation` gains `source: 'html'`. Adds `rehype-parse` as an optional peer.

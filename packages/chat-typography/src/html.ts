@@ -1,5 +1,6 @@
 import type { Element, Nodes, Root, RootContent } from 'hast';
 import { typesetSegments, type ChatTypographyOptions, type Segment } from './engine';
+import { transparent } from './html-elements';
 import { inherit, type State } from './html-scope';
 
 export interface HtmlTypographyOptions extends Omit<ChatTypographyOptions, 'skip'> {
@@ -37,33 +38,6 @@ const literalInline = new Set([
   'video',
   'audio',
   'canvas',
-]);
-const transparent = new Set([
-  'em',
-  'strong',
-  'b',
-  'i',
-  'u',
-  's',
-  'del',
-  'ins',
-  'mark',
-  'small',
-  'sub',
-  'sup',
-  'span',
-  'font',
-  'abbr',
-  'cite',
-  'dfn',
-  'q',
-  'time',
-  'data',
-  'bdi',
-  'bdo',
-  'label',
-  'nobr',
-  'ruby',
 ]);
 const inlineDisplay = new Set(['inline', 'inline-block', 'contents']);
 

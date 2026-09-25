@@ -9,7 +9,7 @@ Conservative English typography for AI-generated text: smart quotes and apostrop
 
 It adds no React, chat SDK, network service, or hosting requirement.
 
-**English only, by design.** Multilingual typography is outside this product's scope. English locale variants share one house style; they do not select regional quotation conventions. Use the plugin only on responses known to be English.
+**English only, by design.** Multilingual typography is outside this product's scope. English locale variants share one house style; they do not select regional quotation conventions. Use the plugin only on responses known to be English, or in [apostrophes-only mode](#when-the-response-language-is-unknown) when the language is unknown.
 
 ESM, Node 22+ for server use. Browser rendering and the local Cloudflare chat transport are checked by the integration fixture. No install scripts or telemetry.
 
@@ -36,11 +36,29 @@ const remarkPlugins = [
 </Streamdown>;
 ```
 
+Streamdown's `remarkPlugins` prop replaces its defaults. Spread `defaultRemarkPlugins` first, as above, or GFM tables, strikethrough, and autolinks stop rendering.
+
 Supply the known language of the **response**, not just the interface language. `en`, `en-US`, `en-GB`, and other valid English BCP 47 tags use the same English house style. Regional punctuation conventions are not implemented. Unknown, invalid, missing, or unsupported locales pass through. The plugin does not detect mixed-language passages.
 
 The default changes quote marks and apostrophes; it leaves whitespace unchanged. To enable conservative nonbreaking pairs such as `30 min`, `Dr. Smith`, and `Fig. 2`, set `spacing: true`. This uses the credited [Typehug](https://github.com/alexszczurek/typehug) engine. Disabling spacing skips its analysis but does not remove it from the bundle.
 
 Only pass assistant text parts through the prose renderer. Render tool results, JSON, citations, and other structured UI using their appropriate components. A generic Remark pipeline can use `.use(typography, options)` after parsing; pass the original Markdown as the VFile value so escaped punctuation and unfinished syntax can be protected.
+
+### When the response language is unknown
+
+Many products have no per-response language signal. In that case, convert apostrophes only:
+
+```ts
+[typography, { locale: 'en', punctuation: { quotes: false, apostrophes: true } }];
+```
+
+- `L'homme dit "bonjour" et c'est l'été.` → `L’homme dit "bonjour" et c’est l’été.`
+- `Er sagt "nein", das ist's.` → `Er sagt "nein", das ist’s.`
+- `Bob's brief says "we're done" and '90s pricing.` → `Bob’s brief says "we’re done" and ’90s pricing.`
+
+The typographic apostrophe is the correct character across Latin-script languages, so this preset is safe on prose of unknown language. Quotation marks stay as written, so regional conventions such as `« »` and `„ “` are left alone. This is not language detection. The package remains English only.
+
+To enable quotes, take the locale from a signal about the response: a tenant or user language setting, the language the system prompt tells the model to answer in, or a structured output field the model fills per response.
 
 ## AI Elements, shadcn, and changing settings
 
@@ -76,7 +94,7 @@ A fixed preset requires no finish callbacks, per-message completion tracking, or
 
 Short-word and paragraph-ending joins are off unless requested. `lastWords` also requires `phase: 'complete'`. If opting into completion refinements, track a successful finish for each message, exclude abort/disconnect/error, and decide which finish reasons qualify. A chat status of `ready` alone is insufficient. The default avoids this lifecycle bookkeeping.
 
-Punctuation context crosses emphasis and link labels within a block. No-break spacing can cross emphasis but does not cross a link, code, math, or skipped subtree boundary. Code, math, raw HTML, link destinations, and syntax are preserved. Escaped quotes are protected when the original source is available. Bare URLs, email addresses, and unfinished backtick spans receive conservative protection. Unfinished inline code protection ends at the next blank line, so later paragraphs still receive typography.
+Punctuation context crosses emphasis, link labels, and inline elements such as `em`, `b`, and `span` within a block. Any other raw HTML element, including a custom element such as `<citation>`, is preserved as a unit, and its content receives no typography. No-break spacing can cross emphasis but does not cross a link, code, math, or skipped subtree boundary. Code, math, raw HTML, link destinations, and syntax are preserved. Escaped quotes are protected when the original source is available. Bare URLs, email addresses, and unfinished backtick spans receive conservative protection. Unfinished inline code protection ends at the next blank line, so later paragraphs still receive typography.
 
 Quote state resets at each block. A quotation that spans paragraphs can leave its final straight closing mark unchanged. An ambiguous inch mark inside an open quotation, such as `"Buy a 24" monitor," he said.`, can be interpreted as the closing quote. Write explicit prime characters (`24″`) or opt out when literal intent must be preserved. A matching closer can resolve an elision-like opening (`'Round the corner.'`) as a quotation; incomplete streams can revise that decision as the closer arrives. This is a conservative heuristic, not grammatical analysis.
 
@@ -127,6 +145,8 @@ const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true }
 
 If your pipeline already has a Markdown renderer, the simplest option is to typeset the Markdown before it enters your HTML or email template. That covers text the model wrote, but not prose the template adds itself.
 
+If outbound mail is rendered outside JavaScript, such as by a Python template, `typeset` cannot sit in that pipeline. Typeset a separate copy with `target: 'markdown'` when the text is generated, and pass that copy to the template. Keep the stored original unchanged, because the same string may also feed SMS or copy actions.
+
 ## HTML input
 
 For prose that is already HTML, such as an email template with a brief interpolated into it, use one of two entry points:
@@ -172,6 +192,8 @@ For paragraph-ending orphan control, prefer progressive-enhancement CSS `text-wr
 `spacing.lastWords` remains opt-in and complete-phase only. Use it when a product explicitly wants to bind the final pair in eligible prose runs, accepting that long pairs can wrap awkwardly on narrow screens and nonbreaking spaces are included in displayed-text copying. Neither this rule nor CSS guarantees a specific final line across arbitrary Markdown boundaries and layouts.
 
 Persist and copy the original `part.text` for a **Copy original** action. Browser selection of rendered prose includes curly punctuation and any nonbreaking spaces. Code copy should use the renderer's original code content. The fixture verifies raw text, clipboard output, and protected rendered content; full screen-reader and selection-copy evaluation remains separate work.
+
+Typeset only what is displayed, never the stored string that feeds SMS. A single curly quote or nonbreaking space moves a message from the GSM-7 alphabet to UCS-2, which cuts a segment from 160 to 70 characters. As a safeguard, an SMS path can also fold curly marks back to straight before sending.
 
 The runtime dependency is `@typehug/en` (which uses `@typehug/core`). `@types/mdast` and `@types/hast` supply the public TypeScript definitions and add no runtime code. License attribution is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
