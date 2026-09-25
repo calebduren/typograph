@@ -100,6 +100,11 @@ samp {
   outline-offset: 2px;
 }
 
+/* In-page link targets take focus for assistive technology, not as controls. */
+[tabindex='-1']:focus {
+  outline: none;
+}
+
 ::selection {
   background: var(--coral-soft);
 }
