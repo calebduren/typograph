@@ -49,6 +49,60 @@ describe('plain-string typography', () => {
     expect(typesetText('Wait 30 min', options)).toBe(`Wait 30${nbsp}min`);
   });
 
+  describe('apostrophes after digits', () => {
+    const presets = {
+      default: { locale: 'en' },
+      'apostrophes-only': { locale: 'en', punctuation: { quotes: false, apostrophes: true } },
+    } as const;
+
+    it.each(Object.entries(presets))('curls digit possessives under the %s preset', (_, preset) => {
+      expect(typesetText("Q3's", preset)).toBe('Q3’s');
+      expect(typesetText("2025's numbers", preset)).toBe('2025’s numbers');
+      expect(typesetText("Q3'S, 5's and 6's.", preset)).toBe('Q3’S, 5’s and 6’s.');
+      expect(
+        typesetText(`The CFO's 'soft no' means we're 'round the corner from Q3's close.`, preset),
+      ).toContain('CFO’s ');
+      expect(
+        typesetText(`The CFO's 'soft no' means we're 'round the corner from Q3's close.`, preset),
+      ).toContain(' Q3’s close.');
+    });
+
+    it.each(Object.entries(presets))('keeps primes straight under the %s preset', (_, preset) => {
+      for (const text of [
+        `She is 5'11" tall.`,
+        "It is 30' long.",
+        "A 6' rack.",
+        'A 24" monitor.',
+        "Room 12'Sam.",
+        "Q3'",
+      ]) {
+        expect(typesetText(text, preset)).toBe(text);
+      }
+      expect(typesetText("The '90s and rock 'n' roll.", preset)).toBe(
+        'The ’90s and rock ’n’ roll.',
+      );
+    });
+
+    it('leaves a trailing plural possessive to the letter rule', () => {
+      expect(typesetText("the 1990s' fashion", { locale: 'en' })).toBe('the 1990s’ fashion');
+    });
+
+    it('holds a digit possessive at the streaming edge and curls it at a complete edge', () => {
+      const streaming = { locale: 'en', phase: 'streaming' } as const;
+      expect(typesetText("Q3'", streaming)).toBe("Q3'");
+      expect(typesetText("Q3's", streaming)).toBe("Q3's");
+      expect(typesetText("Q3's ", streaming)).toBe('Q3’s ');
+      expect(typesetText("Q3's", { locale: 'en', phase: 'complete' })).toBe('Q3’s');
+    });
+
+    it('curls a digit possessive inside a quotation', () => {
+      expect(typesetText(`"Q3's numbers," she said.`, { locale: 'en' })).toBe(
+        '“Q3’s numbers,” she said.',
+      );
+      expect(typesetText(`'Q3's close' he said.`, { locale: 'en' })).toBe('‘Q3’s close’ he said.');
+    });
+  });
+
   it('changes only spaces when punctuation is off', () => {
     expect(typesetText(`J. R. R. said "it's 30 min"`, { ...options, punctuation: false })).toBe(
       `J.${nbsp}R.${nbsp}R. said "it's 30${nbsp}min"`,

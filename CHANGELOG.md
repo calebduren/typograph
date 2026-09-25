@@ -4,6 +4,10 @@ Versions are releases of the npm package `@calebduren/typograph`. While it is at
 
 The site at typograph.dev deploys separately from the same repository. Site changes are noted where they matter to its readers.
 
+## Unreleased
+
+- Curl the apostrophe in possessives and plurals after a digit, such as `Q3's`, `2025's`, and `5's`, including with the apostrophes-only preset. Only `'s` followed by a space, punctuation, or the end of the text changes; foot and inch marks such as `5'11"`, `30' long`, and `6' rack` stay straight. While a reply streams, `Q3's` at the right edge waits for the next character.
+
 ## 0.4.0 — 2026-09-25
 
 - Keep quote context across raw HTML elements with their own content, such as `"frozen"<citation>x9</citation>`: the closing quote now curls. Inline formatting tags such as `<b>` still join the surrounding sentence; any other element, including custom ones, is preserved as a unit and its content receives no typography. While a reply streams, an element that has not closed yet stands alone and later text is still typeset.
