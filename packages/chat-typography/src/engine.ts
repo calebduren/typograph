@@ -1,6 +1,7 @@
 // Internal engine shared by the Markdown, plain-string, and HTML entry points.
 import { analyze } from '@typehug/en';
 import type { Nodes } from 'mdast';
+import { transparent } from './html-elements';
 import { elisions, openingContext, closingContext } from './quote-context';
 
 type Phase = 'streaming' | 'complete';
@@ -380,32 +381,107 @@ export interface CoreHooks {
   boundary(nodes: Writable[]): boolean;
 }
 
-function collectMdastSegments(parent: Node, settings: ChatTypographyOptions): Segment[] {
+// Void elements never have content; any other element may wrap its own.
+const voidElements = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
+// One raw inline HTML tag. Comments, processing instructions, and declarations do not match.
+const htmlTag = /^<(\/?)([A-Za-z][A-Za-z0-9-]*)(?:[\s/][\s\S]*)?>$/;
+
+type Collected = Segment | { kind: 'open'; name: string } | { kind: 'close'; name: string };
+
+/**
+ * Classify a raw inline HTML node the way the rehype entry point treats the element:
+ * inline formatting is invisible, links end a spacing run, and anything else is opaque.
+ */
+function htmlSegment(value: string): Collected {
+  const match = htmlTag.exec(value);
+  const name = match?.[2].toLowerCase();
+  if (!match || !name || transparent.has(name)) return { kind: 'literal', value: '' };
+  if (name === 'a') return { kind: 'boundary' };
+  if (name === 'br') return { kind: 'literal', value: '\n' };
+  if (name === 'wbr') return { kind: 'literal', value: '' };
+  if (match[1]) return { kind: 'close', name };
+  if (value.endsWith('/>') || voidElements.has(name)) return { kind: 'literal', value: '\ufffc' };
+  return { kind: 'open', name };
+}
+
+/**
+ * A matched open/close pair and everything between them become one protected
+ * stand-in. Matching runs on the flattened stream, so it crosses emphasis and
+ * links; a stack per name pairs nested elements of the same name. An unmatched
+ * tag, such as a streaming partial, stands alone and later text stays prose.
+ */
+function resolveElements(items: Collected[]): Segment[] {
+  const closeAt = new Map<number, number>();
+  const pending = new Map<string, number[]>();
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
+    if (item.kind === 'open') {
+      const opens = pending.get(item.name);
+      if (opens) opens.push(index);
+      else pending.set(item.name, [index]);
+    } else if (item.kind === 'close') {
+      const start = pending.get(item.name)?.pop();
+      if (start != null) closeAt.set(start, index);
+    }
+  }
   const segments: Segment[] = [];
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
+    if (item.kind === 'open' || item.kind === 'close') {
+      segments.push({ kind: 'literal', value: '\ufffc' });
+      index = closeAt.get(index) ?? index;
+    } else {
+      segments.push(item);
+    }
+  }
+  return segments;
+}
+
+function collectMdastSegments(parent: Node, settings: ChatTypographyOptions): Segment[] {
+  const items: Collected[] = [];
+  let elements = false;
   const stack: (Node | null)[] = [...(parent.children ?? [])].reverse();
   while (stack.length) {
     const node = stack.pop();
     if (!node) {
-      segments.push({ kind: 'boundary' });
+      items.push({ kind: 'boundary' });
     } else if (settings.skip?.(node as Nodes)) {
-      segments.push({ kind: 'literal', value: '\ufffc' });
+      items.push({ kind: 'literal', value: '\ufffc' });
     } else if (node.type === 'text' && typeof node.value === 'string') {
-      segments.push({ kind: 'text', node: node as TextNode });
+      items.push({ kind: 'text', node: node as TextNode });
     } else if (['emphasis', 'strong', 'delete'].includes(node.type)) {
       const children = node.children ?? [];
       for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]);
     } else if (node.type === 'link' || node.type === 'linkReference') {
-      segments.push({ kind: 'boundary' });
+      items.push({ kind: 'boundary' });
       stack.push(null);
       const children = node.children ?? [];
       for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]);
+    } else if (node.type === 'html') {
+      const item = htmlSegment(node.value ?? '');
+      if (item.kind === 'open' || item.kind === 'close') elements = true;
+      items.push(item);
     } else {
-      const value =
-        node.type === 'html' ? '' : node.type === 'break' ? '\n' : (node.value ?? '\ufffc');
-      segments.push({ kind: 'literal', value });
+      const value = node.type === 'break' ? '\n' : (node.value ?? '\ufffc');
+      items.push({ kind: 'literal', value });
     }
   }
-  return segments;
+  return elements ? resolveElements(items) : (items as Segment[]);
 }
 
 export function typesetSegments(

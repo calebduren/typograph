@@ -39,7 +39,7 @@ const remarkPlugins: StreamdownProps['remarkPlugins'] = [
 </Streamdown>;
 ```
 
-Use a known response language, not the interface language. English tags such as `en-US` and `en-GB` use the same house style, not separate regional conventions. Missing, invalid, or unsupported languages pass through. There is no automatic language detection; opt out of mixed-language or verbatim content as appropriate.
+Use a known response language, not the interface language. English tags such as `en-US` and `en-GB` use the same house style, not separate regional conventions. Missing, invalid, or unsupported languages pass through. There is no automatic language detection; opt out of mixed-language or verbatim content as appropriate. If the response language is unknown, use [apostrophes only](#when-the-response-language-is-unknown).
 
 The default changes quotation marks and apostrophes. Add `spacing: true` to enable conservative no-break pairs such as `30 min`, `Dr. Smith`, and `Fig. 2`. Spacing uses Typehug. All processing is local, and the SDK's original message is unchanged.
 
@@ -48,6 +48,18 @@ The landing-page demo starts with smart punctuation, non-breaking spaces, hangin
 The landing page's **Smart punctuation**, **Non-breaking spaces**, and **Hanging punctuation** switches share one configuration. The formatted preview, code recipes, and copied agent prompts all use those settings. The original preview remains a reference. **Highlight changes** belongs only to the formatted preview and is never installed in your app. You can disable smart punctuation with `punctuation: false` while keeping the other refinements enabled.
 
 Only assistant text parts belong in the prose renderer. Structured tool output should keep its own UI. Persist the original `part.text`, and use it for a clearly labeled Copy original action. Browser selection or copying rendered text includes curly punctuation and nonbreaking spaces.
+
+### When the response language is unknown
+
+Many products have no per-response language signal: no user or tenant language setting and no locale in the web app. In that case, convert apostrophes only:
+
+```ts
+[typography, { locale: 'en', punctuation: { quotes: false, apostrophes: true } }];
+```
+
+This turns `L'homme dit "bonjour" et c'est l'été.` into `L’homme dit "bonjour" et c’est l’été.` The typographic apostrophe is correct across Latin-script languages, so the preset is safe on prose of unknown language. Quotation marks stay as written, so regional conventions such as `« »` and `„ “` are left alone. This is not language detection, and the package remains English only.
+
+To enable quotes, take the locale from a tenant or user language setting, the language the system prompt tells the model to answer in, or a structured output field the model fills per response. Interface language alone is not enough.
 
 ### Keep the renderer's styling configured
 
@@ -138,9 +150,12 @@ Not every AI response streams. For text that is complete before it is shown, suc
 
 - **Markdown you render yourself:** run your usual pipeline with the plugin and `phase: 'complete'`, or call `typeset(markdown, { target: 'web' | 'email' | 'markdown', locale: 'en' })` from `@calebduren/typograph/static`. See the package README for the peers each target needs.
 - **HTML or email templates:** typeset the Markdown _before_ it enters the template, or typeset the finished HTML with `typeset(html, { input: 'html', target: 'email', locale: 'en' })`. The HTML route also covers prose the template adds, and it changes only typographic characters. Template-escaped quotes such as `&quot;` are curled.
+- **Templates rendered outside JavaScript,** such as a Python email renderer: typeset a separate copy with `typeset(markdown, { target: 'markdown', locale: 'en' })` when the text is generated, and pass that copy to the template. Keep the stored original unchanged; the same string may also feed SMS or copy actions.
 - **Plain strings** (titles, notifications, subject lines): `typesetText(text, { locale: 'en' })` from `@calebduren/typograph`. It is synchronous, parses no Markdown, and returns a string of the same length.
 
 Email output never includes hanging-punctuation markup: Gmail and Apple Mail on iOS do not render it. Quotes and nonbreaking spaces work in every client, because they are ordinary characters.
+
+Do not typeset a string that feeds SMS. A single curly quote or nonbreaking space moves a message from the GSM-7 alphabet to UCS-2 and cuts a segment from 160 to 70 characters. Typeset only the displayed copy. An SMS path can also fold curly marks back to straight before sending.
 
 ## Paragraph endings: CSS first
 
@@ -164,7 +179,7 @@ References: [Chrome's explanation of pretty wrapping](https://developer.chrome.c
 
 ## Scope and limits
 
-- English only. Multilingual support is not promised.
+- English only. Multilingual support is not promised. For prose of unknown language, use [apostrophes only](#when-the-response-language-is-unknown).
 - Code, math, raw HTML, link destinations, and literal content are protected.
 - Use `skip: node => ...` to leave an application-selected subtree unchanged.
 - Spacing is off by default. A token over 256 UTF-16 code units skips optional spacing for that prose run.
