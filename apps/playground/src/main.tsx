@@ -15,7 +15,9 @@ import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url&
 import benchmark from '../../../validation/chat-hardening-benchmark.json';
 import { version } from '../../../packages/chat-typography/package.json';
 import { typesetText } from '@calebduren/typograph';
+import { GradientBlinds } from './GradientBlinds';
 import { HeroScene } from './HeroScene';
+import { startSegmentThumbs } from './segments';
 import { QuoteReveal } from './QuoteReveal';
 import { microsecondsPerCall } from './speed';
 import '@calebduren/typograph/hanging.css';
@@ -242,6 +244,8 @@ const places = [
 ];
 
 const settledText = { locale: 'en', spacing: true } as const;
+// Ember reds for the header blinds: crisp stripes under a spotlight, not a pastel wash.
+const blinds = ['#ff6352', '#b3261a', '#3a0d08'];
 
 function PlaceVisual({ kind }: { kind: string }) {
   const lines = useMemo(
@@ -319,12 +323,27 @@ function Landing() {
     // React mounts after navigation, so initial fragment targets do not exist yet.
     const target = document.getElementById(window.location.hash.slice(1));
     target?.scrollIntoView({ behavior: 'instant' });
+    startSegmentThumbs();
   }, []);
   return (
     <>
       <a className="skip-link" href="#finished">
         Skip to the demo
       </a>
+      <div className="hero-backdrop">
+        <GradientBlinds
+          gradientColors={blinds}
+          angle={18}
+          noise={0.1}
+          blindCount={14}
+          blindMinWidth={72}
+          spotlightRadius={0.62}
+          spotlightSoftness={1.15}
+          spotlightOpacity={0.9}
+          mouseDampening={0.25}
+          pointerTarget="window"
+        />
+      </div>
       <header className="site-header" id="top">
         <div className="header-inner">
           <a className="wordmark" href="#top" aria-label="Typograph home">
@@ -342,7 +361,7 @@ function Landing() {
               GitHub <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
             </a>
           </nav>
-          <a className="button button-dark header-cta" href="#install">
+          <a className="button button-light header-cta" href="#install">
             Install
           </a>
         </div>
@@ -362,10 +381,10 @@ function Landing() {
             output. In chat streams, in email, and in every string in your product.
           </p>
           <div className="hero-actions">
-            <a className="button button-dark" href="#install">
+            <a className="button button-light" href="#install">
               Get started
             </a>
-            <a className="button button-light" href="#finished">
+            <a className="button button-dark" href="#finished">
               Try it on your text
             </a>
           </div>

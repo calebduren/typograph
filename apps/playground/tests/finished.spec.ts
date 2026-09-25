@@ -110,3 +110,35 @@ test('the workbench fits a phone without horizontal scrolling', async ({ page })
   );
   await expect(page.getByRole('textbox', { name: 'Input text' })).toBeVisible();
 });
+
+test('the header blinds render, and segmented thumbs follow the selection', async ({ page }) => {
+  await page.goto('/');
+  const blinds = page.locator('.hero-backdrop .gradient-blinds');
+  // WebGL draws a canvas; without it the element falls back to a CSS pattern.
+  await expect
+    .poll(async () =>
+      blinds.evaluate((node) => (node.querySelector('canvas') ? 'webgl' : node.dataset.fallback)),
+    )
+    .toMatch(/webgl|true/);
+  const control = page.getByRole('group', { name: 'Input' });
+  await expect(control).toHaveAttribute('data-thumb', 'ready');
+  const thumb = () =>
+    control.evaluate((node) => [
+      node.style.getPropertyValue('--thumb-x'),
+      node.style.getPropertyValue('--thumb-w'),
+    ]);
+  const markdown = await control
+    .getByRole('button', { name: 'Markdown' })
+    .evaluate((node) => [
+      `${(node as HTMLElement).offsetLeft}px`,
+      `${(node as HTMLElement).offsetWidth}px`,
+    ]);
+  expect(await thumb()).toEqual(markdown);
+  const html = control.getByRole('button', { name: 'HTML email' });
+  await html.click();
+  const target = await html.evaluate((node) => [
+    `${(node as HTMLElement).offsetLeft}px`,
+    `${(node as HTMLElement).offsetWidth}px`,
+  ]);
+  await expect.poll(thumb).toEqual(target);
+});

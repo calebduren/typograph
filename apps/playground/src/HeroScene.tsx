@@ -1,12 +1,4 @@
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { typesetText } from '@calebduren/typograph';
 
 const question = "Can you recap today's launch for the team?";
@@ -103,13 +95,6 @@ export function HeroScene() {
 
   return (
     <div className="scene" ref={scene}>
-      <div className="panels" aria-hidden="true">
-        {Array.from({ length: 7 }, (_, index) => (
-          <span key={index} style={{ '--i': index } as CSSProperties} />
-        ))}
-      </div>
-      <div className="grain" aria-hidden="true" />
-
       <Card className="card-notification">
         <span className="app-icon">“</span>
         <span className="card-lines">

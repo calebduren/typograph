@@ -129,15 +129,16 @@ components:
 
 # Design System: Typograph
 
-## Product direction (second redesign, 25 September 2026, user-directed)
+## Product direction (third iteration, 25 September 2026, user-directed)
 
-This pass treats Typograph as a product rather than a package, after references including popcorn.space, orchid.ai, duna.com, codedvisuals.com, gradients.cool, and Cult UI's hero color panels. Where it conflicts with the sections below, this section governs the homepage.
+Typograph is presented as a product, with Raycast as the reference for this iteration. Where this conflicts with the sections below, it governs the homepage.
 
-- **Palette.** Warm paper (#faf8f4) and ink (#1c1a17), never pure white or black, with a coral accent (#eb5a36) for changed glyphs and actions. Soft chromatic panels (amber, rose, lilac, sky, mint), blurred and grained, appear only as backdrops behind product scenes and in feature visuals. This supersedes the Monochrome Rule on the homepage.
-- **Type.** Inter Variable for interface and headlines (tight, −0.05em at display sizes). Instrument Serif italic, self-hosted under the SIL OFL, is a display accent: one or two words per headline with a coral-to-violet gradient, the footer wordmark, the header wordmark, and the reveal quote. Prose never uses the serif; italics in content keep the reader's face.
-- **Surfaces.** Rounded product windows and cards (24px) with soft warm shadows and translucent blur. This supersedes the Flat Surface Rule on the homepage.
-- **Motion.** The hero reply streams and loops; color panels drift; floating cards bob. All of it stops under reduced motion, and the stream pauses offscreen.
-- **Honesty.** The Live Proof Rule below still holds: the streaming hero, floating cards, reveal, bento visuals, stats timing, and workbench are all computed by the published package when the page is viewed.
+- **Dark by design.** Near-black ground (#07080a), white ink (#f5f5f6, never pure white), and grays at 62–91% lightness. Edges are Raycast-style: a 1px white-alpha ring, a faint top highlight, and a dark bottom edge, rather than borders. This supersedes the Monochrome and Flat Surface rules on the homepage.
+- **One accent.** Red (#ff6352) marks changed glyphs, the caret, the reveal handle, and the “New” badge. There are no pastel or rainbow gradients; glows use the accent alone.
+- **Header background.** Gradient Blinds (adapted from React Bits; see `apps/playground/THIRD_PARTY_NOTICES.md`) in ember reds under a pointer-following spotlight, veiled where the headline sits and masked into the page. It pauses offscreen and draws one still frame under reduced motion.
+- **Type.** Inter Variable for interface and headlines. Hedvig Letters Serif (roman only, optical size 12–24, SIL OFL) for display accents in a silver tone, the wordmarks, and the reveal quote. There is no italic, and none is synthesized.
+- **Controls.** Buttons follow Raycast's light (#e6e6e6, inset white top edge, dark outer ring) and dark (white 3→10% gradient, 22% ring) recipes at a 10px radius. Segmented controls are a recessed track with a raised thumb that slides to the selection; the thumb is positioned by `src/segments.ts` through CSS variables, and the pressed button draws its own surface without the script. Buttons are compact on desktop and 36px tall at 800px and below.
+- **Honesty.** The Live Proof Rule below still holds for every demonstration on the page.
 
 ## Overview
 
