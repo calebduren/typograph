@@ -445,7 +445,7 @@ select {
 }
 
 .toggle[data-motion='on'] .toggle-thumb {
-  transition: transform 180ms ease-out;
+  transition: transform 200ms var(--ease-out);
 }
 
 .mobile-comparison-switch {
@@ -776,7 +776,8 @@ mark::before,
 .slider-visual {
   width: 100%;
   pointer-events: none;
-  transition: transform 320ms cubic-bezier(0.22, 1.5, 0.36, 1);
+  /* After dragging past an end, a slight overshoot on release: the gesture carried momentum. */
+  transition: transform 320ms cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 
 .slider-visual[data-dragging='true'] {
@@ -789,7 +790,7 @@ mark::before,
   overflow: hidden;
   border-radius: 1rem;
   background: var(--line);
-  transition: height 160ms ease-out;
+  transition: height 160ms var(--ease-out);
 }
 
 .slider-fill {
@@ -1362,10 +1363,11 @@ mark[data-typograph-change='spacing']::before,
     transform: none !important;
   }
 
+  /* Gentler, not none: fades and color changes keep their timing; movement is instant. */
   *,
   *::before,
   *::after {
-    transition: none !important;
+    transition-property: opacity, color, background-color, border-color !important;
     animation: none !important;
   }
 }

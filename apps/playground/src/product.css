@@ -1,5 +1,5 @@
 /*
-  Product site: warm paper, olive ink, one lime accent. Components (comparison, toggles,
+  Product site: warm paper, olive-black ink, and one lime accent for typographic changes. Components (comparison, toggles,
   sliders, specimen) keep their structural rules in landing.css and inherit these tokens;
   legacy token names are aliased below.
 */
@@ -15,9 +15,6 @@
   --faint: #979b8f;
   --line: rgba(43, 50, 34, 0.1);
   --line-2: rgba(43, 50, 34, 0.17);
-  --olive: #2d3822;
-  --olive-hover: #3a4730;
-  --lime: #d5f27c;
   --lime-mark: rgba(197, 238, 88, 0.62);
   --lime-flash: rgba(184, 232, 60, 0.95);
   --accent-ink: #4f6d12;
@@ -33,14 +30,26 @@
   --radius: 12px;
   --radius-lg: 20px;
   --header: 4.5rem;
-  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Two shared curves: strong ease-out for things arriving or responding, ease-in-out for
+     motion that stays on screen. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* transitions-dev: text states swap */
+  --text-swap-dur: 200ms;
+  --text-swap-translate-y: 8px;
+  --text-swap-blur: 2px;
+  --text-swap-ease: ease-out;
   --edge: 0 0 0 1px var(--line);
+  /* Elevated surfaces carry their edge inside the shadow as one 0.5px hairline, never a border
+     beside a shadow (smooth-shadow-ring). The ring paints over the page, not the surface. */
+  --ring-width: 0.5px;
+  --ring: rgba(43, 50, 34, 0.1);
   --raised:
-    0 0 0 1px rgba(43, 50, 34, 0.07), 0 1px 2px rgba(43, 50, 34, 0.06),
+    0 0 0 var(--ring-width) var(--ring), 0 1px 2px rgba(43, 50, 34, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --shadow:
-    0 0 0 1px rgba(43, 50, 34, 0.06), 0 1px 2px rgba(43, 50, 34, 0.04),
-    0 18px 50px -18px rgba(43, 50, 34, 0.22);
+    0 0 0 var(--ring-width) var(--ring), 0 1px 2px rgba(43, 50, 34, 0.04),
+    0 18px 50px -18px rgba(43, 50, 34, 0.1);
 
   /* Legacy names used by landing.css and the workbench rules. */
   --coral: var(--accent-ink);
@@ -62,36 +71,36 @@
   font-family: var(--sans);
   background: var(--paper);
   color: var(--ink);
-  accent-color: var(--olive);
+  accent-color: var(--ink);
+  text-wrap: pretty;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
     --paper: #121410;
-    --paper-2: #181b15;
-    --card: #1d2119;
-    --card-2: #23281f;
+    --paper-2: #151713;
+    --card: #1b1c1a;
+    --card-2: #232422;
     --ink: #eceee5;
     --ink-2: #cfd3c5;
     --muted: #9ca191;
     --faint: #6f7566;
     --line: rgba(236, 238, 229, 0.09);
     --line-2: rgba(236, 238, 229, 0.16);
-    --olive: #d5f27c;
-    --olive-hover: #e2f79f;
-    --lime: #1f2716;
     --lime-mark: rgba(197, 238, 88, 0.3);
     --lime-flash: rgba(197, 238, 88, 0.75);
     --accent-ink: #cdef72;
     --pill: rgba(236, 238, 229, 0.08);
     --pill-hover: rgba(236, 238, 229, 0.13);
     --raw-mark: rgba(236, 238, 229, 0.1);
+    /* A dark ring needs far more alpha: it lands on the page, so a faint one vanishes. */
+    --ring: rgba(236, 238, 229, 0.18);
     --raised:
-      0 0 0 1px rgba(236, 238, 229, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 0 0 var(--ring-width) var(--ring), inset 0 1px 0 rgba(255, 255, 255, 0.04),
       0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow:
-      0 0 0 1px rgba(236, 238, 229, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 var(--ring-width) var(--ring), inset 0 1px 0 rgba(255, 255, 255, 0.03),
       0 24px 60px -20px rgba(0, 0, 0, 0.7);
     --softer: #242921;
     --soft: #343a2f;
@@ -153,7 +162,7 @@ main > * {
   color: var(--muted);
 }
 
-/* Buttons: soft pills, olive and lime for the primary action. */
+/* Buttons: soft pills; the primary action is ink on paper, inverted. */
 
 .button {
   display: inline-flex;
@@ -168,7 +177,7 @@ main > * {
   letter-spacing: -0.005em;
   transition:
     background-color 180ms ease,
-    transform 180ms var(--ease);
+    transform 160ms var(--ease-out);
 }
 
 .button:hover {
@@ -176,24 +185,41 @@ main > * {
 }
 
 .button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+/* Every pressable control answers the press itself, the moment it lands. */
+.command button,
+.recipe-copy,
+.pane-meta button,
+.segmented-control button {
+  transition:
+    color 160ms ease,
+    transform 160ms var(--ease-out);
+}
+
+.command button:active,
+.recipe-copy:active,
+.pane-meta button:active,
+.segmented-control button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .button-primary {
-  background: var(--olive);
-  color: var(--lime);
+  background: var(--ink);
+  color: var(--paper);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .button-primary:hover {
-  background: var(--olive-hover);
-  color: var(--lime);
+  background: var(--ink-2);
+  color: var(--paper);
 }
 
 .button-secondary {
   background: var(--pill);
   color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 0.5px var(--line);
 }
 
 .button-secondary:hover {
@@ -206,6 +232,7 @@ main > * {
 .segmented-control {
   position: relative;
   display: inline-flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 2px;
   padding: 3px;
@@ -233,11 +260,12 @@ main > * {
 
 .segmented-control[data-thumb='ready']::before {
   transition:
-    transform 260ms var(--ease),
-    width 260ms var(--ease);
+    transform 260ms var(--ease-out),
+    width 260ms var(--ease-out);
 }
 
 .segmented-control button {
+  white-space: nowrap;
   min-height: 1.875rem;
   padding: 0 0.875rem;
   border: 0;
@@ -247,7 +275,6 @@ main > * {
   color: var(--muted);
   font-size: 0.8125rem;
   font-weight: 500;
-  transition: color 160ms ease;
 }
 
 .segmented-control button:hover:not(:disabled) {
@@ -264,6 +291,42 @@ main > * {
 .segmented-control:not([data-thumb]) button[aria-pressed='true'] {
   background: var(--card-2);
   box-shadow: var(--raised);
+}
+
+/* Holds the widest label's width (set by SwapText), so the control never resizes. */
+.t-text-swap-frame {
+  display: inline-block;
+  text-align: center;
+}
+
+/* transitions-dev: text states swap, verbatim */
+.t-text-swap {
+  display: inline-block;
+  transform: translateY(0);
+  filter: blur(0);
+  opacity: 1;
+  transition:
+    transform var(--text-swap-dur) var(--text-swap-ease),
+    filter var(--text-swap-dur) var(--text-swap-ease),
+    opacity var(--text-swap-dur) var(--text-swap-ease);
+  will-change: transform, filter, opacity;
+}
+.t-text-swap.is-exit {
+  transform: translateY(calc(var(--text-swap-translate-y) * -1));
+  filter: blur(var(--text-swap-blur));
+  opacity: 0;
+}
+.t-text-swap.is-enter-start {
+  transform: translateY(var(--text-swap-translate-y));
+  filter: blur(var(--text-swap-blur));
+  opacity: 0;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-text-swap {
+    transition: none !important;
+  }
 }
 
 /* Header */
@@ -322,6 +385,23 @@ main > * {
   display: flex;
   align-items: center;
   gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+/* Hovering the wordmark spins each stroke half a turn, easing in and out. */
+.logo-mark path {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+
+.logo-mark[data-spin] path {
+  animation: logo-spin 760ms var(--ease-in-out) both;
+  animation-delay: calc(var(--stroke-index) * 38ms);
+}
+
+@keyframes logo-spin {
+  to {
+    transform: rotate(180deg);
+  }
 }
 
 .site-header nav {
@@ -435,8 +515,8 @@ main > .story {
 .badge-new {
   padding: 0.3125rem 0.625rem;
   border-radius: 7px;
-  background: var(--olive);
-  color: var(--lime);
+  background: var(--ink);
+  color: var(--paper);
   font-size: 0.875rem;
   font-weight: 560;
 }
@@ -517,21 +597,44 @@ main > .story {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 4px) scale(0.98);
+  /* It grows from its bottom edge, where it meets the word. */
+  transform: translate(-50%, 4px) scale(0.97);
+  transform-origin: 50% 100%;
+  /* Closing is quicker than opening. */
   transition:
-    opacity 160ms ease,
-    transform 220ms var(--ease);
+    opacity 100ms var(--ease-out),
+    transform 100ms var(--ease-out);
 }
 
-.term:hover .term-tip,
+/* Open after a short pause, so sweeping the pointer across the lede doesn't pop tooltips.
+   Hover opens only where hover is real; touch taps would leave a tooltip stuck open. */
+@media (hover: hover) and (pointer: fine) {
+  .term:hover .term-tip {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    transition:
+      opacity 150ms var(--ease-out) 120ms,
+      transform 150ms var(--ease-out) 120ms;
+  }
+}
+
 .term:focus-visible .term-tip {
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out);
+}
+
+/* Moving straight from one term to the next opens the next at once (Term sets data-instant). */
+.term[data-instant] .term-tip {
+  transition-duration: 0ms;
+  transition-delay: 0ms;
 }
 
 .term-pair {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: 0.75rem;
   font-size: 1.625rem;
@@ -543,8 +646,9 @@ main > .story {
 }
 
 .term-arrow {
-  font-family: var(--sans);
-  font-size: 0.875rem;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
   color: var(--faint);
 }
 
@@ -621,6 +725,9 @@ main > .story {
 .stream-label {
   display: flex;
   align-items: center;
+  /* Both labels share one height, so the rules and the first lines align across columns. */
+  height: 2.75rem;
+  box-sizing: content-box;
   gap: 0.4375rem;
   margin-bottom: clamp(1rem, 2.5vh, 1.75rem);
   padding-bottom: 0.875rem;
@@ -692,7 +799,7 @@ main > .story {
 .stream-reply mark {
   position: relative;
   z-index: -1;
-  border-radius: 3px;
+  border-radius: 0.5px;
   color: inherit;
 }
 
@@ -704,7 +811,7 @@ main > .story {
 .m-typeset {
   background: var(--lime-mark);
   box-shadow: 0 0 0 0.06em var(--lime-mark);
-  animation: settle 900ms var(--ease) both;
+  animation: settle 900ms var(--ease-out) both;
 }
 
 .m-typeset.m-space {
@@ -721,7 +828,7 @@ main > .story {
 }
 
 .stream-live .stream-token {
-  animation: arrive 260ms ease-out both;
+  animation: arrive 260ms var(--ease-out) both;
 }
 
 @keyframes arrive {
@@ -791,6 +898,7 @@ main > .story {
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--muted);
+  text-wrap: balance;
 }
 
 .stats a {
@@ -829,7 +937,6 @@ main > .story {
   color: var(--muted);
   font-size: 1.125rem;
   line-height: 1.55;
-  text-wrap: pretty;
 }
 
 /* Places */
@@ -897,6 +1004,7 @@ main > .story {
   place-items: center;
   height: 12.5rem;
   overflow: hidden;
+  padding: 1rem;
   border-radius: calc(var(--radius-lg) - 6px);
   background:
     radial-gradient(circle at 1px 1px, var(--line-2) 1px, transparent 0) 0 0 / 18px 18px,
@@ -921,8 +1029,8 @@ main > .story {
 .mini-bubble.user {
   justify-self: end;
   border-bottom-right-radius: 4px;
-  background: var(--olive);
-  color: var(--lime);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .mini-bubble.ai {
@@ -959,7 +1067,7 @@ main > .story {
 
 .mini-subject {
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .mini-line {
@@ -991,12 +1099,13 @@ main > .story {
 }
 
 .visual-html code {
-  padding: 1rem 1.25rem;
+  padding: 0.8125rem 1.25rem 1.25rem;
   border-radius: 14px;
   background: var(--card-2);
   box-shadow: var(--raised);
   color: var(--ink-2);
   font-size: 0.875rem;
+  margin-top: 0;
 }
 
 .visual-html .strike {
@@ -1246,15 +1355,15 @@ main > .story {
   /* An eased fade: opacity follows a smooth curve rather than a straight line. */
   background: linear-gradient(
     180deg,
-    var(--ink) 8%,
-    color-mix(in srgb, var(--ink) 96%, transparent) 20%,
-    color-mix(in srgb, var(--ink) 88%, transparent) 32%,
-    color-mix(in srgb, var(--ink) 76%, transparent) 44%,
-    color-mix(in srgb, var(--ink) 60%, transparent) 55%,
-    color-mix(in srgb, var(--ink) 42%, transparent) 65%,
-    color-mix(in srgb, var(--ink) 25%, transparent) 75%,
-    color-mix(in srgb, var(--ink) 12%, transparent) 84%,
-    color-mix(in srgb, var(--ink) 4%, transparent) 92%,
+    var(--pill) 8%,
+    color-mix(in srgb, var(--pill) 96%, transparent) 20%,
+    color-mix(in srgb, var(--pill) 88%, transparent) 32%,
+    color-mix(in srgb, var(--pill) 76%, transparent) 44%,
+    color-mix(in srgb, var(--pill) 60%, transparent) 55%,
+    color-mix(in srgb, var(--pill) 42%, transparent) 65%,
+    color-mix(in srgb, var(--pill) 25%, transparent) 75%,
+    color-mix(in srgb, var(--pill) 12%, transparent) 84%,
+    color-mix(in srgb, var(--pill) 4%, transparent) 92%,
     transparent 100%
   );
   -webkit-background-clip: text;
@@ -1262,7 +1371,7 @@ main > .story {
   color: transparent;
   font-family: var(--serif);
   font-variation-settings: 'opsz' 24;
-  font-size: clamp(5.5rem, 21vw, 19rem);
+  font-size: min(19rem, 19vw);
   line-height: 1.04;
   letter-spacing: 0;
   text-align: center;
@@ -1848,22 +1957,15 @@ main > .story {
     --header: 3.75rem;
   }
 
+  /* Compact on phones: still well above the 24px WCAG 2.2 AA target size. */
   .segmented-control button {
-    min-height: 2.4rem;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .wordmark {
     font-size: 1.5rem;
-  }
-
-  .kern-word {
-    white-space: nowrap;
-  }
-
-  .header-end {
-    display: flex;
-    align-items: center;
-    gap: clamp(1.25rem, 3vw, 2.5rem);
   }
 
   .site-header nav {
@@ -1875,13 +1977,89 @@ main > .story {
   }
 
   .button {
-    min-height: 2.875rem;
-    font-size: 1rem;
+    min-height: 2.5rem;
+    padding: 0 1.125rem;
+    font-size: 0.9375rem;
   }
 
+  .command {
+    gap: 0.75rem;
+    padding: 0.25rem 0.25rem 0.25rem 1.125rem;
+    font-size: 0.875rem;
+  }
+
+  .command button {
+    min-height: 2.125rem;
+    padding: 0 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Stacked on a phone, both columns stay small enough to read together on one screen. */
   .stream-columns {
     grid-template-columns: minmax(0, 1fr);
-    gap: 3rem;
+    gap: 1.25rem;
+  }
+
+  .stream-label {
+    height: 2rem;
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .stream-reply {
+    font-size: 0.9375rem;
+    line-height: 1.42;
+  }
+
+  .stream-reply p + p {
+    margin-top: 0.55em;
+  }
+
+  /* A hero taller than the screen scrolls in full before it pins (StreamStory sets its top). */
+  .story-hero {
+    height: auto;
+    min-height: 100svh;
+    place-items: start center;
+  }
+
+  .hero {
+    padding: calc(var(--header) + 1.5rem) 0 3rem;
+  }
+
+  .hero h1 {
+    margin-top: 1.75rem;
+  }
+
+  .hero-lede {
+    margin-top: 1.5rem;
+  }
+
+  .hero-actions {
+    margin-top: 1.75rem;
+  }
+
+  /* The workbench toolbar stacks: each control gets the full width, buttons share it evenly. */
+  .bench-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bench-bar .segmented-control {
+    display: flex;
+    width: 100%;
+  }
+
+  .bench-bar .segmented-control button {
+    flex: 1;
+    padding-inline: 0.5rem;
+  }
+
+  .bench-target {
+    width: 100%;
+  }
+
+  .bench-target > span {
+    display: none;
   }
 
   .bench-panes {
@@ -1913,6 +2091,57 @@ main > .story {
   }
 }
 
+@media (max-width: 420px) {
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats > div {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .stats span {
+    max-width: none;
+    margin-top: 0;
+    text-wrap: pretty;
+  }
+}
+
+@media (max-width: 380px) {
+  .header-end,
+  .site-header nav {
+    gap: 0.875rem;
+  }
+
+  .site-header nav {
+    font-size: 0.9375rem;
+  }
+
+  .header-cta {
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .hero-actions {
+    gap: 0.625rem;
+  }
+
+  .hero-actions .button {
+    padding: 0 0.9375rem;
+    font-size: 0.875rem;
+  }
+
+  .bench-bar .segmented-control button {
+    padding-inline: 0.25rem;
+    font-size: 0.75rem;
+  }
+}
+
 @media (max-width: 520px) {
   .specimen-controls .typography-settings-switches {
     grid-template-columns: minmax(0, 1fr);
@@ -1920,14 +2149,6 @@ main > .story {
 
   .wordmark > span {
     display: none;
-  }
-
-  .hero-actions {
-    width: 100%;
-  }
-
-  .hero-actions .button {
-    flex: 1 1 100%;
   }
 
   .hero .command {
@@ -1939,15 +2160,49 @@ main > .story {
   }
 }
 
+/* Reduced transparency: a solid header instead of a frosted one. */
+@media (prefers-reduced-transparency: reduce) {
+  .site-header {
+    background: var(--paper);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .logo-mark[data-spin] path,
   .caret,
   .stream-token,
   .m-typeset {
     animation: none !important;
   }
 
+  /* Gentler, not none: fades and color changes stay; movement and scaling go. */
   .button,
+  .command button,
+  .recipe-copy,
+  .pane-meta button,
+  .segmented-control button {
+    transition:
+      background-color 180ms ease,
+      color 160ms ease;
+  }
+
+  .button:active,
+  .command button:active,
+  .recipe-copy:active,
+  .pane-meta button:active,
+  .segmented-control button:active:not(:disabled) {
+    transform: none;
+  }
+
   .term-tip,
+  .term:hover .term-tip,
+  .term:focus-visible .term-tip {
+    transform: translate(-50%, 0);
+    transition: opacity 150ms ease;
+  }
+
   .segmented-control[data-thumb='ready']::before {
     transition: none;
   }

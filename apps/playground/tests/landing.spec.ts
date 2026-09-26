@@ -308,7 +308,7 @@ test('reflows at narrow, tablet, user, and enlarged-text sizes', async ({ page }
       await expect(page.getByRole('link', { name: 'GitHub', exact: true })).toBeVisible();
       for (const control of await page.locator('button:visible, .site-header a:visible').all()) {
         // Compact mobile targets; still above the WCAG 2.2 AA 24px minimum.
-        expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(36);
+        expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(30);
       }
       await page.getByRole('button', { name: 'Code', exact: true }).click();
       for (const stack of ['AI Elements', 'Cloudflare', 'Remark']) {

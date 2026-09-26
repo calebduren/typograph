@@ -3,13 +3,35 @@ import { typesetText } from '@calebduren/typograph';
 import { Kern } from './Kern';
 import { LogoMark } from './LogoMark';
 
-const reply = `Here's the launch note for Friday's all-hands:
+/** Today's date the way a model writes it: “Saturday, September 26th.” */
+function today(date = new Date()) {
+  const day = date.getDate();
+  const suffix =
+    day % 100 >= 11 && day % 100 <= 13 ? 'th' : (['th', 'st', 'nd', 'rd'][day % 10] ?? 'th');
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const month = date.toLocaleDateString('en-US', { month: 'long' });
+  return `${weekday}, ${month} ${day}${suffix}`;
+}
 
-"Atlas" ships Friday morning. It's twice as fast as last year's build, 40 MB lighter, and opens a 300-page doc in under 2 s.
+/** The weekday `count` working days from today: Saturday's next working day is Monday. */
+function workday(count: number, date = new Date()) {
+  const day = new Date(date);
+  while (count > 0) {
+    day.setDate(day.getDate() + 1);
+    if (day.getDay() !== 0 && day.getDay() !== 6) count--;
+  }
+  return day.toLocaleDateString('en-US', { weekday: 'long' });
+}
 
-"We didn't set out to build the fastest editor," Dr. Chen said in Monday's review. "We set out to build the one you'd trust with a sentence that says 'final.'"
+// A daily brief, dated today, with the week's plans ahead of it. Paragraphs that hang a quote
+// open on a straight-sided capital.
+const reply = `Here's your daily brief for ${today()}:
 
-Rollout takes about 30 min per region. If you're on the beta, you'll see it tonight. There's nothing to install, and nothing you've written will change.`;
+"Every launch this quarter shipped on time," Leland wrote in last night's update. The Q3 review moves to ${workday(2)} and it's down to 25 min.
+
+It's clear and 18 °C by noon. Your run is 5 km, so you'll be back before Dr. Osei's call.
+
+"Don't forget," Joan added, "the team's calling ${workday(1)}'s demo 'the big one.'"`;
 
 // Split like a model would: short, uneven tokens, so quotes arrive before their words.
 const tokens = reply.match(/\n\n|[ ]?[^\s"]{1,4}|[ ]?"/g) ?? [reply];
@@ -113,9 +135,14 @@ function useReducedMotion() {
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
-// Streaming starts as the columns come into view, and most of it happens while they are still
-// moving up the page. The columns then pin for this share of the stream to finish it.
+// The columns pin for this share of the section's scroll once they reach the top.
 const pinnedShare = 0.2;
+// The stream runs across this part of the section's scroll: it waits for the columns to settle
+// in, and finishes shortly after they pin, so the complete reply holds before moving on.
+const streamStart = 0.18;
+const streamEnd = 0.84;
+
+const easeOut = (t: number) => 1 - (1 - t) ** 4;
 
 /**
  * The hero, then a two-column stream whose pace is the reader's scroll. The hero stays pinned
@@ -182,6 +209,9 @@ export function StreamStory({ hero }: { hero: ReactNode }) {
       span = moving + pinned;
       stage.current!.style.top = `${pinTop}px`;
       track.current!.style.height = `${height + pinned}px`;
+      // A hero taller than the screen pins once its end is in view, so all of it gets read.
+      const hero = heroLayer.current!;
+      hero.style.top = `${Math.min(0, viewport - hero.offsetHeight)}px`;
     };
     measure();
 
@@ -209,16 +239,21 @@ export function StreamStory({ hero }: { hero: ReactNode }) {
         hero.style.opacity = String(1 - e * 0.94);
         hero.style.visibility = e > 0.999 ? 'hidden' : '';
       }
-      // The columns scale up into place as they arrive.
+      // The columns rise and scale into place on a curve: they start behind the scroll, then
+      // catch up and settle, rather than tracking it one to one.
       const grid = columns.current;
       if (grid) {
-        const e = 1 - (1 - enter) ** 3;
-        grid.style.transform = e < 1 ? `scale(${(0.9 + e * 0.1).toFixed(4)})` : '';
-        grid.style.opacity = String(0.35 + e * 0.65);
+        const e = easeOut(enter);
+        grid.style.transform =
+          e < 1
+            ? `translateY(${((1 - e) * 16).toFixed(3)}vh) scale(${(0.9 + e * 0.1).toFixed(4)})`
+            : '';
+        grid.style.opacity = String(0.3 + e * 0.7);
       }
 
       // Scroll distance maps to tokens, eased so text flows rather than jumps.
-      const target = clamp((viewport - top) / span) * tokens.length;
+      const progress = clamp((viewport - top) / span);
+      const target = clamp((progress - streamStart) / (streamEnd - streamStart)) * tokens.length;
       if (eased < 0) eased = target;
       eased += (target - eased) * (1 - Math.exp(-dt / 0.12));
       if (Math.abs(target - eased) < 0.02) eased = target;

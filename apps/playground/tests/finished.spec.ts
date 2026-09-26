@@ -17,9 +17,11 @@ test('scrolling streams the reply, and the package typesets it live', async ({ p
   const raw = page.locator('.stream-column[data-side="raw"] .stream-live');
   const typeset = page.locator('.stream-column[data-side="typeset"] .stream-live');
   await expect(typeset).toHaveText('');
-  await scrollStream(page, 0.25);
-  await expect(typeset).toContainText('Here’s the launch note for Friday’s');
-  await expect(raw).toContainText("Here's the launch note for Friday's");
+  await scrollStream(page, 0.3);
+  // The brief is always dated today, in the visitor's own clock.
+  const weekday = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  await expect(typeset).toContainText(`Here’s your daily brief for ${weekday},`);
+  await expect(raw).toContainText("Here's your daily brief for");
   await expect(typeset.locator('mark.m-typeset').first()).toBeVisible();
   // The raw pane marks the same characters, so each fix lines up with its original.
   const [rawMarks, typesetMarks] = await page.evaluate(() =>
@@ -33,13 +35,12 @@ test('scrolling streams the reply, and the package typesets it live', async ({ p
   await expect(page.locator('.story-hero')).toHaveCSS('filter', /blur/);
 
   await scrollStream(page, 1);
-  await expect(typeset).toContainText('nothing you’ve written will change.');
-  await expect(typeset).toContainText(`says ‘final.’”`);
+  await expect(typeset).toContainText(`’s demo ‘the big one.’”`);
   // Paragraphs that open with a quote hang it in the margin, in the typeset column only.
   await expect(typeset.locator('.typograph-opening')).toHaveCount(2);
   await expect(raw.locator('.typograph-opening')).toHaveCount(0);
-  await expect(typeset).toContainText(`30${NBSP}min`);
-  await expect(raw).toContainText(`says 'final.'"`);
+  await expect(typeset).toContainText(`25${NBSP}min`);
+  await expect(raw).toContainText(`demo 'the big one.'"`);
 
   // Scrolling back rewinds the stream.
   await scrollStream(page, 0);
@@ -50,9 +51,29 @@ test('reduced motion shows the finished reply without pinning or zoom', async ({
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const typeset = page.locator('.stream-column[data-side="typeset"] .stream-live');
-  await expect(typeset).toContainText('nothing you’ve written will change.');
+  await expect(typeset).toContainText(`demo ‘the big one.’”`);
   await expect(page.locator('.story-hero')).toHaveCSS('position', 'relative');
   await expect(page.locator('.stream-stage')).toHaveCSS('position', 'relative');
+});
+
+test('copy labels swap without resizing their buttons', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  for (const name of ['Copy install command', 'Copy agent prompt']) {
+    const button = page.getByRole('button', { name }).first();
+    await button.scrollIntoViewIfNeeded();
+    const before = (await button.boundingBox())!.width;
+    await button.click();
+    await expect(button).toHaveText('Copied');
+    expect(Math.abs((await button.boundingBox())!.width - before)).toBeLessThan(0.5);
+  }
+  // The integration button also keeps its width between its two formats.
+  const recipe = page.getByRole('button', { name: 'Copy agent prompt' });
+  const width = (await recipe.boundingBox())!.width;
+  await page.getByRole('button', { name: 'Code', exact: true }).click();
+  const code = page.getByRole('button', { name: 'Copy integration code' });
+  await expect(code).toHaveText('Copy code');
+  expect(Math.abs((await code.boundingBox())!.width - width)).toBeLessThan(0.5);
 });
 
 test('the changelog is typeset by the package and linked from every page', async ({ page }) => {
@@ -72,7 +93,7 @@ test('the changelog is typeset by the package and linked from every page', async
 test('the workbench typesets your own text with the real package', async ({ page }) => {
   const foreign: string[] = [];
   page.on('request', (request) => {
-    if (!request.url().startsWith('http://127.0.0.1:4174')) foreign.push(request.url());
+    if (!request.url().startsWith(test.info().project.use.baseURL!)) foreign.push(request.url());
   });
   await page.goto('/#finished');
   const summary = page.getByTestId('bench-summary');

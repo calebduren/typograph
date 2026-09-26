@@ -11,7 +11,7 @@ export function SiteHeader({ home, install }: { home: string; install: string })
     <header className="site-header" id="top">
       <div className="header-inner">
         <a className="wordmark" href={home} aria-label="Typograph home">
-          <LogoMark />
+          <LogoMark spin />
           <span aria-hidden="true">
             <Kern>typograph</Kern>
           </span>

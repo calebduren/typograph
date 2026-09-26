@@ -1,11 +1,14 @@
-"""Measure the clear space between adjacent glyphs in Typograph's serif headings.
+"""Generate hand kerning for Typograph's serif headings.
 
-Shapes each heading with HarfBuzz (Hedvig Letters Serif at opsz 24, font kerning and ligatures
-on, zero tracking), then reports every pair whose outlines come within 0.03em. Pairs under
-0.02em get the printed hand-kerning value in apps/playground/src/Kern.tsx.
+Finds every `<Kern>` string in apps/playground/src, shapes it with HarfBuzz (Hedvig Letters
+Serif at opsz 24, font kerning and ligatures on, zero tracking), and measures the clear space
+between each pair of adjacent letter outlines. Display type set at text spacing reads loose, so
+each pair is pulled toward a common clearance in proportion to how far it sits from it: loose
+pairs such as `Yo` or `he` tighten most, and no pair ends closer than 0.02em. Ligatures are
+never split. Writes apps/playground/src/kerning.ts.
 
     python3 -m venv .venv && .venv/bin/pip install fonttools brotli uharfbuzz shapely
-    .venv/bin/python scripts/measure-hedvig-kerning.py "Your AI writes," "typograph polishes"
+    .venv/bin/python scripts/measure-hedvig-kerning.py
 """
 import uharfbuzz as hb, sys
 from fontTools.ttLib import TTFont
@@ -66,49 +69,78 @@ def shape(g):
     cache[g]=geom
     return geom
 from shapely import affinity
-texts=sys.argv[1:]
-res={}
-for text in texts:
-    b=hb.Buffer(); b.add_str(text); b.guess_segment_properties()
-    hb.shape(font,b,{'kern':True,'liga':True,'calt':True})
-    x=0; placed=[]
-    for info,pos in zip(b.glyph_infos,b.glyph_positions):
-        geom=shape(info.codepoint)
-        if geom is not None and not geom.is_empty:
-            placed.append((info.cluster, affinity.translate(geom, x+pos.x_offset, pos.y_offset)))
-        x+=pos.x_advance
-    for (c1,a),(c2,bb) in zip(placed,placed[1:]):
-        pair=text[c1:c2+1] if c2>c1 else text[c1]
-        d=a.distance(bb)/upm
-        key=text[c1]+text[c2] if c2<len(text) else pair
-        if key not in res or d<res[key]: res[key]=d
+import html, pathlib, re, json
+root = pathlib.Path(__file__).resolve().parents[1]
+src = root / 'apps/playground/src'
+texts = sorted({html.unescape(m) for f in src.glob('*.tsx') for m in re.findall(r'<Kern>([^<{}]+)</Kern>', f.read_text())})
+
+def shaped(text, **features):
+    b = hb.Buffer(); b.add_str(text); b.guess_segment_properties()
+    hb.shape(font, b, {'kern': True, 'liga': True, 'calt': True, **features})
+    return b
+
 def advance(text):
-    b=hb.Buffer(); b.add_str(text); b.guess_segment_properties()
-    hb.shape(font,b,{'kern':True,'liga':False})
-    return sum(p.x_advance for p in b.glyph_positions)
+    return sum(p.x_advance for p in shaped(text, liga=False).glyph_positions)
+
+kern = lambda pair: round((advance(pair) - advance(pair[0]) - advance(pair[1])) / upm, 3)
+# Two letters that shape to one glyph are a ligature; splitting them into spans would break it.
+ligatures = sorted({t[i:i+2] for t in texts for i in range(len(t) - 1)
+                    if t[i:i+2].isalpha() and len(shaped(t[i:i+2]).glyph_infos) == 1})
+
+# Clearance between adjacent letter outlines, measured in context (the tightest occurrence).
+res = {}
+for text in texts:
+    b = shaped(text, liga=False)
+    x = 0; placed = []
+    for info, pos in zip(b.glyph_infos, b.glyph_positions):
+        geom = shape(info.codepoint)
+        if geom is not None and not geom.is_empty:
+            placed.append((info.cluster, affinity.translate(geom, x + pos.x_offset, pos.y_offset)))
+        x += pos.x_advance
+    for (c1, a), (c2, bb) in zip(placed, placed[1:]):
+        if c2 != c1 + 1: continue  # across a space
+        key = text[c1] + text[c2]
+        d = a.distance(bb) / upm
+        if key not in res or d < res[key]: res[key] = d
+
+# Pull each pair toward the common clearance by a share of its distance from it, never below
+# the floor and never more than the cap.
+common, share, floor, cap = 0.05, 0.3, 0.02, 0.035
+def adjustment(d):
+    return max(max(-share * (d - common), -cap), floor - d)
+
+protected = {c for pair in ligatures for c in pair}
+def splittable(text, i):
+    # A letter inside a ligature stays in its run.
+    return not (text[i-1:i+1] in ligatures or text[i:i+2] in ligatures)
 
 # A span with letter-spacing starts a new shaping run, so the browser drops the font's kern on
-# both sides of it. Each hand value restores the font's kern for the pair it starts and adds any
-# missing clearance; pairs that end at a span get their kern restored the same way, repeated
-# until no dropped kern remains.
-target=0.02
-kern=lambda pair: round((advance(pair)-advance(pair[0])-advance(pair[1]))/upm, 3)
-table={k: round(kern(k)+target-d, 3) for k,d in res.items() if len(k)==2 and d<target}
-changed=True
+# both sides of it. Each value therefore restores the font's kern for the pair it starts, and
+# pairs that end at a span get their kern restored the same way, until none is dropped.
+table = {}
+for k, d in res.items():
+    if k in ligatures: continue
+    adj = adjustment(d)
+    if abs(adj) >= 0.002: table[k] = round(kern(k) + adj, 3)
+changed = True
 while changed:
-    changed=False
+    changed = False
     for text in texts:
-        for i in range(1, len(text)-1):
-            before=text[i-1:i+1]
-            if text[i:i+2] in table and before not in table and kern(before):
-                table[before]=kern(before)
-                changed=True
-print('pair  clearance  font-kern')
-for k,d in sorted(res.items(), key=lambda kv: kv[1]):
-    if d<0.03 and len(k)==2: print(f"{k!r:5} {d:9.4f}  {kern(k):9.3f}")
-print()
-print('export const kerning: Record<string, number> = {')
-for k,v in sorted(table.items(), key=lambda kv: -kv[1]):
-    key=k if k.isalpha() else repr(k)
-    print(f"  {key}: {v},")
-print('};')
+        for i in range(1, len(text) - 1):
+            before = text[i-1:i+1]
+            if (text[i:i+2] in table and splittable(text, i) and before not in table
+                    and before not in ligatures and kern(before)):
+                table[before] = kern(before); changed = True
+
+print(f'{len(texts)} headings, {len(res)} letter pairs, {len(table)} kerned, ligatures: {" ".join(ligatures)}')
+for k in ['Yo', 'ou', 'it', 'po', 'ol', 'he']:
+    if k in res: print(f'  {k}: clearance {res[k]:.3f}em -> {res[k] + adjustment(res[k]):.3f}em')
+
+lines = ['// Generated by scripts/measure-hedvig-kerning.py. Do not edit by hand.', '',
+         '/** Letter-spacing, in em, after the first glyph of each pair (see Kern.tsx). */',
+         'export const kerning: Record<string, number> = {']
+for k, v in sorted(table.items()):
+    lines.append(f'  {json.dumps(k, ensure_ascii=False)}: {v},')
+lines += ['};', '', '/** Pairs Hedvig sets as one ligature glyph; never split them. */',
+          f'export const ligatures = new Set({json.dumps(ligatures)});', '']
+(src / 'kerning.ts').write_text('\n'.join(lines))

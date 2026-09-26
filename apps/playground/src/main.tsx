@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { TypographyControls } from './TypographyControls';
 import { agentPrompt } from './agent-prompts';
 import { useScrollFade } from './use-scroll-fade';
@@ -19,6 +19,7 @@ import { Kern } from './Kern';
 import { SiteFooter, SiteHeader } from './SiteHeader';
 import { startSegmentThumbs } from './segments';
 import { StreamStory } from './StreamStory';
+import { SwapText } from './SwapText';
 import { microsecondsPerCall } from './speed';
 import '@calebduren/typograph/hanging.css';
 import './fonts.css';
@@ -64,7 +65,7 @@ function Integration({
         <h2 id="integration-title">
           <Kern>A small addition.</Kern>
           <br />
-          <Kern>Right where you render.</Kern>
+          <Kern>Right where you&nbsp;render.</Kern>
         </h2>
         <p className="muted">Works in the browser. No model call, API key, or new service.</p>
         <CopyCommand command="npm install @calebduren/typograph" />
@@ -121,7 +122,9 @@ function Integration({
             }}
           >
             <span aria-live="polite">
-              {copied ? 'Copied' : mode === 'prompt' ? 'Copy prompt' : 'Copy code'}
+              <SwapText labels={['Copy prompt', 'Copy code', 'Copied']}>
+                {copied ? 'Copied' : mode === 'prompt' ? 'Copy prompt' : 'Copy code'}
+              </SwapText>
             </span>
           </button>
         </div>
@@ -181,6 +184,7 @@ function Integration({
 const kb = (benchmark.bundle.gzipBytes / 1024).toFixed(1);
 
 function CopyCommand({ command }: { command: string }) {
+  const code = useRef<HTMLElement>(null);
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   useEffect(() => {
     if (state === 'idle') return;
@@ -189,7 +193,7 @@ function CopyCommand({ command }: { command: string }) {
   }, [state]);
   return (
     <div className="command">
-      <code>
+      <code ref={code}>
         <span className="command-prompt" aria-hidden="true">
           $
         </span>
@@ -202,12 +206,16 @@ function CopyCommand({ command }: { command: string }) {
             await navigator.clipboard.writeText(command);
             setState('copied');
           } catch {
+            // Clipboard blocked: select the command so a keyboard copy finishes the job.
+            if (code.current) window.getSelection()?.selectAllChildren(code.current);
             setState('failed');
           }
         }}
       >
         <span aria-live="polite">
-          {state === 'copied' ? 'Copied' : state === 'failed' ? 'Select to copy' : 'Copy'}
+          <SwapText labels={['Copy', 'Copied', 'Selected']}>
+            {state === 'copied' ? 'Copied' : state === 'failed' ? 'Selected' : 'Copy'}
+          </SwapText>
         </span>
       </button>
     </div>
@@ -260,19 +268,31 @@ function Glyphs({ text }: { text: string }) {
   );
 }
 
+// When the pointer leaves one term, the next term entered soon after opens its tooltip at once.
+let lastTermClosed = 0;
+
 /** A lede term that previews its own fix, run through the package, on hover or focus. */
 function Term({ children, sample, note }: { children: ReactNode; sample: string; note: string }) {
   const id = useId();
   const fixed = useMemo(() => typesetText(sample, settledText), [sample]);
   return (
-    <span className="term" tabIndex={0} aria-describedby={id}>
+    <span
+      className="term"
+      tabIndex={0}
+      aria-describedby={id}
+      onPointerEnter={(event) => {
+        if (performance.now() - lastTermClosed < 400) event.currentTarget.dataset.instant = '';
+      }}
+      onPointerLeave={(event) => {
+        lastTermClosed = performance.now();
+        delete event.currentTarget.dataset.instant;
+      }}
+    >
       {children}
       <span className="term-tip" role="tooltip" id={id}>
         <span className="term-pair">
           <span className="term-before">{sample}</span>
-          <span className="term-arrow" aria-hidden="true">
-            →
-          </span>
+          <ArrowRight className="term-arrow" aria-hidden="true" strokeWidth={1.5} />
           <span className="term-after">
             <Glyphs text={fixed} />
           </span>
@@ -442,7 +462,7 @@ function Landing() {
               {microseconds.toFixed(microseconds < 10 ? 1 : 0)}
               <small>µs</small>
             </strong>
-            <span>per call, measured just now in your browser</span>
+            <span>Per call, measured just now in your browser</span>
           </div>
           <div>
             <strong>
@@ -458,11 +478,11 @@ function Landing() {
           </div>
           <div>
             <strong>0</strong>
-            <span>network requests. It never phones home.</span>
+            <span>Network requests. It never phones home.</span>
           </div>
           <div>
             <strong>1</strong>
-            <span>runtime dependency, for no-break spacing</span>
+            <span>Runtime dependency, for no-break spacing</span>
           </div>
         </section>
 
@@ -496,8 +516,9 @@ function Landing() {
               <Kern>Try it on your own text.</Kern>
             </h2>
             <p>
-              This is the published package, running in your browser. Paste a brief, an email
-              template, or a notification. Nothing leaves the page.
+              This is the published package, running in your browser.
+              <br />
+              Paste your text. Nothing leaves the page.
             </p>
           </div>
           <Suspense fallback={<p role="status">Loading the workbench…</p>}>
