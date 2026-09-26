@@ -195,6 +195,37 @@ describe('chat typography candidate', () => {
   });
 
   it.each([
+    ["Q3's close.", 'Q3’s close.'],
+    ["Beat 2025's numbers.", 'Beat 2025’s numbers.'],
+    ["The 1990s' fashion.", 'The 1990s’ fashion.'],
+    [`She is 5'11" tall.`, `She is 5'11" tall.`],
+    ["It is 30' long.", "It is 30' long."],
+    ["Room 12'Sam.", "Room 12'Sam."],
+    [`"Q3's numbers," she said.`, '“Q3’s numbers,” she said.'],
+    // Punctuation context crosses emphasis, so the digit before the bold boundary counts.
+    ["**Q3**'s close.", 'Q3’s close.'],
+    // An apostrophe before inline code is not followed by prose.
+    ["Q3'`s` close.", "Q3's close."],
+  ])('curls only digit possessives after a digit: %s', (input, expected) => {
+    for (const phase of ['streaming', 'complete'] as const) {
+      expect(render(input, { locale: 'en', phase }).text).toBe(expected);
+      expect(
+        render(input, { locale: 'en', phase, punctuation: { quotes: false, apostrophes: true } })
+          .text,
+      ).toBe(expected.replace(/[“”]/gu, '"'));
+    }
+  });
+
+  it('holds a digit possessive at the streaming edge until its boundary arrives', () => {
+    expect(render("Q3'", { locale: 'en' }).text).toBe("Q3'");
+    expect(render("Q3's", { locale: 'en' }).text).toBe("Q3's");
+    expect(render("Q3's ", { locale: 'en' }).text).toBe('Q3’s');
+    expect(render("Q3's\n\nNext.", { locale: 'en' }).text).toBe('Q3’s\n\nNext.');
+    expect(render("Q3'", { locale: 'en', phase: 'complete' }).text).toBe("Q3'");
+    expect(render("Q3's", { locale: 'en', phase: 'complete' }).text).toBe('Q3’s');
+  });
+
+  it.each([
     [`"'Hi,' she said."`, '“‘Hi,’ she said.”'],
     [`'"Hi," she said.'`, '‘“Hi,” she said.’'],
     [`"'Tis the season"`, '“’Tis the season”'],
@@ -359,5 +390,77 @@ describe('chat typography candidate', () => {
     const root: any = { type: 'root', children: [{ type: 'paragraph', children: [nested] }] };
     remarkChatTypography({ locale: 'en' })(root);
     expect(text.value).toBe('“' + 'a'.repeat(64_000) + '”');
+  });
+});
+
+describe('raw inline HTML elements', () => {
+  const phases = ['streaming', 'complete'] as const;
+  const typeset = (input: string, options: ChatTypographyOptions = {}) => {
+    const result = render(input, { locale: 'en', ...options });
+    expect(result.html).toEqual(result.originalHtml);
+    return result.text;
+  };
+
+  it.each(phases)('keeps quote context across a custom element with content (%s)', (phase) => {
+    expect(typeset('Budget "frozen"<citation>x9</citation> and "more."', { phase })).toBe(
+      'Budget “frozen”x9 and “more.”',
+    );
+  });
+
+  it.each(phases)(
+    'reads a quote before a self-closing custom element as a closer (%s)',
+    (phase) => {
+      expect(typeset('Budget "frozen"<citation value="x9"/>', { phase })).toBe('Budget “frozen”');
+      expect(typeset('- Budget "frozen"<citation value="x9"/>\n- Next bullet.', { phase })).toBe(
+        'Budget “frozen”Next bullet.',
+      );
+    },
+  );
+
+  it.each(phases)('curls quotes around a custom element inside a quotation (%s)', (phase) => {
+    expect(
+      typeset(
+        'The CFO said "we\'re not renewing<citation>a1b2</citation> this year," which matters.',
+        { phase },
+      ),
+    ).toBe('The CFO said “we’re not renewinga1b2 this year,” which matters.');
+  });
+
+  it('keeps typesetting after an unfinished custom element while streaming', () => {
+    const phase = 'streaming';
+    expect(typeset('The CFO said "we\'re not renewing<citation>a1b', { phase })).toBe(
+      'The CFO said “we’re not renewinga1b',
+    );
+    expect(typeset('The CFO said "we\'re not renewing<citation>a1b2</citation', { phase })).toBe(
+      'The CFO said “we’re not renewinga1b2</citation',
+    );
+  });
+
+  it('still joins inline formatting tags into the surrounding sentence', () => {
+    expect(typeset('Say "hi" <b>bold</b> "bye"')).toBe('Say “hi” bold “bye”');
+    expect(typeset('<b>Bob</b>\'s "plan"')).toBe('Bob’s “plan”');
+    // The apostrophe inside <b> sees the letters around the tags, as before this rule.
+    expect(typeset("don<b>'</b>t")).toBe('don’t');
+  });
+
+  it.each(phases)('pairs quotes around a custom element inside emphasis (%s)', (phase) => {
+    expect(typeset('*"a"<citation>x</citation>* and "b"', { phase })).toBe('“a”x and “b”');
+  });
+
+  it('leaves the content of a custom element untouched', () => {
+    expect(typeset('<citation>it\'s "raw"</citation>')).toBe('it\'s "raw"');
+    expect(typeset('Say "hi"<citation>*it\'s* "raw"</citation> now.')).toBe(
+      'Say “hi”it\'s "raw" now.',
+    );
+  });
+
+  it('pairs nested elements of the same name and isolates stray tags', () => {
+    expect(typeset('a "b"<c-x><c-x>\'</c-x>"</c-x> "d"')).toBe('a “b”\'" “d”');
+    expect(typeset('"x"</c-x> and "y"')).toBe('“x” and “y”');
+  });
+
+  it('treats a raw link as a spacing boundary whose label keeps typography', () => {
+    expect(typeset('Say <a href="/x">"hi"</a> now.')).toBe('Say “hi” now.');
+    expect(typeset('Wait 30 <a href="/x">min</a>.', { spacing: true })).toBe('Wait 30 min.');
   });
 });

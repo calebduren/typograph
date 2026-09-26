@@ -325,6 +325,27 @@ function Landing() {
     target?.scrollIntoView({ behavior: 'instant' });
     startSegmentThumbs();
   }, []);
+  useEffect(() => {
+    // Smooth-scroll in-page links here, not with CSS, so programmatic scrolls stay instant.
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
+      if (!link || link.target || event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = document.getElementById(link.hash.slice(1));
+      if (!target) return;
+      event.preventDefault();
+      // Push before scrolling so Back restores the position the link was clicked from.
+      if (window.location.hash !== link.hash) history.pushState(null, '', link.hash);
+      const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+      // The sticky header is always in view, so #top scrolls the page itself.
+      const scrollTarget = target.id === 'top' ? document.documentElement : target;
+      scrollTarget.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      if (target.tabIndex < 0) target.tabIndex = -1;
+      target.focus({ preventScroll: true });
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
   return (
     <>
       <a className="skip-link" href="#finished">
@@ -368,9 +389,9 @@ function Landing() {
       </header>
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <a className="badge" href="#finished">
+          <a className="badge" href="#demo">
             <span className="badge-new">New</span>
-            HTML input in v{version}
+            Quotes pair around citations since v0.4.0
             <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.75} />
           </a>
           <h1 id="hero-title">

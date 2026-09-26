@@ -1,24 +1,81 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
-  mkdtempSync,
-  writeFileSync,
-  readFileSync,
-  mkdirSync,
+  constants,
   copyFileSync,
   existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
+// `npm run check` packs into release/check/, which is scratch space. Only
+// `npm run pack:release` (this script with --release) writes a versioned
+// archive to release/, and never over an existing file or a published version.
+const release = process.argv.includes('--release');
 const root = process.cwd();
 const dir = mkdtempSync(join(tmpdir(), 'typograph-chat-consumer-'));
+const checkDir = resolve('release/check');
 const exec = (command, args, cwd = dir) =>
   execFileSync(command, args, {
     cwd,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+
+const { name: packageName, version } = JSON.parse(
+  readFileSync(join(root, 'packages/chat-typography/package.json'), 'utf8'),
+);
+const releaseName = `${packageName.replace(/^@/, '').replace('/', '-')}-${version}.tgz`;
+const releasePath = resolve('release', releaseName);
+const refuse = (message) => {
+  console.error(`pack:release refused: ${message}`);
+  process.exit(1);
+};
+if (release) {
+  if (existsSync(releasePath))
+    refuse(`release/${releaseName} already exists. Release archives are never overwritten.`);
+  let published = false;
+  try {
+    published =
+      exec(
+        'npm',
+        [
+          'view',
+          `${packageName}@${version}`,
+          'version',
+          '--fetch-retries',
+          '1',
+          '--fetch-timeout',
+          '20000',
+        ],
+        root,
+      ).trim() !== '';
+  } catch (error) {
+    // npm reports an unpublished version as E404; anything else (offline,
+    // timeout, registry trouble) is not an answer, so packing continues.
+    if (!/\bE404\b/.test(`${error.stderr ?? ''}`)) {
+      const reason = `${error.stderr || error.message}`.trim().split('\n')[0];
+      console.warn(
+        `Warning: could not ask the registry about ${packageName}@${version}: ${reason}`,
+      );
+    }
+  }
+  if (published)
+    refuse(
+      `${packageName}@${version} is already on the registry. Bump the version before packing a release.`,
+    );
+}
+
+mkdirSync(checkDir, { recursive: true });
+for (const file of readdirSync(checkDir))
+  if (file.endsWith('.tgz')) rmSync(join(checkDir, file), { force: true });
 const [pack] = JSON.parse(
   exec(
     'npm',
@@ -29,7 +86,7 @@ const [pack] = JSON.parse(
       '--cache',
       join(dir, 'npm-cache'),
       '--pack-destination',
-      dir,
+      checkDir,
       '-w',
       '@calebduren/typograph',
     ],
@@ -51,7 +108,7 @@ exec('npm', [
   '--save-exact',
   '--cache',
   join(dir, 'npm-cache'),
-  join(dir, pack.filename),
+  join(checkDir, pack.filename),
   'unified@11.0.5',
   'remark-parse@11.0.0',
   'remark-gfm@4.0.1',
@@ -175,7 +232,7 @@ exec(
     '--no-fund',
     '--cache',
     join(dir, 'npm-cache'),
-    join(dir, pack.filename),
+    join(checkDir, pack.filename),
   ],
   bare,
 );
@@ -199,10 +256,8 @@ console.log('Peerless consumer: entries import; typeset() names missing peers');
 `,
 );
 console.log(exec(process.execPath, ['peerless.mjs'], bare).trim());
-mkdirSync(resolve('release'), { recursive: true });
-copyFileSync(join(dir, pack.filename), resolve('release', pack.filename));
 writeFileSync(
-  resolve('release/chat-package-check.json'),
+  join(checkDir, 'chat-package-check.json'),
   JSON.stringify(
     {
       version: manifest.version,
@@ -226,4 +281,30 @@ writeFileSync(
     2,
   ) + '\n',
 );
-console.log('Chat TypeScript and clean consumer passed. Tested tarball: release/' + pack.filename);
+console.log(
+  'Chat TypeScript and clean consumer passed. Tested tarball: release/check/' + pack.filename,
+);
+
+if (release) {
+  assert.equal(pack.filename, releaseName);
+  // COPYFILE_EXCL makes the copy itself refuse to replace an archive, even one
+  // that appeared while the checks ran.
+  try {
+    copyFileSync(join(checkDir, pack.filename), releasePath, constants.COPYFILE_EXCL);
+  } catch (error) {
+    if (error.code === 'EEXIST')
+      refuse(`release/${releaseName} already exists. Release archives are never overwritten.`);
+    throw error;
+  }
+  const bytes = readFileSync(releasePath);
+  const shasum = createHash('sha1').update(bytes).digest('hex');
+  const integrity = `sha512-${createHash('sha512').update(bytes).digest('base64')}`;
+  assert.equal(shasum, pack.shasum);
+  assert.equal(integrity, pack.integrity);
+  console.log(`Release archive: release/${releaseName}`);
+  console.log(`  shasum (sha1):      ${shasum}`);
+  console.log(`  integrity (sha512): ${integrity}`);
+  console.log(
+    `After publishing, compare with: npm view ${packageName}@${version} dist.shasum dist.integrity`,
+  );
+}

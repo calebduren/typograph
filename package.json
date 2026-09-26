@@ -23,6 +23,7 @@
     "bench": "node scripts/benchmark-chat.mjs",
     "bench:chat": "node scripts/benchmark-chat-engine.mjs",
     "check:package": "node scripts/check-chat-package.mjs",
+    "pack:release": "npm run build:chat && node scripts/check-chat-package.mjs --release",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "oxlint --deny-warnings .",

@@ -237,8 +237,15 @@ describe('HTML corpus', () => {
       });
       if (marks(fromMarkdown) !== marks(fromHtml)) differ.push(fixture.id);
     }
-    // HTML has no backslash escapes, so those quotes curl. Changing this list needs review.
-    expect(differ.sort()).toEqual(['escaped-after-entity', 'escaped-quote']);
+    // HTML has no backslash escapes, so those quotes curl. remark-rehype drops raw HTML,
+    // so a custom element's content reaches the HTML side as bare prose. Changing this
+    // list needs review.
+    expect(differ.sort()).toEqual([
+      'custom-element-citation',
+      'custom-element-content',
+      'escaped-after-entity',
+      'escaped-quote',
+    ]);
   });
 
   it('is idempotent', async () => {
