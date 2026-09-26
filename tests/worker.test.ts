@@ -71,3 +71,14 @@ it('serves the app shell for the specimen route', async () => {
   expect(await response.text()).toBe('shell');
   expect(assets.fetch.mock.calls[0][0].url).toBe('https://typograph.dev/?size=18');
 });
+
+it('serves the app shell for the changelog route', async () => {
+  const assets = {
+    fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('shell')),
+  };
+  const response = await worker.fetch(new Request('https://typograph.dev/changelog'), {
+    ASSETS: assets,
+  });
+  expect(await response.text()).toBe('shell');
+  expect(assets.fetch.mock.calls[0][0].url).toBe('https://typograph.dev/');
+});

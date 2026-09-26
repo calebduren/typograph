@@ -3,6 +3,7 @@ import { Streamdown, defaultRemarkPlugins } from 'streamdown';
 import hangingPunctuation from '@calebduren/typograph/hanging';
 import { remarkPreview, previewRehypePlugins } from './chat-preview';
 import { Slider } from './Slider';
+import { SiteHeader } from './SiteHeader';
 import { Toggle } from './Toggle';
 import type { TypographySettings } from './integration-settings';
 
@@ -117,96 +118,97 @@ export function Specimen() {
     spacing: true,
     hanging: true,
   });
-  const [family, setFamily] = useState<'sans' | 'serif'>('sans');
   const [size, setSize] = useState(18);
   const [leading, setLeading] = useState(1.7);
   const [changes, setChanges] = useState(true);
 
   return (
-    <main className="specimen-page">
-      <section
-        className={`specimen-sheet specimen-${family}`}
-        style={{ '--specimen-size': `${size}px`, '--specimen-leading': leading } as CSSProperties}
-        aria-label="Typography specimen"
-      >
-        <aside className="specimen-controls" aria-label="Specimen controls">
-          <a className="wordmark specimen-wordmark" href="/">
-            Typograph
-          </a>
-          <div className="specimen-control-title">
-            <p>Live typesetting</p>
-            <span>Every switch touches the copy.</span>
-          </div>
-          <div className="typography-settings-switches">
-            <Toggle
-              label="Smart punctuation"
-              checked={settings.punctuation}
-              onChange={(punctuation) => setSettings({ ...settings, punctuation })}
-            />
-            <Toggle
-              label="Non-breaking spaces"
-              checked={settings.spacing}
-              onChange={(spacing) => setSettings({ ...settings, spacing })}
-            />
-            <Toggle
-              label="Hanging punctuation"
-              checked={settings.hanging}
-              onChange={(hanging) => setSettings({ ...settings, hanging })}
-            />
-            <Toggle label="Highlight changes" checked={changes} onChange={setChanges} />
-          </div>
-          <div className="specimen-field">
-            <span>Face</span>
-            <div className="segmented-control" role="group" aria-label="Typeface">
-              <button aria-pressed={family === 'serif'} onClick={() => setFamily('serif')}>
-                Serif
-              </button>
-              <button aria-pressed={family === 'sans'} onClick={() => setFamily('sans')}>
-                Sans serif
-              </button>
+    <>
+      <SiteHeader home="/" install="/#install" />
+      <main className="specimen-page">
+        <section
+          className="specimen-sheet"
+          style={{ '--specimen-size': `${size}px`, '--specimen-leading': leading } as CSSProperties}
+          aria-label="Typography specimen"
+        >
+          <aside className="specimen-controls" aria-label="Specimen controls">
+            <p className="specimen-control-title">Specimen</p>
+            <div className="typography-settings-switches">
+              <Toggle
+                label="Smart punctuation"
+                checked={settings.punctuation}
+                onChange={(punctuation) => setSettings({ ...settings, punctuation })}
+              />
+              <Toggle
+                label="Non-breaking spaces"
+                checked={settings.spacing}
+                onChange={(spacing) => setSettings({ ...settings, spacing })}
+              />
+              <Toggle
+                label="Hanging punctuation"
+                checked={settings.hanging}
+                onChange={(hanging) => setSettings({ ...settings, hanging })}
+              />
+              <Toggle label="Highlight changes" checked={changes} onChange={setChanges} />
             </div>
-          </div>
-          <label className="specimen-field">
-            Size <output>{size}px</output>
-            <Slider
-              label="Specimen font size"
-              min={10}
-              max={22}
-              value={size}
-              onChange={setSize}
-              valueText={`${size}px`}
-            />
-          </label>
-          <label className="specimen-field">
-            Leading <output>{leading.toFixed(2)}</output>
-            <Slider
-              label="Specimen line height"
-              min={1.1}
-              max={1.7}
-              step={0.02}
-              value={leading}
-              onChange={setLeading}
-              valueText={leading.toFixed(2)}
-            />
-          </label>
+            <div className="specimen-dials">
+              <label className="specimen-field specimen-slider">
+                <span className="specimen-field-row">
+                  Size <output>{size}px</output>
+                </span>
+                <Slider
+                  label="Specimen font size"
+                  min={10}
+                  max={22}
+                  value={size}
+                  onChange={setSize}
+                  valueText={`${size}px`}
+                />
+              </label>
+              <label className="specimen-field specimen-slider">
+                <span className="specimen-field-row">
+                  Leading <output>{leading.toFixed(2)}</output>
+                </span>
+                <Slider
+                  label="Specimen line height"
+                  min={1.1}
+                  max={1.7}
+                  step={0.02}
+                  value={leading}
+                  onChange={setLeading}
+                  valueText={leading.toFixed(2)}
+                />
+              </label>
+            </div>
+          </aside>
+          <article className="specimen-reading">
+            <div
+              className="specimen-guides"
+              aria-hidden="true"
+              hidden={!changes || !settings.hanging}
+            >
+              <span />
+              <span />
+              <span />
+            </div>
+            <FormattedText settings={settings} changes={changes} />
+          </article>
           <p className="specimen-key">
-            <i data-change="punctuation" /> punctuation <i data-change="spacing" /> joined space{' '}
-            <i data-change="hanging" /> hanging quote
+            <span>
+              <i data-change="punctuation" /> Punctuation
+            </span>
+            <span>
+              <i data-change="spacing" /> Joined space
+            </span>
+            <span>
+              <i data-change="hanging" /> Hanging quote
+            </span>
+            <span className="specimen-note">
+              Original prose, rendered by Streamdown through the Remark plugin.
+            </span>
           </p>
-        </aside>
-        <article className="specimen-reading">
-          <div
-            className="specimen-guides"
-            aria-hidden="true"
-            hidden={!changes || !settings.hanging}
-          >
-            <span />
-            <span />
-            <span />
-          </div>
-          <FormattedText settings={settings} changes={changes} />
-        </article>
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }

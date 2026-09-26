@@ -17,7 +17,13 @@ The homepage centers the tested chat package.
 
 Both references were inspected in Chrome on 17 September 2026. They are inspiration, not dependencies or endorsement.
 
-## Page sequence (product redesign, 25 September 2026)
+## Page sequence (fourth iteration, 25 September 2026)
+
+1. **Hero.** A “New” pill, the serif headline “Your AI writes, typograph polishes,” a lede whose three terms preview their own fix on hover or focus, a secondary line, Get started and Try it buttons, and a copyable install pill. No backdrop.
+2. **The stream.** The hero pins, zooms, and blurs as two plain columns rise over it: the model’s raw reply and the same tokens through Typograph, with hanging opening quotes. The reader’s scroll drives the stream, starting as the columns enter; there is no heading or status bar.
+3. **Stats**, **One engine, everywhere**, **Try it on your own text**, **Careful where it counts**, **Integration**, **Specifications**, and the footer, restyled to the light system. The quote reveal and the controllable streaming comparison are removed; the stream story covers streaming, and the workbench is the one place to try your own text.
+
+## Page sequence (product redesign, 25 September 2026, superseded)
 
 1. **Hero.** A “New · HTML input” pill, the headline “Every word your AI writes, _typeset._”, a lede, Get started and Try it buttons, and a copyable install pill. Below, a scene over blurred color panels: an assistant window whose reply streams token by token through `typesetText` in its streaming phase, with each settled change flashing coral and a Typograph switch to compare, plus floating notification, email, and code-point cards typeset live.
 2. **Stats.** Microseconds per call measured in the visitor's browser, gzip size from the committed measurement, zero network requests, one dependency.

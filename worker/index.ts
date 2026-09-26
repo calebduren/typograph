@@ -12,8 +12,8 @@ export default {
       url.port = '';
       return Response.redirect(url.toString(), 308);
     }
-    // The playground is an SPA; keep the specimen's direct URL refreshable in production.
-    if (url.pathname === '/specimen') {
+    // The playground is an SPA; keep its direct routes refreshable in production.
+    if (url.pathname === '/specimen' || url.pathname === '/changelog') {
       url.pathname = '/';
       return env.ASSETS.fetch(new Request(url, request));
     }

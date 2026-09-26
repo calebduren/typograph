@@ -4,6 +4,12 @@ Versions are releases of the npm package `@calebduren/typograph`. While it is at
 
 The site at typograph.dev deploys separately from the same repository. Site changes are noted where they matter to its readers.
 
+## Site — 2026-09-25
+
+- Redesign typograph.dev in warm paper and olive ink, with Hedvig for headings and Inter for text. Below the hero, a model reply streams into two columns as you scroll, raw on the left and through `typesetText` on the right, with hanging opening quotes.
+- Add this changelog at typograph.dev/changelog, typeset by the package, and restyle the specimen page.
+- Remove the replayable streaming comparison; the scroll demo covers streaming, and the workbench remains the place to try your own text.
+
 ## 0.4.1 — 2026-09-25
 
 - Curl the apostrophe in possessives and plurals after a digit, such as `Q3's`, `2025's`, and `5's`, including with the apostrophes-only preset. Only `'s` followed by a space, punctuation, or the end of the text changes; foot and inch marks such as `5'11"`, `30' long`, and `6' rack` stay straight. While a reply streams, `Q3's` at the right edge waits for the next character.

@@ -2,40 +2,71 @@ import { expect, test } from '@playwright/test';
 
 const NBSP = String.fromCharCode(0xa0);
 
-test('the hero streams a reply that the package typesets live', async ({ page }) => {
+/** Scroll the stream track from just below the viewport (0) to just above it (1). */
+async function scrollStream(page: import('@playwright/test').Page, fraction: number) {
+  await page.evaluate((fraction) => {
+    const track = document.querySelector<HTMLElement>('.stream-track')!;
+    const top = track.getBoundingClientRect().top + window.scrollY;
+    const travel = innerHeight + track.offsetHeight;
+    window.scrollTo({ top: top - innerHeight + travel * fraction, behavior: 'instant' });
+  }, fraction);
+}
+
+test('scrolling streams the reply, and the package typesets it live', async ({ page }) => {
   await page.goto('/');
-  const window = page.getByRole('group', { name: 'Streaming assistant reply' });
-  const bubble = window.locator('.bubble-ai > [aria-hidden="true"]:not(.bubble-sizer)');
-  // The reply streams in, and quotes curl as soon as they settle.
-  await expect(bubble).toContainText('Here’s the recap', { timeout: 10_000 });
-  await expect(bubble.locator('mark.flip').first()).toBeVisible();
-  await expect(bubble).toContainText('then tell everyone.”', { timeout: 15_000 });
-  await expect(window.locator('.window-foot')).toContainText("phase: 'complete'");
-  const typeset = window.getByRole('switch', { name: 'Typograph' });
-  await typeset.click();
-  await expect(typeset).toHaveAttribute('aria-checked', 'false');
-  await expect(bubble).toContainText(`Here's the recap: "Atlas"`);
-  await expect(bubble.locator('mark.flip')).toHaveCount(0);
+  const raw = page.locator('.stream-column[data-side="raw"] .stream-live');
+  const typeset = page.locator('.stream-column[data-side="typeset"] .stream-live');
+  await expect(typeset).toHaveText('');
+  await scrollStream(page, 0.25);
+  await expect(typeset).toContainText('Here’s the launch note for Friday’s');
+  await expect(raw).toContainText("Here's the launch note for Friday's");
+  await expect(typeset.locator('mark.m-typeset').first()).toBeVisible();
+  // The raw pane marks the same characters, so each fix lines up with its original.
+  const [rawMarks, typesetMarks] = await page.evaluate(() =>
+    ['raw', 'typeset'].map(
+      (side) => document.querySelectorAll(`[data-side="${side}"] .stream-live mark`).length,
+    ),
+  );
+  expect(rawMarks).toBe(typesetMarks);
+  expect(rawMarks).toBeGreaterThan(0);
+  // The pinned hero recedes behind the stream.
+  await expect(page.locator('.story-hero')).toHaveCSS('filter', /blur/);
+
+  await scrollStream(page, 1);
+  await expect(typeset).toContainText('nothing you’ve written will change.');
+  await expect(typeset).toContainText(`says ‘final.’”`);
+  // Paragraphs that open with a quote hang it in the margin, in the typeset column only.
+  await expect(typeset.locator('.typograph-opening')).toHaveCount(2);
+  await expect(raw.locator('.typograph-opening')).toHaveCount(0);
+  await expect(typeset).toContainText(`30${NBSP}min`);
+  await expect(raw).toContainText(`says 'final.'"`);
+
+  // Scrolling back rewinds the stream.
+  await scrollStream(page, 0);
+  await expect(typeset).toHaveText('');
 });
 
-test('the reveal compares typeset and original without moving any text', async ({ page }) => {
+test('reduced motion shows the finished reply without pinning or zoom', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const slider = page.getByRole('slider', { name: 'Compare typeset and original' });
-  await expect(
-    page.getByLabel('Typeset: “It’s not what you say. It’s how it’s set.”'),
-  ).toBeAttached();
-  await expect(
-    page.getByLabel(`Original: "It's not what you say. It's how it's set."`),
-  ).toBeAttached();
-  const box = (selector: string) =>
-    page.locator(selector).evaluate((node) => {
-      const rect = node.getBoundingClientRect();
-      return [Math.round(rect.width), Math.round(rect.height)];
-    });
-  // Both layers occupy the same box, so the clip reveals, rather than shifts, the text.
-  expect(await box('.reveal-after')).toEqual(await box('.reveal-before'));
-  await slider.fill('100');
-  await expect(page.locator('.reveal-stage')).toHaveAttribute('style', /--split: 100%/);
+  const typeset = page.locator('.stream-column[data-side="typeset"] .stream-live');
+  await expect(typeset).toContainText('nothing you’ve written will change.');
+  await expect(page.locator('.story-hero')).toHaveCSS('position', 'relative');
+  await expect(page.locator('.stream-stage')).toHaveCSS('position', 'relative');
+});
+
+test('the changelog is typeset by the package and linked from every page', async ({ page }) => {
+  await page.goto('/');
+  await page
+    .getByRole('navigation', { name: 'Main navigation' })
+    .getByRole('link', { name: 'Changelog' })
+    .click();
+  await expect(page).toHaveURL(/\/changelog$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Changelog');
+  await expect(page.getByRole('heading', { level: 2, name: /^0\.4\.1/ })).toBeVisible();
+  await expect(page.locator('.changelog-body')).toContainText('site at typograph.dev');
+  await expect(page.locator('.changelog-body')).toContainText('a published version’s tarball');
+  await expect(page.getByRole('link', { name: 'Typograph home' })).toHaveAttribute('href', '/');
 });
 
 test('the workbench typesets your own text with the real package', async ({ page }) => {
@@ -109,4 +140,35 @@ test('the workbench fits a phone without horizontal scrolling', async ({ page })
     true,
   );
   await expect(page.getByRole('textbox', { name: 'Input text' })).toBeVisible();
+});
+
+test('lede terms preview their fix, and segmented thumbs follow the selection', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const term = page.locator('.term').filter({ hasText: 'straight quotes' });
+  await term.hover();
+  await expect(page.getByRole('tooltip').filter({ hasText: '“Atlas”' })).toBeVisible();
+  await page.goto('/#finished');
+  const control = page.getByRole('group', { name: 'Input' });
+  await expect(control).toHaveAttribute('data-thumb', 'ready');
+  const thumb = () =>
+    control.evaluate((node) => [
+      node.style.getPropertyValue('--thumb-x'),
+      node.style.getPropertyValue('--thumb-w'),
+    ]);
+  const markdown = await control
+    .getByRole('button', { name: 'Markdown' })
+    .evaluate((node) => [
+      `${(node as HTMLElement).offsetLeft}px`,
+      `${(node as HTMLElement).offsetWidth}px`,
+    ]);
+  expect(await thumb()).toEqual(markdown);
+  const html = control.getByRole('button', { name: 'HTML email' });
+  await html.click();
+  const target = await html.evaluate((node) => [
+    `${(node as HTMLElement).offsetLeft}px`,
+    `${(node as HTMLElement).offsetWidth}px`,
+  ]);
+  await expect.poll(thumb).toEqual(target);
 });
