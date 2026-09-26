@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowUpRight } from 'lucide-react';
 import { TypographyControls } from './TypographyControls';
@@ -15,21 +15,21 @@ import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url&
 import benchmark from '../../../validation/chat-hardening-benchmark.json';
 import { version } from '../../../packages/chat-typography/package.json';
 import { typesetText } from '@calebduren/typograph';
-import { GradientBlinds } from './GradientBlinds';
-import { HeroScene } from './HeroScene';
+import { Kern } from './Kern';
+import { SiteFooter, SiteHeader } from './SiteHeader';
 import { startSegmentThumbs } from './segments';
-import { QuoteReveal } from './QuoteReveal';
+import { StreamStory } from './StreamStory';
 import { microsecondsPerCall } from './speed';
 import '@calebduren/typograph/hanging.css';
 import './fonts.css';
 import './landing.css';
 import './product.css';
 
-const ChatComparison = lazy(() =>
-  import('./ChatComparison').then((module) => ({ default: module.ChatComparison })),
-);
 const FinishedDemo = lazy(() =>
   import('./FinishedDemo').then((module) => ({ default: module.FinishedDemo })),
+);
+const Changelog = lazy(() =>
+  import('./Changelog').then((module) => ({ default: module.Changelog })),
 );
 const Specimen = lazy(() => import('./Specimen').then((module) => ({ default: module.Specimen })));
 
@@ -62,14 +62,12 @@ function Integration({
     <section id="integrate" className="band integration" aria-labelledby="integration-title">
       <div className="section-intro">
         <h2 id="integration-title">
-          A small addition.
+          <Kern>A small addition.</Kern>
           <br />
-          Right where you <em>render.</em>
+          <Kern>Right where you render.</Kern>
         </h2>
         <p className="muted">Works in the browser. No model call, API key, or new service.</p>
-        <p className="release-note">
-          <code>npm install @calebduren/typograph</code>
-        </p>
+        <CopyCommand command="npm install @calebduren/typograph" />
         <div
           className="integration-settings"
           role="group"
@@ -244,8 +242,91 @@ const places = [
 ];
 
 const settledText = { locale: 'en', spacing: true } as const;
-// Ember reds for the header blinds: crisp stripes under a spotlight, not a pastel wash.
-const blinds = ['#ff6352', '#b3261a', '#3a0d08'];
+
+/** Glyphs with every no-break space drawn, so an invisible fix can be seen. */
+function Glyphs({ text }: { text: string }) {
+  return (
+    <>
+      {[...text].map((char, index) =>
+        char === '\u00a0' ? (
+          <span key={index} className="nbsp">
+            {char}
+          </span>
+        ) : (
+          char
+        ),
+      )}
+    </>
+  );
+}
+
+/** A lede term that previews its own fix, run through the package, on hover or focus. */
+function Term({ children, sample, note }: { children: ReactNode; sample: string; note: string }) {
+  const id = useId();
+  const fixed = useMemo(() => typesetText(sample, settledText), [sample]);
+  return (
+    <span className="term" tabIndex={0} aria-describedby={id}>
+      {children}
+      <span className="term-tip" role="tooltip" id={id}>
+        <span className="term-pair">
+          <span className="term-before">{sample}</span>
+          <span className="term-arrow" aria-hidden="true">
+            →
+          </span>
+          <span className="term-after">
+            <Glyphs text={fixed} />
+          </span>
+        </span>
+        <span className="term-note">{note}</span>
+      </span>
+    </span>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="hero" aria-labelledby="hero-title">
+      <a className="badge" href="/changelog">
+        <span className="badge-new">New</span>
+        <span className="badge-text">Quotes pair around citations in v0.4</span>
+        <ArrowUpRight size={14} aria-hidden="true" strokeWidth={1.75} />
+      </a>
+      <h1 id="hero-title">
+        <span>
+          <Kern>Your AI writes,</Kern>
+        </span>{' '}
+        <span>
+          <Kern>typograph polishes</Kern>
+        </span>
+      </h1>
+      <p className="hero-lede">
+        Typograph fixes the{' '}
+        <Term sample={`"Atlas"`} note="Curled, open and closed.">
+          straight quotes
+        </Term>
+        ,{' '}
+        <Term sample="it's" note="The typewriter mark, retired.">
+          stray{'\u00a0'}apostrophes
+        </Term>
+        , and{' '}
+        <Term sample="30 min" note="Held together at line ends.">
+          breakable spaces
+        </Term>{' '}
+        in model output.
+      </p>
+      <p className="hero-sub">Chat streams, email, and every string in your product.</p>
+      <div className="hero-actions">
+        <a className="button button-primary" href="#install">
+          Get started
+        </a>
+        <a className="button button-secondary" href="#finished">
+          Try it on your text
+        </a>
+      </div>
+      <CopyCommand command="npm install @calebduren/typograph" />
+    </section>
+  );
+}
 
 function PlaceVisual({ kind }: { kind: string }) {
   const lines = useMemo(
@@ -351,67 +432,9 @@ function Landing() {
       <a className="skip-link" href="#finished">
         Skip to the demo
       </a>
-      <div className="hero-backdrop">
-        <GradientBlinds
-          gradientColors={blinds}
-          angle={18}
-          noise={0.1}
-          blindCount={14}
-          blindMinWidth={72}
-          spotlightRadius={0.62}
-          spotlightSoftness={1.15}
-          spotlightOpacity={0.9}
-          mouseDampening={0.25}
-          pointerTarget="window"
-        />
-      </div>
-      <header className="site-header" id="top">
-        <div className="header-inner">
-          <a className="wordmark" href="#top" aria-label="Typograph home">
-            typograph
-          </a>
-          <nav aria-label="Main navigation">
-            <a href="#finished">Try it</a>
-            <a href="#demo">Streaming</a>
-            <a href="#integrate">Integration</a>
-            <a
-              href="https://github.com/calebduren/typograph"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
-            </a>
-          </nav>
-          <a className="button button-light header-cta" href="#install">
-            Install
-          </a>
-        </div>
-      </header>
+      <SiteHeader home="#top" install="#install" />
       <main>
-        <section className="hero" aria-labelledby="hero-title">
-          <a className="badge" href="#demo">
-            <span className="badge-new">New</span>
-            Quotes pair around citations since v0.4.0
-            <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.75} />
-          </a>
-          <h1 id="hero-title">
-            Every word your AI writes, <em>typeset.</em>
-          </h1>
-          <p className="hero-lede">
-            Typograph fixes the straight quotes, stray apostrophes, and breakable spaces in model
-            output. In chat streams, in email, and in every string in your product.
-          </p>
-          <div className="hero-actions">
-            <a className="button button-light" href="#install">
-              Get started
-            </a>
-            <a className="button button-dark" href="#finished">
-              Try it on your text
-            </a>
-          </div>
-          <CopyCommand command="npm install @calebduren/typograph" />
-          <HeroScene />
-        </section>
+        <StreamStory hero={<Hero />} />
 
         <section className="stats" aria-label="Measured facts">
           <div>
@@ -443,17 +466,10 @@ function Landing() {
           </div>
         </section>
 
-        <section className="band band-reveal" aria-labelledby="reveal-title">
-          <h2 id="reveal-title" className="sr-only">
-            Before and after
-          </h2>
-          <QuoteReveal />
-        </section>
-
         <section className="band" aria-labelledby="places-title">
           <div className="band-head">
             <h2 id="places-title">
-              One engine, <em>everywhere</em> your AI writes.
+              <Kern>One engine, everywhere your AI writes.</Kern>
             </h2>
             <p>
               Four entry points share the same rules, so a quote curls the same way in a chat reply,
@@ -477,7 +493,7 @@ function Landing() {
         <section id="finished" className="band" aria-labelledby="finished-title">
           <div className="band-head">
             <h2 id="finished-title">
-              Try it on <em>your own</em> text.
+              <Kern>Try it on your own text.</Kern>
             </h2>
             <p>
               This is the published package, running in your browser. Paste a brief, an email
@@ -489,27 +505,10 @@ function Landing() {
           </Suspense>
         </section>
 
-        <section className="band comparison" aria-labelledby="comparison-title">
-          <div className="band-head">
-            <h2 id="comparison-title">
-              Built for text that <em>hasn’t finished</em> arriving.
-            </h2>
-            <p>
-              An opening quote may not have closed yet, and “30 m” may become “30 million.” Replay a
-              recorded stream through the real plugin, or edit it.
-            </p>
-          </div>
-          <div id="demo" className="comparison-workspace">
-            <Suspense fallback={<p role="status">Loading the comparison…</p>}>
-              <ChatComparison settings={settings} onSettingsChange={setSettings} />
-            </Suspense>
-          </div>
-        </section>
-
         <section className="band" aria-labelledby="care-title">
           <div className="band-head">
             <h2 id="care-title">
-              Careful where it <em>counts.</em>
+              <Kern>Careful where it counts.</Kern>
             </h2>
             <p>
               Apart from the optional hanging quote, every edit swaps a character in prose for its
@@ -539,7 +538,9 @@ function Landing() {
 
         <section id="scope" className="band" aria-labelledby="scope-title">
           <div className="band-head">
-            <h2 id="scope-title">Specifications</h2>
+            <h2 id="scope-title">
+              <Kern>Specifications</Kern>
+            </h2>
           </div>
           <dl className="specs">
             <div>
@@ -593,23 +594,19 @@ function Landing() {
           </dl>
         </section>
       </main>
-      <footer className="site-footer">
-        <p className="footer-mark" aria-hidden="true">
-          typograph
-        </p>
-        <div className="footer-row">
-          <span className="version">v{version}</span>
-          <a href="https://calebduren.com/" target="_blank" rel="noopener noreferrer">
-            Caleb Durenberger <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
-          </a>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
 
+const route = window.location.pathname.replace(/\/$/, '');
+
 createRoot(document.getElementById('root')!).render(
-  window.location.pathname === '/specimen' ? (
+  route === '/changelog' ? (
+    <Suspense fallback={null}>
+      <Changelog />
+    </Suspense>
+  ) : route === '/specimen' ? (
     <Suspense fallback={<p role="status">Loading the specimen…</p>}>
       <Specimen />
     </Suspense>
