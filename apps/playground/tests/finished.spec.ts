@@ -64,7 +64,7 @@ test('the changelog is typeset by the package and linked from every page', async
   await expect(page).toHaveURL(/\/changelog$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Changelog');
   await expect(page.getByRole('heading', { level: 2, name: /^0\.4\.1/ })).toBeVisible();
-  await expect(page.locator('.changelog-body')).toContainText('site at typograph.dev');
+  await expect(page.locator('.changelog-body')).toContainText('Curl the apostrophe in possessives');
   await expect(page.locator('.changelog-body')).toContainText('a published version’s tarball');
   await expect(page.getByRole('link', { name: 'Typograph home' })).toHaveAttribute('href', '/');
 });
