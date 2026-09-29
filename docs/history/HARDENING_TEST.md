@@ -1,5 +1,7 @@
 # Chat typography hardening and integration pass
 
+> Historical record. Current verification is in [docs/verification.md](../verification.md).
+
 Tested 17 September 2026. This records the focused engine-hardening and reproducible SDK-fixture work. The package remains private and unpublished.
 
 ## What changed
@@ -15,7 +17,7 @@ Tested 17 September 2026. This records the focused engine-hardening and reproduc
 
 ## Reproducible integrations
 
-The [fixture](examples/chat-integration/README.md) is checked into the repository and uses the official AI Elements Message component plus shadcn components. One UI runs either Vercel AI SDK HTTP streaming or Cloudflare Agents through a local Worker/Durable Object. Responses use the actual AI SDK UI-message protocol with deterministic chunks, rather than a paid model.
+The [fixture](../../examples/chat-integration/README.md) is checked into the repository and uses the official AI Elements Message component plus shadcn components. One UI runs either Vercel AI SDK HTTP streaming or Cloudflare Agents through a local Worker/Durable Object. Responses use the actual AI SDK UI-message protocol with deterministic chunks, rather than a paid model.
 
 AI Elements and Streamdown 2.6.0 both memoize away some changes to parser configuration. The owned MessageResponse uses normal React prop comparison and changes its renderer-plugin identity only when configuration changes. Browser tests verify a locale/spacing update without replacing the existing paragraph DOM. This supersedes the earlier keyed-remount recipe.
 
@@ -55,7 +57,7 @@ The prior diagnostic measured 1,653.95 ms at 64,002 characters for dense apostro
 
 The minified ESM browser bundle, including Typehug, is **10,446 bytes / 4,250 bytes gzip**. The audit and launch fixes add 208 compressed bytes over the previous 4,042-byte hardening measurement. The fixture's full application is much larger because it includes chat SDKs, UI components, and upstream rendering plugins; do not use its app bundle as the utility's size.
 
-Run `npm run build:chat && npm run bench:chat`. The [script](scripts/benchmark-chat-engine.mjs) and [complete measured results](validation/chat-hardening-benchmark.json) are included. No timing threshold is asserted in CI: results depend on the machine, and real client-update budgets still need profiling.
+Run `npm run build:chat && npm run bench:chat`. The [script](../../scripts/benchmark-chat-engine.mjs) and [complete measured results](../../validation/chat-hardening-benchmark.json) are included. No timing threshold is asserted in CI: results depend on the machine, and real client-update budgets still need profiling.
 
 ## Audit follow-up
 
@@ -79,7 +81,7 @@ These historical totals include the superseded toolkit, which has since been rem
 
 This is a narrow English typography policy, not universal editorial correctness. Real anonymized model replies, editorial review, mixed-language decisions, narrow-screen/zoom comparisons, selection-copy and screen-reader checks, hydration, and slower-device browser profiling remain. The fixture is local; nothing was deployed or published. A shadcn registry entry and a public install command should follow those checks, not precede them.
 
-The controlled before/after streaming comparison is now implemented in the [landing page](LANDING_PAGE_BRIEF.md), using the tested engine and renderer integration.
+The controlled before/after streaming comparison is now implemented in the [landing page](../../LANDING_PAGE_BRIEF.md), using the tested engine and renderer integration.
 
 ## Launch candidate checks (2026-09-19)
 

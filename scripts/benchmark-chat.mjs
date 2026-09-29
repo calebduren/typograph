@@ -2,13 +2,13 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { performance } from 'node:perf_hooks';
 import { Streamdown, defaultRemarkPlugins } from 'streamdown';
-import remarkChatTypography from '../packages/chat-typography/dist/index.js';
+import remarkTypography from '../packages/chat-typography/dist/index.js';
 
 const fragment = `"Hello," she said. Give 'em a chance. Wait 30 min; Dr. Smith reviewed Fig. 2. Read [the guide](https://example.com/it's-here) and keep \`const x = "hi"\`.\n\n`;
 const defaults = Object.values(defaultRemarkPlugins);
 const candidate = [
   ...defaults,
-  [remarkChatTypography, { locale: 'en', phase: 'streaming', spacing: true }],
+  [remarkTypography, { locale: 'en', phase: 'streaming', spacing: true }],
 ];
 
 function render(source, plugins) {

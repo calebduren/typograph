@@ -3,6 +3,8 @@ import { defineConfig } from '@playwright/test';
 // Override when 4174 is taken, e.g. by a local dev server: PLAYWRIGHT_PORT=4175.
 const port = process.env.PLAYWRIGHT_PORT ?? '4174';
 
+const browser = (process.env.PLAYWRIGHT_BROWSER ?? 'chromium') as 'chromium' | 'firefox' | 'webkit';
+
 export default defineConfig({
   testDir: './tests',
   timeout: 20_000,
@@ -10,7 +12,9 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     viewport: { width: 1440, height: 1000 },
-    channel: process.platform === 'darwin' ? 'chrome' : undefined,
+    // PLAYWRIGHT_BROWSER=firefox|webkit runs the same suite in another engine.
+    browserName: browser,
+    channel: browser === 'chromium' && process.platform === 'darwin' ? 'chrome' : undefined,
     trace: 'retain-on-failure',
   },
   webServer: {

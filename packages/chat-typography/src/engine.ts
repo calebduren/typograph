@@ -6,7 +6,7 @@ import { elisions, openingContext, closingContext } from './quote-context';
 
 type Phase = 'streaming' | 'complete';
 
-export interface ChatTypographyOptions {
+export interface TypographyOptions {
   /** Required for transformations. Unsupported or missing locales pass through. */
   locale?: string;
   /** Defaults to streaming, including conservative lookahead at the right edge. */
@@ -194,7 +194,7 @@ function inchesAfterFeet(source: string, index: number): boolean {
 function smartPunctuation(
   source: string,
   mask: Uint8Array,
-  settings: ChatTypographyOptions,
+  settings: TypographyOptions,
   terminalBoundary: boolean,
   state: QuoteState,
 ): string {
@@ -339,7 +339,7 @@ function smartPunctuation(
 function applySpacing(
   source: string,
   mask: Uint8Array,
-  settings: ChatTypographyOptions,
+  settings: TypographyOptions,
   terminalBoundary: boolean,
 ): string {
   const spacing = settings.spacing;
@@ -463,7 +463,7 @@ function resolveElements(items: Collected[]): Segment[] {
   return segments;
 }
 
-function collectMdastSegments(parent: Node, settings: ChatTypographyOptions): Segment[] {
+function collectMdastSegments(parent: Node, settings: TypographyOptions): Segment[] {
   const items: Collected[] = [];
   let elements = false;
   const stack: (Node | null)[] = [...(parent.children ?? [])].reverse();
@@ -497,7 +497,7 @@ function collectMdastSegments(parent: Node, settings: ChatTypographyOptions): Se
 
 export function typesetSegments(
   segments: Segment[],
-  settings: ChatTypographyOptions,
+  settings: TypographyOptions,
   hooks: CoreHooks,
 ): void {
   // Punctuation sees the whole visible block; spacing remains local to prose
@@ -557,7 +557,7 @@ export function typesetSegments(
 
 function formatInline(
   parent: Node,
-  settings: ChatTypographyOptions,
+  settings: TypographyOptions,
   original?: string,
   sourceMask?: Uint8Array,
 ): void {
@@ -572,7 +572,7 @@ function formatInline(
 
 export function visit(
   root: Node,
-  settings: ChatTypographyOptions,
+  settings: TypographyOptions,
   original?: string,
   sourceMask?: Uint8Array,
 ): void {

@@ -5,8 +5,10 @@ import remarkParse from 'remark-parse';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import type { Root } from 'mdast';
-import remarkChatTypography, {
+import remarkTypography, {
+  remarkTypography as namedRemarkTypography,
   type ChatTypographyOptions,
+  type TypographyOptions,
 } from '../packages/chat-typography/src/index';
 
 interface Case {
@@ -19,12 +21,12 @@ const cases = JSON.parse(
   readFileSync(new URL('../validation/cases.json', import.meta.url), 'utf8'),
 ) as Case[];
 
-function render(input: string, options: ChatTypographyOptions) {
+function render(input: string, options: TypographyOptions) {
   const processor = unified()
     .use(remarkParse)
     .use(remarkMath)
     .use(remarkGfm)
-    .use(remarkChatTypography, options);
+    .use(remarkTypography, options);
   const source = processor.parse(input);
   const originalLinks: string[] = [];
   const originalHtml: string[] = [];
@@ -241,7 +243,7 @@ describe('chat typography candidate', () => {
       const result = render(input, { locale: 'en', phase });
       expect(result.text).toBe(expected);
       const once = JSON.stringify(result.tree);
-      remarkChatTypography({ locale: 'en', phase })(result.tree, { value: input });
+      remarkTypography({ locale: 'en', phase })(result.tree, { value: input });
       expect(JSON.stringify(result.tree)).toBe(once);
     }
   });
@@ -276,7 +278,7 @@ describe('chat typography candidate', () => {
   it('has switchable rule families and only applies paragraph endings after completion', () => {
     const sentence =
       'The design needs a careful review before we share the first version with the whole team.';
-    const options: ChatTypographyOptions = { locale: 'en', spacing: { lastWords: true } };
+    const options: TypographyOptions = { locale: 'en', spacing: { lastWords: true } };
     expect(render(sentence, options).text).toContain('whole team.');
     expect(render(sentence, { ...options, phase: 'complete' }).text).toContain('whole\u00a0team.');
     expect(render('Wait 30 min.', { locale: 'en', spacing: false }).text).toBe('Wait 30 min.');
@@ -298,7 +300,7 @@ describe('chat typography candidate', () => {
       '"Hello," she said. Wait 30 **min**; read [the guide](https://example.com/it\'s).';
     const processor = unified()
       .use(remarkParse)
-      .use(remarkChatTypography, { locale: 'en', phase: 'complete' });
+      .use(remarkTypography, { locale: 'en', phase: 'complete' });
     const tree = processor.parse(input);
     processor.runSync(tree, input);
     const once = JSON.stringify(tree);
@@ -388,14 +390,14 @@ describe('chat typography candidate', () => {
     let nested: any = text;
     for (let i = 0; i < 20_000; i++) nested = { type: 'emphasis', children: [nested] };
     const root: any = { type: 'root', children: [{ type: 'paragraph', children: [nested] }] };
-    remarkChatTypography({ locale: 'en' })(root);
+    remarkTypography({ locale: 'en' })(root);
     expect(text.value).toBe('“' + 'a'.repeat(64_000) + '”');
   });
 });
 
 describe('raw inline HTML elements', () => {
   const phases = ['streaming', 'complete'] as const;
-  const typeset = (input: string, options: ChatTypographyOptions = {}) => {
+  const typeset = (input: string, options: TypographyOptions = {}) => {
     const result = render(input, { locale: 'en', ...options });
     expect(result.html).toEqual(result.originalHtml);
     return result.text;
@@ -462,5 +464,18 @@ describe('raw inline HTML elements', () => {
   it('treats a raw link as a spacing boundary whose label keeps typography', () => {
     expect(typeset('Say <a href="/x">"hi"</a> now.')).toBe('Say “hi” now.');
     expect(typeset('Wait 30 <a href="/x">min</a>.', { spacing: true })).toBe('Wait 30 min.');
+  });
+});
+
+describe('public names', () => {
+  it('exports the plugin as both the default and a named export', () => {
+    expect(namedRemarkTypography).toBe(remarkTypography);
+  });
+
+  it('keeps ChatTypographyOptions as a deprecated alias of TypographyOptions', () => {
+    const options: TypographyOptions = { locale: 'en', phase: 'complete' };
+    const legacy: ChatTypographyOptions = options;
+    const back: TypographyOptions = legacy;
+    expect(back).toBe(options);
   });
 });

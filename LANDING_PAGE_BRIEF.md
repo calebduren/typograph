@@ -1,6 +1,6 @@
 # Typograph landing page
 
-**Implemented 17 September 2026:** the home page now uses the hardened chat plugin and the comparison below. See [LANDING_TEST.md](LANDING_TEST.md) for verification and remaining evaluation work.
+**Implemented 17 September 2026:** the home page now uses the hardened chat plugin and the comparison below. See [LANDING_TEST.md](docs/history/LANDING_TEST.md) for verification and remaining evaluation work.
 
 Implemented direction following the hardening pass. English-only scope and the reference sites are user decisions. Mode: Persuade. Target: `/`, implemented by `apps/playground/src/main.tsx`, `ChatComparison.tsx`, and `landing.css`.
 
@@ -72,7 +72,7 @@ Do not display an npm install command for the candidate until the package name a
 
 ## Completion and remaining evaluation
 
-The introduction, comparison, integration examples, local guide, and scope section are implemented. Local automated checks and desktop/mobile/light/dark review are recorded in LANDING_TEST.md. The finish reviewer returned **Ship**, with no material findings in the inspected states. This review is not a package release or deployment.
+The introduction, comparison, integration examples, local guide, and scope section are implemented. Local automated checks and desktop/mobile/light/dark review are recorded in [LANDING_TEST.md](docs/history/LANDING_TEST.md). The finish reviewer returned **Ship**, with no material findings in the inspected states. This review is not a package release or deployment.
 
 Physical-device profiling, a screen-reader session, broader browser/zoom coverage, blind reading comparisons, and editorial review with real anonymized replies remain release evaluations. Package publication and the shadcn registry recipe are still pending. Keep those limits visible rather than treating local verification as evidence for untested conditions.
 

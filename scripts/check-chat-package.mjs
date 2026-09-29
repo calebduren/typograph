@@ -123,11 +123,12 @@ writeFileSync(
 import assert from 'node:assert/strict';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography, { rehypeTypography, typesetText } from '@calebduren/typograph';
+import typography, { remarkTypography, rehypeTypography, typesetText } from '@calebduren/typograph';
 import hanging from '@calebduren/typograph/hanging';
 import { typeset } from '@calebduren/typograph/static';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+assert.equal(remarkTypography, typography);
 const source = ${JSON.stringify('"Read [the guide](https://example.com/it\'s-here) today." Wait 30 min.')};
 const processor = unified().use(remarkParse).use(typography, { locale: 'en-US' });
 const tree = processor.runSync(processor.parse(source), source);
@@ -160,12 +161,14 @@ writeFileSync(
   `
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import typography, { typesetText, type ChatTypographyOptions, type TypesetTextOptions } from '@calebduren/typograph';
+import typography, { typesetText, type ChatTypographyOptions, type TypographyOptions, type TypesetTextOptions } from '@calebduren/typograph';
 import hanging, { type HangingPunctuationOptions } from '@calebduren/typograph/hanging';
 import { typeset as typesetStatic, type HtmlTypesetOptions, type TypesetOptions } from '@calebduren/typograph/static';
 import { rehypeTypography, type HtmlTypographyOptions } from '@calebduren/typograph';
-const options: ChatTypographyOptions = { locale: 'en-GB', skip: node => node.type === 'link' };
-unified().use(remarkParse).use(typography, options);
+const options: TypographyOptions = { locale: 'en-GB', skip: node => node.type === 'link' };
+const legacy: ChatTypographyOptions = options;
+const current: TypographyOptions = legacy;
+unified().use(remarkParse).use(typography, current);
 const hangingOptions: HangingPunctuationOptions = { locale: 'en', skip: node => node.type === 'element' && node.tagName === 'code' };
 unified().use(hanging, hangingOptions);
 const textOptions: TypesetTextOptions = { locale: 'en', phase: 'complete', spacing: true };

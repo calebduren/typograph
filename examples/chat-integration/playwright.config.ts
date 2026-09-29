@@ -1,5 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
+const browser = (process.env.PLAYWRIGHT_BROWSER ?? 'chromium') as 'chromium' | 'firefox' | 'webkit';
+
 export default defineConfig({
   testDir: './tests',
   timeout: 30_000,
@@ -7,7 +9,9 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL: 'http://127.0.0.1:4175',
-    channel: process.platform === 'darwin' ? 'chrome' : undefined,
+    // PLAYWRIGHT_BROWSER=firefox|webkit runs the same suite in another engine.
+    browserName: browser,
+    channel: browser === 'chromium' && process.platform === 'darwin' ? 'chrome' : undefined,
     trace: 'retain-on-failure',
   },
   webServer: [

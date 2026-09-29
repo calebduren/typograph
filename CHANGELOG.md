@@ -1,6 +1,21 @@
 # Changelog
 
-Versions are releases of the npm package `@calebduren/typograph`. While it is at 0.x, a minor version can change rendered output and a patch version does not; 0.1.1, which stopped hanging quotes in lists, is the one exception.
+Versions are releases of the npm package `@calebduren/typograph`. From 1.0.0 they follow semantic versioning. The public API is the exports, the option names and their defaults, and the documented guarantees: length-preserving character substitutions in text nodes, idempotency, protected content (code, math, URLs, link destinations, raw HTML, and escaped punctuation), and activation only for an English locale.
+
+- A patch release fixes behavior that contradicts the documentation. It does not change output on input that was already handled as documented.
+- A minor release adds an opt-in capability or refines a heuristic on input the documentation calls ambiguous. Its entry lists every change to rendered output.
+- A major release changes a default, removes or renames an export, or changes an established rule.
+
+Before 1.0.0, a minor version could change rendered output and a patch version did not; 0.1.1, which stopped hanging quotes in lists, was the one exception.
+
+## 1.0.0 — 2026-09-29
+
+- Freeze the API. This release adds no typography rules; the two changes below are the only differences from 0.4.1.
+- Rename the options type `ChatTypographyOptions` to `TypographyOptions`. `ChatTypographyOptions` remains exported as a deprecated alias for all of 1.x and is removed in 2.0.0. The Remark plugin is still the default export and is also exported as `remarkTypography`, alongside `rehypeTypography`.
+- Drop unsafe URL protocols from `web` and `email` output for Markdown input. `typeset('[x](javascript:alert(1))', { target: 'web' })` returned `<p><a href="javascript:alert(1)">x</a></p>` and now returns `<p><a>x</a></p>`. Links keep `http`, `https`, `irc`, `ircs`, `mailto`, `xmpp`, and relative URLs; images keep `http`, `https`, and relative URLs. This matches the CommonMark reference renderer. The element and its text stay, and the text is still typeset; only the `href` or `src` attribute is removed. `markdown` output and HTML input are unchanged. This is not a sanitizer.
+- Apply the semantic versioning policy above from this release on. `@typehug/en` stays pinned to an exact version, and a Typehug upgrade that changes which pairs join ships as a minor release that lists the changes.
+- Record the 1.0.0 verification in `docs/verification.md`, including a review of model replies generated for this release. The replies are in `validation/model-replies/`, and `tests/model-replies.test.ts` checks the package's guarantees on each one, complete and at streaming prefixes.
+- Tag each published version `typograph-v<version>` on its release commit, starting with `typograph-v1.0.0`. The `v1.0.0` and `v1.0.1` tags already mark the Curly releases described below.
 
 ## 0.4.1 — 2026-09-25
 

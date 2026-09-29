@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { allowClipboard } from './clipboard';
 
 const review = '../../.impeccable/review';
 
@@ -149,11 +150,14 @@ test('the specimen is a direct, live typography route', async ({ page }) => {
   expect(await page.locator('.specimen-prose mark').count()).toBeGreaterThan(0);
 });
 
-test('integration recipes, local guide, and keyboard entry work', async ({ page }) => {
+test('integration recipes, local guide, and keyboard entry work', async ({ page, browserName }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('link', { name: 'Skip to the demo' })).toBeFocused();
+  // Safari and WebKit skip links when tabbing.
+  if (browserName !== 'webkit') {
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Skip to the demo' })).toBeFocused();
+  }
   await page.getByRole('button', { name: 'Code', exact: true }).click();
   await page.getByRole('button', { name: 'Cloudflare', exact: true }).click();
   await expect(page.getByLabel('Cloudflare code example')).toContainText('useAgentChat');
@@ -167,8 +171,9 @@ test('integration recipes, local guide, and keyboard entry work', async ({ page 
 test('one agent prompt covers every stack and code alone exposes stack selection', async ({
   page,
   context,
+  browserName,
 }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await allowClipboard(page, context, browserName);
   await page.goto('/');
   const examples = page.getByRole('group', { name: 'Integration examples' });
   const prompt = page.getByRole('region', { name: 'Typography agent prompt' });
@@ -228,8 +233,9 @@ test('one agent prompt covers every stack and code alone exposes stack selection
 test('all typography combinations stay in sync with prompts and code', async ({
   page,
   context,
+  browserName,
 }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await allowClipboard(page, context, browserName);
   await page.goto('/');
   const settings = page.getByRole('group', {
     name: 'Integration typography settings',
@@ -367,8 +373,9 @@ test('the agent prompt scroll fades follow both edges and restored prompts', asy
 test('integration switches share settings with the workbench and copied instructions', async ({
   page,
   context,
+  browserName,
 }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await allowClipboard(page, context, browserName);
   await page.goto('/');
   const workbench = page.getByRole('group', { name: 'Finished text settings' });
   const integration = page.getByRole('group', {

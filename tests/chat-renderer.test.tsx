@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Streamdown, defaultRemarkPlugins } from 'streamdown';
 import { expect, it } from 'vitest';
-import remarkChatTypography from '../packages/chat-typography/src/index';
+import remarkTypography from '../packages/chat-typography/src/index';
 import hanging from '../packages/chat-typography/src/hanging';
 import { remarkPreview, previewRehypePlugins } from '../apps/playground/src/chat-preview';
 
@@ -13,7 +13,7 @@ it('renders polished assistant prose through Streamdown without changing code', 
       controls={false}
       remarkPlugins={[
         ...Object.values(defaultRemarkPlugins),
-        [remarkChatTypography, { locale: 'en', phase: 'complete', spacing: true }],
+        [remarkTypography, { locale: 'en', phase: 'complete', spacing: true }],
       ]}
     >
       {'"Hello," she said. Wait 30 **min** and keep `const x = "hi"`.'}

@@ -1,16 +1,13 @@
 import type { Root } from 'mdast';
-import {
-  protectionMask,
-  visit,
-  type ChatTypographyOptions,
-  type Node,
-  type TextNode,
-} from './engine';
+import { protectionMask, visit, type TypographyOptions, type Node, type TextNode } from './engine';
 
-export type { ChatTypographyOptions } from './engine';
+export type { TypographyOptions } from './engine';
+
+/** @deprecated Renamed to TypographyOptions in 1.0.0; this alias will be removed in 2.0.0. */
+export type ChatTypographyOptions = TypographyOptions;
 
 /** Remark plugin for presentation-only typography in a parsed Markdown reply. */
-export default function remarkChatTypography(options: ChatTypographyOptions = {}) {
+function remarkTypography(options: TypographyOptions = {}) {
   let english = false;
   try {
     english =
@@ -30,8 +27,11 @@ export default function remarkChatTypography(options: ChatTypographyOptions = {}
   };
 }
 
+export default remarkTypography;
+export { remarkTypography };
+
 export type TypesetTextOptions = Pick<
-  ChatTypographyOptions,
+  TypographyOptions,
   'locale' | 'phase' | 'punctuation' | 'spacing'
 >;
 
@@ -46,7 +46,7 @@ export function typesetText(text: string, options: TypesetTextOptions = {}): str
       .filter((_, i) => i % 2 === 0)
       .map((node) => ({ type: 'paragraph', children: [node] })),
   };
-  remarkChatTypography({ phase: 'complete', ...options })(root as unknown as Root);
+  remarkTypography({ phase: 'complete', ...options })(root as unknown as Root);
   return blocks.map((node) => node.value).join('');
 }
 
