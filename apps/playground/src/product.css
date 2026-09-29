@@ -17,6 +17,9 @@
   --line-2: rgba(43, 50, 34, 0.17);
   --lime-mark: rgba(197, 238, 88, 1);
   --lime-flash: rgba(184, 232, 60, 1);
+  /* Text and ticks set on lime stay dark in both themes. */
+  --on-lime: var(--ink);
+  --lime-tick: var(--accent-ink);
   --accent-ink: #4f6d12;
   --pill: #dededa;
   --pill-hover: #d5d5d0;
@@ -88,8 +91,11 @@
     --faint: #6f7566;
     --line: rgba(236, 238, 229, 0.09);
     --line-2: rgba(236, 238, 229, 0.16);
-    --lime-mark: rgba(197, 238, 88, 0.3);
-    --lime-flash: rgba(197, 238, 88, 0.75);
+    /* The same bright lime as the light theme, with dark text on it, not a faint wash. */
+    --lime-mark: #c5ee58;
+    --lime-flash: #dbfa85;
+    --on-lime: #1d230f;
+    --lime-tick: #1d230f;
     --accent-ink: #cdef72;
     --pill: rgba(236, 238, 229, 0.08);
     --pill-hover: rgba(236, 238, 229, 0.13);
@@ -105,7 +111,7 @@
     --softer: #242921;
     --soft: #343a2f;
     --selected: #2b3126;
-    --change-spacing: rgba(197, 238, 88, 0.14);
+    --change-spacing: rgba(197, 238, 88, 0.3);
     --change-spacing-stripe: #a6cf4a;
     --change-hanging: #2b3126;
     --ruler: rgba(236, 238, 229, 0.12);
@@ -137,6 +143,7 @@ samp {
 
 ::selection {
   background: var(--lime-mark);
+  color: var(--on-lime);
 }
 
 /* Hedvig has no italic: accent words are set apart by tone, never a synthesized slant. */
@@ -516,8 +523,8 @@ main > .story {
   padding: 0.3125rem 0.625rem;
   border-radius: 7px;
   background: var(--lime-mark);
-  color: var(--ink-2);
-  border: 0.5px solid color-mix(in srgb, var(--ink) 5%, transparent 95%);
+  color: var(--on-lime);
+  border: 0.5px solid color-mix(in srgb, var(--on-lime) 5%, transparent 95%);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -616,7 +623,7 @@ main > .story {
   padding: 0.3125rem 0.4375rem;
   border-radius: 3px 3px 3px 0;
   background: var(--lime-mark);
-  color: var(--ink);
+  color: var(--on-lime);
 }
 
 .gi-label b {
@@ -921,6 +928,10 @@ main > .story {
   background: var(--raw-mark);
 }
 
+.stream-reply .m-typeset {
+  color: var(--on-lime);
+}
+
 .m-typeset::before {
   background: var(--lime-mark);
   animation: settle 900ms var(--ease-out) both;
@@ -928,7 +939,7 @@ main > .story {
 
 .m-typeset.m-space::before {
   background:
-    linear-gradient(var(--accent-ink), var(--accent-ink)) 50% 88% / 72% 2px no-repeat,
+    linear-gradient(var(--lime-tick), var(--lime-tick)) 50% 88% / 72% 2px no-repeat,
     var(--lime-mark);
 }
 
@@ -1231,7 +1242,7 @@ main > .story {
   border-radius: 3px;
   background: var(--lime-mark);
   font-size: 1.35em;
-  color: var(--ink);
+  color: var(--on-lime);
 }
 
 /* Promises */
@@ -1784,6 +1795,12 @@ main > .story {
 
 .bench-context mark {
   color: var(--ink);
+}
+
+/* Punctuation marks sit on solid lime, so their glyphs take the on-lime ink in both themes. */
+mark[data-typograph-change='punctuation'],
+.bench-context mark[data-typograph-change='punctuation'] {
+  color: var(--on-lime);
 }
 
 .bench-status {
