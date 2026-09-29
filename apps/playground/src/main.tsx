@@ -362,10 +362,7 @@ function PlaceVisual({ kind }: { kind: string }) {
     return (
       <div className="visual visual-chat" aria-hidden="true">
         <span className="mini-bubble user">Summarize the launch?</span>
-        <span className="mini-bubble ai">
-          {lines.chat}
-          <span className="caret" />
-        </span>
+        <span className="mini-bubble ai">{lines.chat}</span>
       </div>
     );
   }
