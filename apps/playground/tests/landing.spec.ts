@@ -33,13 +33,6 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   await expectPng('/social.png', 1200, 630);
   await expectPng('/social-square.png', 1200, 1200);
   await expectPng('/brand/avatar.png', 512, 512);
-  for (const size of [16, 32, 48]) {
-    await expect(page.locator(`link[rel="icon"][sizes="${size}x${size}"]`)).toHaveAttribute(
-      'href',
-      `/favicon-${size}.png`,
-    );
-    await expectPng(`/favicon-${size}.png`, size, size);
-  }
   await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute(
     'href',
     '/favicon.svg',
@@ -47,9 +40,13 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   const vectorIcon = await page.request.get('/favicon.svg');
   expect(vectorIcon.status()).toBe(200);
   expect(vectorIcon.headers()['content-type']).toContain('image/svg+xml');
-  const favicon = await page.request.get('/favicon.ico');
-  expect(favicon.status()).toBe(200);
-  expect((await favicon.body()).subarray(0, 6)).toEqual(Buffer.from([0, 0, 1, 0, 3, 0]));
+  // One vector icon for every browser tab, recolored for dark browser chrome.
+  await expect(page.locator('link[rel="icon"]')).toHaveCount(1);
+  const vectorSource = await vectorIcon.text();
+  expect(vectorSource).toContain('#2B3222');
+  expect(vectorSource).toMatch(
+    /prefers-color-scheme:\s*dark\)\s*\{\s*path\s*\{\s*stroke:\s*#C5EE58/,
+  );
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
     'href',
     '/apple-touch-icon.png',

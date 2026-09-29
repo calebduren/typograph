@@ -431,7 +431,7 @@ select {
   width: 16px;
   height: 12px;
   border-radius: 1rem;
-  background: var(--paper);
+  background: var(--card);
 }
 
 .toggle[aria-checked='true'] .toggle-track {
@@ -441,7 +441,6 @@ select {
 
 .toggle[aria-checked='true'] .toggle-thumb {
   transform: translateX(8px);
-  background: var(--paper);
 }
 
 .toggle[data-motion='on'] .toggle-thumb {

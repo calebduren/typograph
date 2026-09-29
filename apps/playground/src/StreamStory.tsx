@@ -27,9 +27,9 @@ function workday(count: number, date = new Date()) {
 // open on a straight-sided capital.
 const reply = `Here's your daily brief for ${today()}:
 
-"Every launch this quarter shipped on time," Leland wrote in last night's update. The Q3 review moves to ${workday(2)} and it's down to 25 min.
+"Every launch this quarter shipped on time," Leland wrote in last night's update. The Q3 review moves to ${workday(2)} and it's down to 30 min.
 
-It's clear and 18 °C by noon. Your run is 5 km, so you'll be back before Dr. Osei's call.
+It's clear and 67 °F by noon. Your run is 5 km, so you'll be back before Mrs. Osei's call.
 
 "Don't forget," Joan added, "the team's calling ${workday(1)}'s demo 'the big one.'"`;
 

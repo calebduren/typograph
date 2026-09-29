@@ -1,9 +1,8 @@
 import type { InputKind } from './finished';
 
 // Starting points only: every sample is plain, untypeset text that you can replace.
-export const samples: Record<InputKind, { file: string; text: string }> = {
+export const samples: Record<InputKind, { text: string }> = {
   text: {
-    file: 'notifications.txt',
     text: `Your brief is ready: "Q3 pipeline review" takes 12 min to read.
 
 Dr. Patel's team shipped 3 fixes. J. R. Okafor reviews them at 9 a.m.
@@ -11,7 +10,6 @@ Dr. Patel's team shipped 3 fixes. J. R. Okafor reviews them at 9 a.m.
 'Til Friday, the rollout stays at 25 %.`,
   },
   markdown: {
-    file: 'brief.md',
     text: `# Thursday brief
 
 "Good morning." Here's what changed overnight.
@@ -28,7 +26,6 @@ Run \`npm run check\` before you merge, and read [the guide](https://typograph.d
 `,
   },
   html: {
-    file: 'email.html',
     text: `<!DOCTYPE html>
 <html lang="en">
 <head><title>Thursday brief</title></head>

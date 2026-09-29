@@ -40,7 +40,7 @@ test('scrolling streams the reply, and the package typesets it live', async ({ p
   // Paragraphs that open with a quote hang it in the margin, in the typeset column only.
   await expect(typeset.locator('.typograph-opening')).toHaveCount(2);
   await expect(raw.locator('.typograph-opening')).toHaveCount(0);
-  await expect(typeset).toContainText(`25${NBSP}min`);
+  await expect(typeset).toContainText(`30${NBSP}min`);
   await expect(raw).toContainText(`demo 'the big one.'"`);
 
   // Scrolling back rewinds the stream.

@@ -15,6 +15,7 @@ import benchmarkUrl from '../../../validation/chat-hardening-benchmark.json?url&
 import benchmark from '../../../validation/chat-hardening-benchmark.json';
 import { version } from '../../../packages/chat-typography/package.json';
 import { typesetText } from '@calebduren/typograph';
+import { GlyphInspector } from './GlyphInspector';
 import { Kern } from './Kern';
 import { SiteFooter, SiteHeader } from './SiteHeader';
 import { startSegmentThumbs } from './segments';
@@ -318,6 +319,7 @@ function Hero() {
         <span>
           <Kern>typograph polishes</Kern>
         </span>
+        <GlyphInspector />
       </h1>
       <p className="hero-lede">
         Typograph fixes the{' '}
@@ -542,11 +544,11 @@ function Landing() {
             ))}
           </ul>
           <div className="limits">
-            <h3>Known limits</h3>
             <p>
-              English only, with one house style; other languages pass through. No dashes, ellipses,
-              primes, or hyphenation. An inch mark inside an open quotation can read as its closing
-              quote. Email output never hangs punctuation, because mail clients do not render it.
+              <span className="deemphasized">Known Limits:</span> English only, with one house
+              style; other languages pass through. No dashes, ellipses, primes, or hyphenation. An
+              inch mark inside an open quotation can read as its closing quote. Email output never
+              hangs punctuation, because mail clients do not render it.
             </p>
           </div>
         </section>

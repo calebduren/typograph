@@ -1,10 +1,9 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-<style>path{stroke:#2B3222}@media (prefers-color-scheme:dark){path{stroke:#C5EE58}}</style>
-<g clip-path="url(#clip)">
+<g clip-path="url(#clip0_3359_15)">
 <path d="M24.0023 48V0M17.7914 47.1822L30.2147 0.817774M12.0023 44.7846L36.0023 3.21538M7.03125 40.9704L40.9724 7.02924M3.21563 35.9995L44.7848 11.9995M0.817969 30.2104L47.1824 17.7871M0 23.9981H48" stroke="#2B3222" stroke-width="2.05714"/>
 </g>
 <defs>
-<clipPath id="clip">
+<clipPath id="clip0_3359_15">
 <rect width="48" height="48" fill="white"/>
 </clipPath>
 </defs>

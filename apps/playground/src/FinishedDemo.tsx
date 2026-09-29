@@ -175,22 +175,6 @@ export function FinishedDemo({
             </button>
           ))}
         </div>
-        {kind === 'markdown' && (
-          <div className="bench-target">
-            <span aria-hidden="true">→</span>
-            <div className="segmented-control" role="group" aria-label="Output">
-              {targets.map((option) => (
-                <button
-                  key={option.value}
-                  aria-pressed={target === option.value}
-                  onClick={() => setTarget(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         <div className="bench-settings" role="group" aria-label="Finished text settings">
           <TypographyControls settings={settings} onSettingsChange={onSettingsChange} />
         </div>
@@ -198,7 +182,19 @@ export function FinishedDemo({
       <div className="bench-panes">
         <div className="bench-pane">
           <div className="pane-bar">
-            <span className="file">{samples[kind].file}</span>
+            {kind === 'markdown' && (
+              <div className="segmented-control" role="group" aria-label="Output">
+                {targets.map((option) => (
+                  <button
+                    key={option.value}
+                    aria-pressed={target === option.value}
+                    onClick={() => setTarget(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <span className="pane-meta">
               {bytes(input).toLocaleString()} B
               {edited && (
