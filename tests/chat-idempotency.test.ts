@@ -6,9 +6,7 @@ import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import type { Root } from 'mdast';
-import remarkChatTypography, {
-  type ChatTypographyOptions,
-} from '../packages/chat-typography/src/index';
+import remarkTypography, { type TypographyOptions } from '../packages/chat-typography/src/index';
 
 interface Case {
   id: string;
@@ -19,7 +17,7 @@ const cases = JSON.parse(
   readFileSync(new URL('../validation/cases.json', import.meta.url), 'utf8'),
 ) as Case[];
 
-const configs: { name: string; options: ChatTypographyOptions }[] = [
+const configs: { name: string; options: TypographyOptions }[] = [
   { name: 'complete, default spacing', options: { phase: 'complete', spacing: true } },
   { name: 'streaming, default spacing', options: { phase: 'streaming', spacing: true } },
   {
@@ -36,8 +34,8 @@ const configs: { name: string; options: ChatTypographyOptions }[] = [
 // The static `markdown` target splices into the source instead (plan 009).
 const stringifyLosses = ['escaped-after-entity', 'escaped-quote'];
 
-const processor = (options: ChatTypographyOptions) =>
-  unified().use(remarkParse).use(remarkMath).use(remarkGfm).use(remarkChatTypography, options);
+const processor = (options: TypographyOptions) =>
+  unified().use(remarkParse).use(remarkMath).use(remarkGfm).use(remarkTypography, options);
 
 const visible = (node: any): string => {
   if (['text', 'inlineCode', 'code', 'math', 'inlineMath'].includes(node.type)) return node.value;
@@ -45,12 +43,12 @@ const visible = (node: any): string => {
   return (node.children ?? []).map(visible).join(node.type === 'root' ? '\n\n' : '');
 };
 
-function typeset(input: string, options: ChatTypographyOptions): Root {
+function typeset(input: string, options: TypographyOptions): Root {
   const run = processor(options);
   return run.runSync(run.parse(input), input) as Root;
 }
 
-function reparse(fixture: Case, options: ChatTypographyOptions) {
+function reparse(fixture: Case, options: TypographyOptions) {
   const settings = { locale: fixture.locale ?? 'en', ...options };
   const first = typeset(fixture.input, settings);
   const markdown = unified().use(remarkMath).use(remarkGfm).use(remarkStringify).stringify(first);
@@ -97,7 +95,7 @@ describe('idempotency', () => {
     ["‘Quoted’ and 'quoted' with Bob’s and Bob's.", '‘Quoted’ and ‘quoted’ with Bob’s and Bob’s.'],
     ['J.\u00a0R. R. Tolkien wrote "it."', 'J.\u00a0R.\u00a0R. Tolkien wrote “it.”'],
   ])('keeps already-typeset input stable: %s', (input, expected) => {
-    const options: ChatTypographyOptions = { locale: 'en', phase: 'complete', spacing: true };
+    const options: TypographyOptions = { locale: 'en', phase: 'complete', spacing: true };
     const once = visible(typeset(input, options));
     expect(once).toBe(expected);
     expect(visible(typeset(once, options))).toBe(once);

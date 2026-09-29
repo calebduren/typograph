@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { allowClipboard } from './clipboard';
 
 const NBSP = String.fromCharCode(0xa0);
 
@@ -56,8 +57,8 @@ test('reduced motion shows the finished reply without pinning or zoom', async ({
   await expect(page.locator('.stream-stage')).toHaveCSS('position', 'relative');
 });
 
-test('copy labels swap without resizing their buttons', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('copy labels swap without resizing their buttons', async ({ page, context, browserName }) => {
+  await allowClipboard(page, context, browserName);
   await page.goto('/');
   for (const name of ['Copy install command', 'Copy agent prompt']) {
     const button = page.getByRole('button', { name }).first();
@@ -84,7 +85,7 @@ test('the changelog is typeset by the package and linked from every page', async
     .click();
   await expect(page).toHaveURL(/\/changelog$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Changelog');
-  await expect(page.getByRole('heading', { level: 2, name: /^0\.4\.1/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: /^1\.0\.0/ })).toBeVisible();
   await expect(page.locator('.changelog-body')).toContainText('Curl the apostrophe in possessives');
   await expect(page.locator('.changelog-body')).toContainText('a published version’s tarball');
   await expect(page.getByRole('link', { name: 'Typograph home' })).toHaveAttribute('href', '/');

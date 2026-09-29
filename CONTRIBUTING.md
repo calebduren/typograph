@@ -17,7 +17,7 @@ CI runs the checks on Node 22 and 24. The package supports Node 22+ at runtime; 
 
 The main implementation paths are:
 
-- `packages/chat-typography/src/index.ts`: English punctuation and optional no-break spacing.
+- `packages/chat-typography/src/engine.ts` and `index.ts`: English punctuation, optional no-break spacing, and the Remark plugin.
 - `packages/chat-typography/src/hanging.ts` and `hanging.css`: optional opening-quote layout.
 - `apps/playground/src/main.tsx`: landing page and integration UI.
 - `apps/playground/src/ChatComparison.tsx`: editable comparison and recorded replay.
@@ -34,6 +34,8 @@ npm run test:chat-integration
 The first command builds the package and both apps, checks types, runs unit/renderer tests, and validates the packed package in a clean consumer. The landing command rebuilds the site and serves its production assets through the local Cloudflare Worker on port 4174, including the configured headers. It never reuses the Vite development server. The SDK suite covers local Vercel/Cloudflare flows. See the [fixture README](examples/chat-integration/README.md) for browser prerequisites and local servers.
 
 Punctuation changes need meaningful examples, preservation checks for neighboring syntax, and incomplete-stream coverage. Editorial examples live in `validation/cases.json`; tests live in `tests/chat-*.test.*`. Keep locale opt-outs, code, math, URLs, and original messages intact. Integration changes must preserve the renderer's sanitization and defaults.
+
+The package follows the versioning policy at the top of the [changelog](CHANGELOG.md). Name every change to rendered output in the changelog entry. Changing a default, removing or renaming an export, or changing an established rule waits for a major release. The model-reply corpus in `validation/model-replies/` is checked by `tests/model-replies.test.ts`; keep it passing.
 
 For UI changes, preserve one native comparison scroller, keyboard access, narrow-screen reflow, and stable text geometry when highlighting changes. The landing page styles Streamdown's semantic elements and data attributes with plain CSS; emitted Tailwind class names are not its styling API.
 

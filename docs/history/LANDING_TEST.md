@@ -1,12 +1,14 @@
 # Landing page verification
 
-17 September 2026. The site demonstrates the English-only chat package described in [the landing-page brief](LANDING_PAGE_BRIEF.md). The package is private and unpublished; nothing was deployed.
+> Historical record. Current verification is in [docs/verification.md](../verification.md).
+
+17 September 2026. The site demonstrates the English-only chat package described in [the landing-page brief](../../LANDING_PAGE_BRIEF.md). The package is private and unpublished; nothing was deployed.
 
 ## Current repository
 
 The workspace has three packages: the typography utility, its React/Vite landing page, and the Vercel/Cloudflare compatibility fixture. The site mounts directly from `apps/playground/src/main.tsx`. The superseded toolkit, specimen route, duplicate stylesheet, generated downloads, portable skill, and exploratory comparison runners have been removed. Development and production builds use only the current chat package.
 
-The [README](README.md), [contributing guide](CONTRIBUTING.md), and [release guide](docs/releasing.md) describe the remaining commands. Editorial fixtures and the engine measurements remain in `validation`; package and performance scripts remain in `scripts`.
+The [README](../../README.md), [contributing guide](../../CONTRIBUTING.md), and [release guide](../releasing.md) describe the remaining commands. Editorial fixtures and the engine measurements remain in `validation`; package and performance scripts remain in `scripts`.
 
 ## Checks after the audit fixes
 

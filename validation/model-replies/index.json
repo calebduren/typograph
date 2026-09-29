@@ -1,0 +1,202 @@
+[
+  {
+    "file": "replies/01-dialogue-tips.md",
+    "prompt": "How do I write better dialogue in fiction?",
+    "words": 387
+  },
+  {
+    "file": "replies/02-desk-setup.md",
+    "prompt": "I'm 5'11\" and setting up a standing desk with a 24\" monitor. What should I know?",
+    "words": 366
+  },
+  {
+    "file": "replies/03-js-strings.md",
+    "prompt": "What's the difference between single quotes, double quotes, and backticks in JavaScript?",
+    "words": 368
+  },
+  {
+    "file": "replies/04-q3-update-email.md",
+    "prompt": "Draft a short email to my team about our Q3 results and Q4 plans.",
+    "words": 297
+  },
+  {
+    "file": "replies/05-nineties-music.md",
+    "prompt": "Why does '90s alternative music still hold up?",
+    "words": 348
+  },
+  {
+    "file": "replies/06-button-microcopy.md",
+    "prompt": "What should the button labels say in a save-changes dialog?",
+    "words": 365
+  },
+  {
+    "file": "replies/07-cover-letter.md",
+    "prompt": "Write a cover letter for a product analyst job at a health company.",
+    "words": 322
+  },
+  {
+    "file": "replies/08-derivatives.md",
+    "prompt": "Explain prime notation like f'(x) and x' in calculus.",
+    "words": 374
+  },
+  {
+    "file": "replies/09-french-phrases.md",
+    "prompt": "Give me some French phrases for a first trip to Paris.",
+    "words": 347
+  },
+  {
+    "file": "replies/10-family-names.md",
+    "prompt": "How do I start researching my Irish O'Brien ancestors?",
+    "words": 363
+  },
+  {
+    "file": "replies/11-running-plan.md",
+    "prompt": "Give me an eight-week plan to run 5 km as a beginner.",
+    "words": 450
+  },
+  {
+    "file": "replies/12-history-of-quotes.md",
+    "prompt": "Where did quotation marks come from?",
+    "words": 397
+  },
+  {
+    "file": "replies/13-gettysburg.md",
+    "prompt": "What is the Gettysburg Address actually doing, rhetorically?",
+    "words": 397
+  },
+  {
+    "file": "replies/14-python-sql.md",
+    "prompt": "How do I safely put names like O'Connor into SQL from Python?",
+    "words": 336
+  },
+  {
+    "file": "replies/15-shell-quoting.md",
+    "prompt": "Explain single vs double quotes in bash.",
+    "words": 398
+  },
+  {
+    "file": "replies/16-utm-links.md",
+    "prompt": "How do I build campaign links with UTM parameters?",
+    "words": 371
+  },
+  {
+    "file": "replies/17-csv-escaping.md",
+    "prompt": "How should I handle quotes and commas in CSV files?",
+    "words": 356
+  },
+  {
+    "file": "replies/18-roast-chicken.md",
+    "prompt": "Give me an easy roast chicken recipe for a weeknight.",
+    "words": 406
+  },
+  {
+    "file": "replies/19-household-budget.md",
+    "prompt": "Help me build a simple household budget.",
+    "words": 389
+  },
+  {
+    "file": "replies/20-contract-terms.md",
+    "prompt": "How do I read the defined terms in a service agreement?",
+    "words": 385
+  },
+  {
+    "file": "replies/21-poem-feedback.md",
+    "prompt": "Give me feedback on my poem about a kettle and the morning.",
+    "words": 383
+  },
+  {
+    "file": "replies/22-commit-messages.md",
+    "prompt": "How should I write good git commit messages?",
+    "words": 367
+  },
+  {
+    "file": "replies/23-apostrophe-rules.md",
+    "prompt": "What are the basic rules for apostrophes?",
+    "words": 374
+  },
+  {
+    "file": "replies/24-interview-prep.md",
+    "prompt": "How do I prepare for a behavioral interview?",
+    "words": 377
+  },
+  {
+    "file": "replies/25-lisbon-itinerary.md",
+    "prompt": "Plan three days in Lisbon for me.",
+    "words": 364
+  },
+  {
+    "file": "replies/26-short-story-scene.md",
+    "prompt": "Write a short scene with a lighthouse keeper and an unexpected visitor.",
+    "words": 391
+  },
+  {
+    "file": "replies/27-json-api-errors.md",
+    "prompt": "How should I design error responses for a JSON API?",
+    "words": 376
+  },
+  {
+    "file": "replies/28-markdown-links.md",
+    "prompt": "How do links, titles, and quotes work in Markdown?",
+    "words": 314
+  },
+  {
+    "file": "replies/29-idioms.md",
+    "prompt": "Which English idioms confuse learners the most?",
+    "words": 398
+  },
+  {
+    "file": "replies/30-photo-prints.md",
+    "prompt": "How do I choose print sizes and crops for my photos?",
+    "words": 391
+  },
+  {
+    "file": "replies/31-plywood-shelves.md",
+    "prompt": "How can I build simple garage shelves from lumber?",
+    "words": 401
+  },
+  {
+    "file": "replies/32-junk-dna.md",
+    "prompt": "Is junk DNA really junk?",
+    "words": 412
+  },
+  {
+    "file": "replies/33-book-recs.md",
+    "prompt": "Recommend some science fiction books for a beginner.",
+    "words": 397
+  },
+  {
+    "file": "replies/34-meeting-notes.md",
+    "prompt": "Summarize these meeting notes from Tuesday's product sync.",
+    "words": 362
+  },
+  {
+    "file": "replies/35-twas-parody.md",
+    "prompt": "Write an office parody of 'Twas the Night Before Christmas.",
+    "words": 315
+  },
+  {
+    "file": "replies/36-css-quotes.md",
+    "prompt": "How do I get typographic quotes in HTML and CSS?",
+    "words": 339
+  },
+  {
+    "file": "replies/37-editing-emphasis.md",
+    "prompt": "Give me an editing checklist for emphasis and quotation marks.",
+    "words": 411
+  },
+  {
+    "file": "replies/38-spanish-basics.md",
+    "prompt": "Teach me some Spanish for a week in Mexico City.",
+    "words": 354
+  },
+  {
+    "file": "replies/39-p-values.md",
+    "prompt": "What does a p-value actually tell me?",
+    "words": 443
+  },
+  {
+    "file": "replies/40-support-reply.md",
+    "prompt": "Draft a reply to a customer who was charged twice for an annual plan.",
+    "words": 389
+  }
+]

@@ -22,10 +22,25 @@ for (const backend of ['ai-sdk', 'cloudflare']) {
     test('streams rich Markdown, preserves code/math/URLs/tools, and copies the original', async ({
       page,
       context,
+      browserName,
     }) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
-      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      if (browserName === 'chromium') {
+        await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      } else {
+        // Firefox and WebKit have no clipboard permission grant; keep the copied payload in page.
+        await page.addInitScript(() => {
+          let copied = '';
+          Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: {
+              writeText: async (text: string) => void (copied = text),
+              readText: async () => copied,
+            },
+          });
+        });
+      }
       await openChat(page, backend);
       await page.getByRole('button', { name: 'Run rich', exact: true }).click();
       const response = page.getByTestId('response');

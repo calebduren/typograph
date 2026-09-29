@@ -1,9 +1,9 @@
 import type { Element, Nodes, Root, RootContent } from 'hast';
-import { typesetSegments, type ChatTypographyOptions, type Segment } from './engine';
+import { typesetSegments, type TypographyOptions, type Segment } from './engine';
 import { transparent } from './html-elements';
 import { inherit, type State } from './html-scope';
 
-export interface HtmlTypographyOptions extends Omit<ChatTypographyOptions, 'skip'> {
+export interface HtmlTypographyOptions extends Omit<TypographyOptions, 'skip'> {
   /** Leave an application-selected HTML element and its descendants unchanged. */
   skip?: (node: Readonly<Nodes>) => boolean;
 }
@@ -55,7 +55,7 @@ function hardStop(element: Element, options: HtmlTypographyOptions): boolean {
 
 /** Walk one block container; nested blocks are queued so traversal never recurses. */
 function typesetHtml(tree: Root, options: HtmlTypographyOptions): void {
-  const settings: ChatTypographyOptions = { ...options, skip: undefined };
+  const settings: TypographyOptions = { ...options, skip: undefined };
   // HTML carries no source-syntax escapes, and right-edge decisions stay conservative.
   const hooks = { boundary: () => false };
   const blocks: [Root | Element, State][] = [[tree, { english: true, translate: true }]];

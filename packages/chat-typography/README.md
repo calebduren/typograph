@@ -40,7 +40,7 @@ Streamdown's `remarkPlugins` prop replaces its defaults. Spread `defaultRemarkPl
 
 Supply the known language of the **response**, not just the interface language. `en`, `en-US`, `en-GB`, and other valid English BCP 47 tags use the same English house style. Regional punctuation conventions are not implemented. Unknown, invalid, missing, or unsupported locales pass through. The plugin does not detect mixed-language passages.
 
-The default changes quote marks and apostrophes; it leaves whitespace unchanged. To enable conservative nonbreaking pairs such as `30 min`, `Dr. Smith`, and `Fig. 2`, set `spacing: true`. This uses the credited [Typehug](https://github.com/alexszczurek/typehug) engine. Disabling spacing skips its analysis but does not remove it from the bundle.
+The default changes quote marks and apostrophes; it leaves whitespace unchanged. To enable conservative nonbreaking pairs such as `30 min`, `Dr. Smith`, and `Fig. 2`, set `spacing: true`. This uses the credited [Typehug](https://github.com/alexszczurek/typehug) engine. Disabling spacing skips its analysis but does not remove it from the bundle. There is no spacing-free entry point in 1.x; the plugin, Typehug included, is about 4 KB gzip.
 
 Only pass assistant text parts through the prose renderer. Render tool results, JSON, citations, and other structured UI using their appropriate components. A generic Remark pipeline can use `.use(typography, options)` after parsing; pass the original Markdown as the VFile value so escaped punctuation and unfinished syntax can be protected.
 
@@ -84,6 +84,8 @@ A fixed preset requires no finish callbacks, per-message completion tracking, or
 
 ## Contract
 
+The default export is the Remark plugin, also available as the named export `remarkTypography`. Its options type is `TypographyOptions`. The former name, `ChatTypographyOptions`, remains exported as a deprecated alias for all of 1.x and is removed in 2.0.0.
+
 | Option        | Default     | Behavior                                                                                                       |
 | ------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
 | `locale`      | absent      | A valid English language tag enables transformations.                                                          |
@@ -94,13 +96,23 @@ A fixed preset requires no finish callbacks, per-message completion tracking, or
 
 Short-word and paragraph-ending joins are off unless requested. `lastWords` also requires `phase: 'complete'`. If opting into completion refinements, track a successful finish for each message, exclude abort/disconnect/error, and decide which finish reasons qualify. A chat status of `ready` alone is insufficient. The default avoids this lifecycle bookkeeping.
 
-Punctuation context crosses emphasis, link labels, and inline elements such as `em`, `b`, and `span` within a block. Any other raw HTML element, including a custom element such as `<citation>`, is preserved as a unit, and its content receives no typography. No-break spacing can cross emphasis but does not cross a link, code, math, or skipped subtree boundary. Code, math, raw HTML, link destinations, and syntax are preserved. Escaped quotes are protected when the original source is available. Bare URLs, email addresses, and unfinished backtick spans receive conservative protection. Unfinished inline code protection ends at the next blank line, so later paragraphs still receive typography.
+Punctuation context crosses emphasis, link labels, and inline elements such as `em`, `b`, and `span` within a block. Any other raw HTML element, including a custom element such as `<citation>`, is preserved as a unit, and its content receives no typography. No-break spacing can cross emphasis but does not cross a link, code, math, or skipped subtree boundary. Code, math, raw HTML, link destinations, and syntax are preserved. The one exception is `typeset` with `web` or `email` output for Markdown input, which removes a link or image URL with an unsafe protocol; see [Finished Markdown](#finished-markdown-web-email-and-markdown-output). Escaped quotes are protected when the original source is available. Bare URLs, email addresses, and unfinished backtick spans receive conservative protection. Unfinished inline code protection ends at the next blank line, so later paragraphs still receive typography.
 
 Quote state resets at each block. A quotation that spans paragraphs can leave its final straight closing mark unchanged. An ambiguous inch mark inside an open quotation, such as `"Buy a 24" monitor," he said.`, can be interpreted as the closing quote. Write explicit prime characters (`24″`) or opt out when literal intent must be preserved. A matching closer can resolve an elision-like opening (`'Round the corner.'`) as a quotation; incomplete streams can revise that decision as the closer arrives. This is a conservative heuristic, not grammatical analysis.
 
 To bound known expensive Typehug recognition, spacing passes through an entire prose run if any token exceeds **256 UTF-16 code units**. Punctuation still runs. A run is a contiguous span of prose that may include emphasis; links and protected content delimit it. This fallback deliberately forgoes some optional joins.
 
 The core plugin's edits are length-preserving character substitutions in existing text nodes. The plugin is stateless between transformations; it does not mutate the SDK message, manage transport, throttle chunks, sanitize HTML, or replace the Markdown parser. The static `typeset` entry uses your installed unified and remark packages rather than bundling a parser. Incomplete Markdown can still change interpretation as more text arrives. Dashes, ellipses, primes, hyphenation, automatic language detection, and arbitrary-language typography are outside this package's scope. Running the plugin twice on the same parsed tree leaves it unchanged, and so does running it on text that already contains curly quotes and nonbreaking spaces. Serializing the tree back to Markdown can drop escapes, so a reparsed result is not covered by this guarantee.
+
+### Stability
+
+From 1.0.0 the package follows semantic versioning. The public API is the exports, the option names and their defaults, and the guarantees documented here: edits are length-preserving character substitutions in text nodes; running again on the output leaves it unchanged; code, math, URLs, link destinations, raw HTML, and escaped punctuation are protected; and typography applies only when the locale is English.
+
+- A patch release fixes behavior that contradicts this documentation. It does not change output on input that was already handled as documented.
+- A minor release adds an opt-in capability or refines a heuristic on input this documentation calls ambiguous. The [changelog](https://github.com/calebduren/typograph/blob/main/CHANGELOG.md) lists every change to rendered output.
+- A major release changes a default, removes or renames an export, or changes an established rule.
+
+Which pairs `spacing` joins is decided by Typehug and is outside this promise. Spacing is opt-in, `@typehug/en` is pinned to an exact version, and a Typehug upgrade that changes existing joins ships as a minor release that lists those changes, so a product that needs fixed spacing output pins its own version. Punctuation rules are covered by the promise in full. The limits described above, such as quotations across paragraphs and inch marks inside an open quotation, are documented behavior rather than bugs, so a patch release does not change them.
 
 ## Plain strings
 
@@ -139,6 +151,8 @@ const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true }
 
 - **Syntax:** CommonMark plus GFM (tables, strikethrough, autolink literals, footnotes, task lists). Math is off by default because `remark-math` reads single dollars, which are usually currency, as inline math. Pass `math: true` (and install `remark-math`) to parse `$…$` and `$$…$$`; math is rendered as `remark-rehype`'s default `<code class="language-math">` markup, so bring your own TeX renderer.
 - **Raw HTML** is dropped from `web` and `email` output, following `remark-rehype`'s defaults; sanitize and add it yourself if you need it. `markdown` output keeps it as written.
+- **Unsafe URLs** are removed from `web` and `email` output, as in the CommonMark reference renderer. Links keep `http`, `https`, `irc`, `ircs`, `mailto`, `xmpp`, and relative URLs; images keep `http`, `https`, and relative URLs. Any other `href` or `src` attribute, such as a `javascript:` or `data:` URL, is removed, and the element and its text stay: `[x](javascript:alert(1))` becomes `<p><a>x</a></p>`. `markdown` output keeps the URL as written.
+- **Not a sanitizer.** With raw HTML dropped, the remaining attributes come from `remark-rehype`. A product that needs attribute-level control should still run `rehype-sanitize` or its own sanitizer on the output.
 - **Hanging CSS:** `web` output with hanging markup needs `@calebduren/typograph/hanging.css`. `typeset` returns markup only.
 - **`markdown` output** writes each change back into your original text, so emphasis markers, bullets, line wrapping, and escapes stay as they were. Backslash-escaped quotes stay straight. Quotes written as entities (`&quot;`) stay as entities, although `web` output curls them. Text containing a named entity other than `&amp; &lt; &gt; &quot; &apos; &nbsp;` keeps its original characters.
 - **Idempotent:** typesetting the `markdown` output again returns it unchanged.
@@ -151,7 +165,7 @@ If outbound mail is rendered outside JavaScript, such as by a Python template, `
 
 For prose that is already HTML, such as an email template with a brief interpolated into it, use one of two entry points:
 
-- **`typeset(html, { input: 'html', target: 'web' | 'email', locale: 'en' })`** from `@calebduren/typograph/static` returns your HTML with only typographic characters changed. Markup, attributes, comments, the doctype, and line endings stay byte for byte. Install `unified` and `rehype-parse`. Pass `html: 'document'` for a full document; the default parses a fragment. Both targets return the same string.
+- **`typeset(html, { input: 'html', target: 'web' | 'email', locale: 'en' })`** from `@calebduren/typograph/static` returns your HTML with only typographic characters changed. Markup, attributes, comments, the doctype, and line endings stay byte for byte. Install `unified` and `rehype-parse`. Pass `html: 'document'` for a full document; the default parses a fragment. Both targets return the same string. The `target` option is kept for symmetry with Markdown input, and both values are stable.
 - **`rehypeTypography`** from `@calebduren/typograph` typesets hast text nodes inside your own rehype pipeline. Pair it with `rehypeHangingPunctuation({ locale: 'en', source: 'html' })` for hanging quotes on the web.
 
 ```ts
@@ -165,7 +179,7 @@ const email = await typeset(template, {
 });
 ```
 
-- **Trusted HTML only.** The input is returned unsanitized.
+- **Trusted HTML only.** The input is returned unsanitized, and link and image URLs are not checked.
 - **What is prose.** Text inside `code`, `kbd`, `samp`, `var`, `pre`, `script`, `style`, `textarea`, `template`, `svg`, `math`, `head`, `title`, `noscript`, and ruby annotations is never changed. Neither is anything under `data-typograph="off"` or your `skip(node)`. Text under a non-English `lang`, an empty `lang`, or `translate="no"` is left alone, but a nested `lang="en"` or `translate="yes"` turns it back on. Inline elements such as `em`, `b`, `span`, and `font` join the surrounding sentence, so quotes pair across them. Links end a no-break spacing run. Every other element, including custom elements, starts a new block, and quote state resets there. Only inline `style` attributes are read: an inline element styled `display: block` counts as a block.
 - **Escaped quotes.** Template engines escape interpolated text, so quotes often arrive as `&quot;` or `&#39;`. Those references are replaced with curly quotes. Other references, including `&amp;quot;`, are left as written.
 - **Conservative edits.** A text node is edited only when every character lines up with the source. Text the parser moves (such as stray text inside a `<table>`), or text next to a reference it cannot account for, keeps its original characters.
@@ -208,4 +222,4 @@ npm run test:chat-integration
 npm run bench:chat
 ```
 
-Browser prerequisites and local startup are in the fixture README. The clean-package check installs the packed artifact into a temporary generic Remark consumer and checks public types without `skipLibCheck`. See [the hardening report](https://github.com/calebduren/typograph/blob/main/HARDENING_TEST.md) for measured results and remaining limits.
+Browser prerequisites and local startup are in the fixture README. The clean-package check installs the packed artifact into a temporary generic Remark consumer and checks public types without `skipLibCheck`. The [1.0.0 verification record](https://github.com/calebduren/typograph/blob/main/docs/verification.md) lists what ran for this release, the model-reply review, and what was not verified. The earlier [hardening report](https://github.com/calebduren/typograph/blob/main/docs/history/HARDENING_TEST.md) is kept as history.

@@ -1,24 +1,25 @@
 import type { Root } from 'mdast';
 import type { Root as HastRoot } from 'hast';
-import remarkChatTypography, { type ChatTypographyOptions } from './index';
+import remarkTypography, { type TypographyOptions } from './index';
 import rehypeHangingPunctuation from './hanging';
 import { rehypeTypography, type HtmlTypographyOptions } from './html';
 import { spliceHtml, type HtmlText } from './html-splice';
+import rehypeDropUnsafeUrls from './safe-urls';
 
 export type TypesetTarget = 'web' | 'email' | 'markdown';
 
 interface SharedTypesetOptions {
   /** A valid English language tag enables typography; otherwise text passes through. */
   locale?: string;
-  punctuation?: ChatTypographyOptions['punctuation'];
-  spacing?: ChatTypographyOptions['spacing'];
+  punctuation?: TypographyOptions['punctuation'];
+  spacing?: TypographyOptions['spacing'];
 }
 
 export interface MarkdownTypesetOptions extends SharedTypesetOptions {
   input?: 'markdown';
   /** Required. 'web' and 'email' return an HTML fragment; 'markdown' returns typeset Markdown. */
   target: TypesetTarget;
-  skip?: ChatTypographyOptions['skip'];
+  skip?: TypographyOptions['skip'];
   /** Parse `$…$` and `$$…$$` as math. Off by default: single dollars are usually currency. */
   math?: boolean;
   /** Opening-quote hanging markup for 'web' (default true). Ignored for 'email' and 'markdown'. */
@@ -262,7 +263,7 @@ export function createTypeset(peers: Peers) {
       .use(loaded['remark-parse']!.default)
       .use(loaded['remark-gfm']!.default);
     if (options.math) processor = processor.use(loaded['remark-math']!.default);
-    const settings: ChatTypographyOptions = {
+    const settings: TypographyOptions = {
       locale: options.locale,
       phase: 'complete',
       punctuation: options.punctuation,
@@ -272,10 +273,14 @@ export function createTypeset(peers: Peers) {
 
     if (target === 'markdown') {
       const tree = processor.parse(markdown) as Node;
-      const transform = remarkChatTypography(settings);
+      const transform = remarkTypography(settings);
       return splice(markdown, tree, (root) => transform(root as Root, { value: markdown }));
     }
-    processor = processor.use(remarkChatTypography, settings).use(loaded['remark-rehype']!.default);
+    processor = processor
+      .use(remarkTypography, settings)
+      .use(loaded['remark-rehype']!.default)
+      // Markdown is untrusted more often than HTML input, so match CommonMark's URL allow-list.
+      .use(rehypeDropUnsafeUrls);
     if (target === 'web' && options.hanging !== false) {
       processor = processor.use(rehypeHangingPunctuation, { locale: options.locale });
     }

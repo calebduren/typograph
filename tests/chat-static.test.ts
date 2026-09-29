@@ -3,9 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
-import remarkChatTypography, {
-  type ChatTypographyOptions,
-} from '../packages/chat-typography/src/index';
+import remarkTypography, { type TypographyOptions } from '../packages/chat-typography/src/index';
 import { typeset } from '../packages/chat-typography/src/static';
 import { createTypeset, type Peers } from '../packages/chat-typography/src/static-core';
 
@@ -21,11 +19,11 @@ const visible = (node: any): string => {
   return (node.children ?? []).map(visible).join(node.type === 'root' ? '\n\n' : '');
 };
 const parse = (markdown: string) => unified().use(remarkParse).use(remarkGfm).parse(markdown);
-function engine(markdown: string, options: ChatTypographyOptions) {
+function engine(markdown: string, options: TypographyOptions) {
   const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkChatTypography, { phase: 'complete', ...options });
+    .use(remarkTypography, { phase: 'complete', ...options });
   return visible(processor.runSync(processor.parse(markdown), markdown));
 }
 const html = (markdown: string, options: object = {}) =>
@@ -287,5 +285,73 @@ describe('options', () => {
   it('turns hanging off for web and ignores it for email', async () => {
     expect(await html('"Hi"', { hanging: false })).toBe('<p>“Hi”</p>');
     expect(await typeset('"Hi"', { target: 'email', ...en, hanging: true })).toBe('<p>“Hi”</p>');
+  });
+});
+
+describe('unsafe URL protocols', () => {
+  const targets = ['web', 'email'] as const;
+  const link = (url: string, target: 'web' | 'email') =>
+    typeset(`[click](${url})`, { target, locale: 'en', hanging: false });
+
+  describe.each(targets)('%s target', (target) => {
+    it.each([
+      ['javascript:alert%281%29'],
+      ['JavaScript:alert(1)'],
+      ['vbscript:msgbox'],
+      ['data:text/html,%3Cscript%3E'],
+    ])('removes the href of %s and keeps the link text', async (url) => {
+      expect(await link(url, target)).toBe('<p><a>click</a></p>');
+    });
+
+    it.each([
+      ['https://example.com/a'],
+      ['http://example.com'],
+      ['mailto:a@example.com'],
+      ['xmpp:a@example.com'],
+      ['irc://example.com/room'],
+      ['/path'],
+      ['#frag'],
+      ['?q=1'],
+      ['./a:b'],
+      ['a/b:c'],
+    ])('keeps %s', async (url) => {
+      expect(await link(url, target)).toBe(`<p><a href="${url}">click</a></p>`);
+    });
+
+    it('removes unsafe image sources and keeps alt text', async () => {
+      const run = (src: string) => typeset(`![alt text](${src})`, { target, locale: 'en' });
+      expect(await run('javascript:alert(1)')).toBe('<p><img alt="alt text"></p>');
+      expect(await run('data:image/png;base64,AAAA')).toBe('<p><img alt="alt text"></p>');
+      expect(await run('https://example.com/a.png')).toBe(
+        '<p><img src="https://example.com/a.png" alt="alt text"></p>',
+      );
+      expect(await run('/a.png')).toBe('<p><img src="/a.png" alt="alt text"></p>');
+      // Only http(s) is allowed for images, unlike links.
+      expect(await run('mailto:a@example.com')).toBe('<p><img alt="alt text"></p>');
+    });
+
+    it('still typesets the text of a link that lost its href', async () => {
+      expect(
+        await typeset('Wait [the "brief" 30 min](javascript:alert(1)) now.', {
+          target,
+          ...en,
+          hanging: false,
+        }),
+      ).toBe(`<p>Wait <a>the “brief” 30${nbsp}min</a> now.</p>`);
+    });
+  });
+
+  it('leaves the markdown target unchanged', async () => {
+    expect(await md('[click](javascript:alert(1))')).toBe('[click](javascript:alert(1))');
+  });
+
+  it('leaves trusted HTML input unchanged', async () => {
+    expect(
+      await typeset('<a href="javascript:alert(1)">x</a>', {
+        input: 'html',
+        target: 'web',
+        locale: 'en',
+      }),
+    ).toBe('<a href="javascript:alert(1)">x</a>');
   });
 });
