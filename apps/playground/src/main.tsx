@@ -308,7 +308,7 @@ function Hero() {
     <section className="hero" aria-labelledby="hero-title">
       <a className="badge" href="/changelog">
         <span className="badge-new">New</span>
-        <span className="badge-text">Quotes pair around citations in v0.4</span>
+        <span className="badge-text">1.0.0 is out: the API is now stable</span>
         <ArrowUpRight size={14} aria-hidden="true" strokeWidth={1.75} />
       </a>
       <h1 id="hero-title">
