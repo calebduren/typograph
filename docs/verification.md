@@ -37,9 +37,15 @@ The packed-consumer check installs the package archive into a fresh temporary pr
 
 The corpus has 40 replies, generated on 2026-09-29 by a Claude Sonnet subagent answering realistic prompts as a chat assistant. They are not production traffic and contain no user data. The replies are in `validation/model-replies/`.
 
-`tests/model-replies.test.ts` runs every reply through the plugin with `phase: 'complete'` and at streaming prefixes, and checks the documented guarantees on each: edits are length-preserving substitutions in text nodes, a second run leaves the output unchanged, and code, URLs, and link destinations stay as written. The hand review, prepared with `scripts/review-replies.mjs`, is recorded in `validation/model-replies/review.md`.
+Two runners check the corpus mechanically, and they check different things at different points:
 
-Findings: 14,980 words, 1,080 characters changed, 29,241 streaming prefixes checked, and no violation of any guarantee. Of the 93 straight marks left in prose, 80 are foot and inch marks such as `5'11"` and `24" x 96"`, which is the documented behavior. The rest fall under documented limits and none changes 1.0.0:
+- On the complete reply, both check that `typeset` with `target: 'markdown'` returns a string of the same UTF-16 length and that typesetting that output again returns it unchanged.
+- At streaming prefixes, both parse the prefix with and without the plugin in `phase: 'streaming'` and check that the text nodes match one for one, that only `"`, `'`, and spaces changed, only into curly marks and nonbreaking spaces, and that `code`, `inlineCode`, and link, image, and definition destinations are identical. Idempotency is not checked at prefixes.
+- `scripts/review-replies.mjs` samples every third prefix (29,241 in this run); `tests/model-replies.test.ts` samples every sixty-first to stay fast. The script also lists straight marks left in prose for the hand review, which is recorded in `validation/model-replies/review.md`.
+
+The corpus runners do not separately verify bare URLs, escaped punctuation, or raw HTML; those guarantees rest on the unit suite.
+
+Findings: 14,980 words, 1,080 characters changed, 29,241 streaming prefixes checked by the script, and no violation of the checks above. Of the 93 straight marks left in prose, 80 are foot and inch marks such as `5'11"` and `24" x 96"`, which is the documented behavior. The rest fall under documented limits and none changes 1.0.0:
 
 - Mathematical primes. `f'(x)` keeps its straight mark because the apostrophe is followed by `(`, while `y'` before a comma curls to `’`, so a reply that uses ASCII primes is typeset inconsistently. Primes are outside the package's scope, and the README asks for explicit prime characters.
 - Mentioned quote characters. In `a single "` and `the inch mark (")`, a quotation mark that is being discussed rather than used is curled. The plugin has no way to tell the two apart; a code span protects a mentioned character.

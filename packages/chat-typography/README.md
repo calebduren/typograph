@@ -112,7 +112,7 @@ From 1.0.0 the package follows semantic versioning. The public API is the export
 - A minor release adds an opt-in capability or refines a heuristic on input this documentation calls ambiguous. The [changelog](https://github.com/calebduren/typograph/blob/main/CHANGELOG.md) lists every change to rendered output.
 - A major release changes a default, removes or renames an export, or changes an established rule.
 
-`@typehug/en` is pinned to an exact version. Spacing is opt-in, and a Typehug upgrade that changes which pairs join ships as a minor release that lists those changes. The limits described above, such as quotations across paragraphs and inch marks inside an open quotation, are documented behavior rather than bugs, so a patch release does not change them.
+Which pairs `spacing` joins is decided by Typehug and is outside this promise. Spacing is opt-in, `@typehug/en` is pinned to an exact version, and a Typehug upgrade that changes existing joins ships as a minor release that lists those changes, so a product that needs fixed spacing output pins its own version. Punctuation rules are covered by the promise in full. The limits described above, such as quotations across paragraphs and inch marks inside an open quotation, are documented behavior rather than bugs, so a patch release does not change them.
 
 ## Plain strings
 
