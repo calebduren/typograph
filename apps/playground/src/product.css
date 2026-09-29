@@ -17,9 +17,14 @@
   --line-2: rgba(43, 50, 34, 0.17);
   --lime-mark: rgba(197, 238, 88, 1);
   --lime-flash: rgba(184, 232, 60, 1);
-  /* Text and ticks set on lime stay dark in both themes. */
+  /* Solid lime labels (the New badge, the inspector's chip) keep dark text in both themes. */
   --on-lime: var(--ink);
-  --lime-tick: var(--accent-ink);
+  /* Highlights mark characters inside running text, which keeps its own ink. In light they are
+     the same solid lime; in dark, a lime wash, so light text stays readable on them. */
+  --highlight: var(--lime-mark);
+  --highlight-flash: var(--lime-flash);
+  --on-highlight: var(--ink);
+  --highlight-tick: var(--accent-ink);
   --accent-ink: #4f6d12;
   --pill: #dededa;
   --pill-hover: #d5d5d0;
@@ -65,7 +70,7 @@
   --selected: #dcdcd6;
   --gray: var(--faint);
   --line-strong: var(--line-2);
-  --change-punctuation: var(--lime-mark);
+  --change-punctuation: var(--highlight);
   --change-spacing: rgba(197, 238, 88, 0.3);
   --change-spacing-stripe: #7da22a;
   --change-hanging: #deded8;
@@ -95,7 +100,9 @@
     --lime-mark: #c5ee58;
     --lime-flash: #dbfa85;
     --on-lime: #1d230f;
-    --lime-tick: #1d230f;
+    --highlight: rgba(197, 238, 88, 0.4);
+    --highlight-flash: rgba(197, 238, 88, 0.75);
+    --highlight-tick: var(--accent-ink);
     --accent-ink: #cdef72;
     --pill: rgba(236, 238, 229, 0.08);
     --pill-hover: rgba(236, 238, 229, 0.13);
@@ -111,7 +118,7 @@
     --softer: #242921;
     --soft: #343a2f;
     --selected: #2b3126;
-    --change-spacing: rgba(197, 238, 88, 0.3);
+    --change-spacing: rgba(197, 238, 88, 0.22);
     --change-spacing-stripe: #a6cf4a;
     --change-hanging: #2b3126;
     --ruler: rgba(236, 238, 229, 0.12);
@@ -142,8 +149,8 @@ samp {
 }
 
 ::selection {
-  background: var(--lime-mark);
-  color: var(--on-lime);
+  background: var(--highlight);
+  color: var(--on-highlight);
 }
 
 /* Hedvig has no italic: accent words are set apart by tone, never a synthesized slant. */
@@ -929,24 +936,24 @@ main > .story {
 }
 
 .stream-reply .m-typeset {
-  color: var(--on-lime);
+  color: var(--on-highlight);
 }
 
 .m-typeset::before {
-  background: var(--lime-mark);
+  background: var(--highlight);
   animation: settle 900ms var(--ease-out) both;
 }
 
 .m-typeset.m-space::before {
   background:
-    linear-gradient(var(--lime-tick), var(--lime-tick)) 50% 88% / 72% 2px no-repeat,
-    var(--lime-mark);
+    linear-gradient(var(--highlight-tick), var(--highlight-tick)) 50% 88% / 72% 2px no-repeat,
+    var(--highlight);
 }
 
 @keyframes settle {
   from {
-    background-color: var(--lime-flash);
-    box-shadow: 0 0 0 0.16em var(--lime-mark);
+    background-color: var(--highlight-flash);
+    box-shadow: 0 0 0 0.16em var(--highlight);
   }
 }
 
@@ -1240,9 +1247,9 @@ main > .story {
   margin: 0 0.15em 0 0.1em;
   padding: 0 0.1em;
   border-radius: 3px;
-  background: var(--lime-mark);
+  background: var(--highlight);
   font-size: 1.35em;
-  color: var(--on-lime);
+  color: var(--on-highlight);
 }
 
 /* Promises */
@@ -1797,10 +1804,10 @@ main > .story {
   color: var(--ink);
 }
 
-/* Punctuation marks sit on solid lime, so their glyphs take the on-lime ink in both themes. */
+/* Punctuation marks take the highlight ink: the page's own ink, on either theme's highlight. */
 mark[data-typograph-change='punctuation'],
 .bench-context mark[data-typograph-change='punctuation'] {
-  color: var(--on-lime);
+  color: var(--on-highlight);
 }
 
 .bench-status {
