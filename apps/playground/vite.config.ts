@@ -20,6 +20,14 @@ export default defineConfig(({ command }) => ({
             },
             { find: /^@calebduren\/typograph\/hanging$/, replacement: packageSource('hanging.ts') },
             { find: /^@calebduren\/typograph\/static$/, replacement: packageSource('static.ts') },
+            {
+              find: /^@calebduren\/typograph\/markdown$/,
+              replacement: packageSource('markdown.ts'),
+            },
+            {
+              find: /^@calebduren\/typograph\/html$/,
+              replacement: packageSource('typeset-html.ts'),
+            },
             { find: /^@calebduren\/typograph$/, replacement: packageSource('index.ts') },
           ]
         : [],

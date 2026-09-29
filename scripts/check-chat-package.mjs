@@ -29,9 +29,28 @@ const exec = (command, args, cwd = dir) =>
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
-const { name: packageName, version } = JSON.parse(
-  readFileSync(join(root, 'packages/chat-typography/package.json'), 'utf8'),
-);
+const {
+  name: packageName,
+  version,
+  peerDependencies,
+} = JSON.parse(readFileSync(join(root, 'packages/chat-typography/package.json'), 'utf8'));
+// Each peer at the lowest version its declared range allows, e.g. unified@11.0.5.
+const peerSpec = (peer) => `${peer}@${peerDependencies[peer].replace(/^\^/, '')}`;
+const install = (cwd, ...specs) =>
+  exec(
+    'npm',
+    [
+      'install',
+      '--ignore-scripts',
+      '--no-audit',
+      '--no-fund',
+      '--save-exact',
+      '--cache',
+      join(dir, 'npm-cache'),
+      ...specs,
+    ],
+    cwd,
+  );
 const releaseName = `${packageName.replace(/^@/, '').replace('/', '-')}-${version}.tgz`;
 const releasePath = resolve('release', releaseName);
 const refuse = (message) => {
@@ -100,23 +119,17 @@ writeFileSync(
   join(dir, 'package.json'),
   JSON.stringify({ name: 'chat-clean-consumer', private: true, type: 'module' }),
 );
-exec('npm', [
-  'install',
-  '--ignore-scripts',
-  '--no-audit',
-  '--no-fund',
-  '--save-exact',
-  '--cache',
-  join(dir, 'npm-cache'),
-  join(checkDir, pack.filename),
-  'unified@11.0.5',
-  'remark-parse@11.0.0',
-  'remark-gfm@4.0.1',
-  'remark-math@6.0.0',
-  'remark-rehype@11.1.2',
-  'rehype-stringify@10.0.1',
-  'rehype-parse@9.0.1',
-]);
+const tarball = join(checkDir, pack.filename);
+const allPeers = [
+  'unified',
+  'remark-parse',
+  'remark-gfm',
+  'remark-math',
+  'remark-rehype',
+  'rehype-stringify',
+  'rehype-parse',
+];
+install(dir, tarball, ...allPeers.map(peerSpec));
 writeFileSync(
   join(dir, 'consumer.mjs'),
   `
@@ -126,6 +139,9 @@ import remarkParse from 'remark-parse';
 import typography, { remarkTypography, rehypeTypography, typesetText } from '@calebduren/typograph';
 import hanging from '@calebduren/typograph/hanging';
 import { typeset } from '@calebduren/typograph/static';
+import { typeset as typesetMarkdown } from '@calebduren/typograph/markdown';
+import { typeset as typesetHtmlEntry } from '@calebduren/typograph/html';
+import remarkMath from 'remark-math';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 assert.equal(remarkTypography, typography);
@@ -150,10 +166,19 @@ assert.equal(
   await typeset('<p>&quot;Hi,&quot; it&#39;s <code>"x"</code></p>', { input: 'html', target: 'email', locale: 'en' }),
   '<p>“Hi,” it’s <code>"x"</code></p>',
 );
+assert.equal(await typesetMarkdown(brief, { target: 'web', locale: 'en', spacing: true }), web);
+assert.equal(await typesetMarkdown(brief, { target: 'email', locale: 'en', spacing: true }), email);
+assert.equal(await typesetMarkdown('[x](javascript:alert(1))', { target: 'web' }), '<p><a>x</a></p>');
+assert.match(await typesetMarkdown('$x$', { target: 'email', math: remarkMath }), /math-inline/);
+await assert.rejects(typesetMarkdown('$x$', { target: 'email', math: true }), TypeError);
+assert.equal(
+  await typesetHtmlEntry('<p>&quot;Hi,&quot; it&#39;s</p>', { target: 'email', locale: 'en' }),
+  '<p>“Hi,” it’s</p>',
+);
 const hastTree = { type: 'root', children: [{ type: 'element', tagName: 'p', properties: {}, children: [{ type: 'text', value: '"Hi"' }] }] };
 rehypeTypography({ locale: 'en' })(hastTree);
 assert.equal(hastTree.children[0].children[0].value, '“Hi”');
-console.log('Packed chat plugin + generic Remark pipeline + static entry + HTML input: passed');
+console.log('Packed chat plugin + generic Remark pipeline + static, markdown, and html entries: passed');
 `,
 );
 writeFileSync(
@@ -165,6 +190,9 @@ import typography, { typesetText, type ChatTypographyOptions, type TypographyOpt
 import hanging, { type HangingPunctuationOptions } from '@calebduren/typograph/hanging';
 import { typeset as typesetStatic, type HtmlTypesetOptions, type TypesetOptions } from '@calebduren/typograph/static';
 import { rehypeTypography, type HtmlTypographyOptions } from '@calebduren/typograph';
+import { typeset as typesetMarkdown, type MarkdownOptions, type MathPlugin } from '@calebduren/typograph/markdown';
+import { typeset as typesetHtmlEntry, type HtmlOptions } from '@calebduren/typograph/html';
+import remarkMath from 'remark-math';
 const options: TypographyOptions = { locale: 'en-GB', skip: node => node.type === 'link' };
 const legacy: ChatTypographyOptions = options;
 const current: TypographyOptions = legacy;
@@ -183,6 +211,19 @@ const htmlHanging: HtmlTypesetOptions = { input: 'html', target: 'web', hanging:
 const htmlMarkdown: HtmlTypesetOptions = { input: 'html', target: 'markdown' };
 const rehypeOptions: HtmlTypographyOptions = { locale: 'en', skip: node => node.type === 'element' && node.tagName === 'aside' };
 rehypeTypography(rehypeOptions);
+const mathPlugin: MathPlugin = remarkMath;
+const markdownOptions: MarkdownOptions = { target: 'web', locale: 'en', math: remarkMath, hanging: false };
+const fromMarkdown: Promise<string> = typesetMarkdown('$x$', markdownOptions);
+const staticMath: Promise<string> = typesetStatic('$x$', { target: 'email', math: remarkMath });
+// @ts-expect-error The markdown entry takes the plugin, not a boolean.
+const markdownBoolean: MarkdownOptions = { target: 'web', math: true };
+// @ts-expect-error The markdown entry takes Markdown input only.
+const markdownHtml: MarkdownOptions = { input: 'html', target: 'web' };
+const entryHtmlOptions: HtmlOptions = { target: 'email', locale: 'en', html: 'document' };
+const copied: HtmlOptions = htmlOptions;
+const fromHtml: Promise<string> = typesetHtmlEntry('<p>"Hi"</p>', entryHtmlOptions);
+// @ts-expect-error HTML input cannot produce Markdown.
+const entryHtmlMarkdown: HtmlOptions = { target: 'markdown' };
 `,
 );
 console.log(exec(process.execPath, ['consumer.mjs']).trim());
@@ -259,6 +300,108 @@ console.log('Peerless consumer: entries import; typeset() names missing peers');
 `,
 );
 console.log(exec(process.execPath, ['peerless.mjs'], bare).trim());
+
+// Bundlers resolve every literal import at build time, including /static's dynamic
+// ones, so each entry is bundled with only the peers its documentation lists.
+const { build } = await import('esbuild');
+const consumer = (label, peerNames) => {
+  const cwd = mkdtempSync(join(tmpdir(), `typograph-chat-${label}-`));
+  writeFileSync(
+    join(cwd, 'package.json'),
+    JSON.stringify({ name: `chat-${label}-consumer`, private: true, type: 'module' }),
+  );
+  install(cwd, tarball, ...peerNames.map(peerSpec));
+  return cwd;
+};
+const markdownPeers = [
+  'unified',
+  'remark-parse',
+  'remark-gfm',
+  'remark-rehype',
+  'rehype-stringify',
+];
+const htmlPeers = ['unified', 'rehype-parse'];
+const markdownConsumer = consumer('markdown', markdownPeers);
+const htmlConsumer = consumer('html', htmlPeers);
+const quote = JSON.stringify('"Hi," it\'s');
+const bundles = [
+  {
+    entry: packageName,
+    cwd: bare,
+    peers: [],
+    run: `import { typesetText } from '${packageName}';
+assert.equal(typesetText(${quote}, { locale: 'en' }), '“Hi,” it’s');`,
+  },
+  {
+    entry: `${packageName}/hanging`,
+    cwd: bare,
+    peers: [],
+    run: `import hanging from '${packageName}/hanging';
+assert.equal(typeof hanging, 'function');`,
+  },
+  {
+    entry: `${packageName}/markdown`,
+    cwd: markdownConsumer,
+    peers: markdownPeers,
+    run: `import { typeset } from '${packageName}/markdown';
+assert.equal(await typeset(${quote}, { target: 'email', locale: 'en' }), '<p>“Hi,” it’s</p>');`,
+  },
+  {
+    entry: `${packageName}/html`,
+    cwd: htmlConsumer,
+    peers: htmlPeers,
+    run: `import { typeset } from '${packageName}/html';
+assert.equal(await typeset('<p>&quot;Hi&quot;</p>', { target: 'web', locale: 'en' }), '<p>“Hi”</p>');`,
+  },
+  {
+    entry: `${packageName}/static`,
+    cwd: dir,
+    peers: allPeers,
+    run: `import { typeset } from '${packageName}/static';
+assert.equal(await typeset(${quote}, { target: 'email', locale: 'en' }), '<p>“Hi,” it’s</p>');
+assert.equal(await typeset('<p>"Hi"</p>', { input: 'html', target: 'web', locale: 'en' }), '<p>“Hi”</p>');`,
+  },
+];
+const bundle = (cwd, name, code) => {
+  writeFileSync(join(cwd, `${name}.mjs`), code);
+  return build({
+    entryPoints: [join(cwd, `${name}.mjs`)],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    write: false,
+    logLevel: 'silent',
+  });
+};
+for (const [i, { entry, cwd, peers: installed, run }] of bundles.entries()) {
+  for (const peer of allPeers)
+    assert.equal(existsSync(join(cwd, 'node_modules', peer)), installed.includes(peer), peer);
+  const result = await bundle(
+    cwd,
+    `entry-${i}`,
+    `import assert from 'node:assert/strict';\n${run}\n`,
+  );
+  // Run the bundle itself, so the check covers what the bundler produced.
+  writeFileSync(join(cwd, `bundle-${i}.mjs`), result.outputFiles[0].contents);
+  exec(process.execPath, [`bundle-${i}.mjs`], cwd);
+  console.log(
+    `Bundled ${entry} with esbuild and ${installed.length ? installed.join(', ') : 'no peers'}: passed`,
+  );
+}
+await assert.rejects(
+  bundle(markdownConsumer, 'entry-static-markdown-peers', `import '${packageName}/static';\n`),
+  (error) => {
+    const unresolved = (error.errors ?? [])
+      .map((message) => /^Could not resolve "([^"]+)"/.exec(message.text)?.[1])
+      .filter(Boolean)
+      .sort();
+    assert.deepEqual(unresolved, ['rehype-parse', 'remark-math']);
+    return true;
+  },
+);
+console.log(
+  `Bundling ${packageName}/static with only the Markdown peers fails as documented: Could not resolve "rehype-parse", "remark-math"`,
+);
 writeFileSync(
   join(checkDir, 'chat-package-check.json'),
   JSON.stringify(
@@ -278,6 +421,9 @@ writeFileSync(
         'static entry',
         'optional peers',
         'HTML input',
+        'markdown entry',
+        'html entry',
+        'bundled entries',
       ],
     },
     null,

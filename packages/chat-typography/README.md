@@ -1,11 +1,13 @@
 # @calebduren/typograph
 
-Conservative English typography for AI-generated text: smart quotes and apostrophes, optional nonbreaking spaces, and optional hanging opening quotes. One engine powers three entry points:
+Conservative English typography for AI-generated text: smart quotes and apostrophes, optional nonbreaking spaces, and optional hanging opening quotes. One engine powers every entry point:
 
-- **Streaming chat:** a Remark plugin (the default export) that refines rendered prose as tokens arrive, while the app keeps the original model text.
-- **Finished Markdown:** `typeset()` from `@calebduren/typograph/static` returns web HTML, email HTML, or typeset Markdown for artifacts such as a daily brief.
-- **Plain strings:** `typesetText()` for titles, notifications, and other text that is not Markdown.
-- **HTML:** `typeset(html, { input: 'html' })` or `rehypeTypography` for prose that is already HTML, such as an email template.
+- **Streaming chat:** a Remark plugin (the default export of `@calebduren/typograph`) that refines rendered prose as tokens arrive, while the app keeps the original model text.
+- **Finished Markdown:** `typeset()` from `@calebduren/typograph/markdown` returns web HTML, email HTML, or typeset Markdown for artifacts such as a daily brief.
+- **HTML:** `typeset()` from `@calebduren/typograph/html`, or `rehypeTypography` from the root entry, for prose that is already HTML, such as an email template.
+- **Plain strings:** `typesetText()` from the root entry for titles, notifications, and other text that is not Markdown.
+- **Opening-quote hanging:** `hangingPunctuation` from `@calebduren/typograph/hanging`, an optional Rehype helper for the web.
+- **Scripts and CLIs:** `typeset()` from `@calebduren/typograph/static` takes Markdown or HTML in one call. See [the `/static` entry](#the-static-entry) before using it under a bundler.
 
 It adds no React, chat SDK, network service, or hosting requirement.
 
@@ -15,9 +17,15 @@ ESM, Node 22+ for server use. Browser rendering and the local Cloudflare chat tr
 
 ## Install
 
-```sh
-npm install @calebduren/typograph
-```
+Each entry needs only the packages in its row. The parser packages are peer dependencies, so your project controls their versions.
+
+| Entry                            | For                                                           | Install                                                                                                                     | Notes                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `@calebduren/typograph`          | Remark plugin, `rehypeTypography`, and `typesetText`          | `npm install @calebduren/typograph`                                                                                         | No peers.                                                                                                    |
+| `@calebduren/typograph/hanging`  | Hanging opening quotes in your own Rehype pipeline            | `npm install @calebduren/typograph`                                                                                         | Needs `@calebduren/typograph/hanging.css`.                                                                   |
+| `@calebduren/typograph/markdown` | Finished Markdown to web HTML, email HTML, or Markdown        | `npm install @calebduren/typograph unified remark-parse remark-gfm remark-rehype rehype-stringify`                          | `web` output with hanging markup needs `@calebduren/typograph/hanging.css`. Add `remark-math` to parse math. |
+| `@calebduren/typograph/html`     | Trusted HTML input                                            | `npm install @calebduren/typograph unified rehype-parse`                                                                    | No Markdown packages.                                                                                        |
+| `@calebduren/typograph/static`   | Markdown or HTML input in one call, for Node scripts and CLIs | `npm install @calebduren/typograph unified remark-parse remark-gfm remark-math remark-rehype rehype-stringify rehype-parse` | Under a bundler, needs all seven peers even when a call never uses them.                                     |
 
 ## Start with one stable preset
 
@@ -84,7 +92,7 @@ A fixed preset requires no finish callbacks, per-message completion tracking, or
 
 ## Contract
 
-The default export is the Remark plugin, also available as the named export `remarkTypography`. Its options type is `TypographyOptions`. The former name, `ChatTypographyOptions`, remains exported as a deprecated alias for all of 1.x and is removed in 2.0.0.
+The default export is the Remark plugin, also available as the named export `remarkTypography`. Its options type is `TypographyOptions`. The former name, `ChatTypographyOptions`, remains exported as a deprecated alias for all of 1.x and is removed in 2.0.0. `/markdown` exports its options type as `MarkdownOptions`, whose `math` takes only a `MathPlugin`, and `/html` exports `HtmlOptions`. In `/static`, `MarkdownTypesetOptions.math` accepts `boolean | MathPlugin`. `MathPlugin` is exported from `/static` and `/markdown`.
 
 | Option        | Default     | Behavior                                                                                                       |
 | ------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
@@ -102,7 +110,7 @@ Quote state resets at each block. A quotation that spans paragraphs can leave it
 
 To bound known expensive Typehug recognition, spacing passes through an entire prose run if any token exceeds **256 UTF-16 code units**. Punctuation still runs. A run is a contiguous span of prose that may include emphasis; links and protected content delimit it. This fallback deliberately forgoes some optional joins.
 
-The core plugin's edits are length-preserving character substitutions in existing text nodes. The plugin is stateless between transformations; it does not mutate the SDK message, manage transport, throttle chunks, sanitize HTML, or replace the Markdown parser. The static `typeset` entry uses your installed unified and remark packages rather than bundling a parser. Incomplete Markdown can still change interpretation as more text arrives. Dashes, ellipses, primes, hyphenation, automatic language detection, and arbitrary-language typography are outside this package's scope. Running the plugin twice on the same parsed tree leaves it unchanged, and so does running it on text that already contains curly quotes and nonbreaking spaces. Serializing the tree back to Markdown can drop escapes, so a reparsed result is not covered by this guarantee.
+The core plugin's edits are length-preserving character substitutions in existing text nodes. The plugin is stateless between transformations; it does not mutate the SDK message, manage transport, throttle chunks, sanitize HTML, or replace the Markdown parser. The `/markdown`, `/html`, and `/static` entries use your installed unified, remark, and rehype packages rather than bundling a parser. Incomplete Markdown can still change interpretation as more text arrives. Dashes, ellipses, primes, hyphenation, automatic language detection, and arbitrary-language typography are outside this package's scope. Running the plugin twice on the same parsed tree leaves it unchanged, and so does running it on text that already contains curly quotes and nonbreaking spaces. Serializing the tree back to Markdown can drop escapes, so a reparsed result is not covered by this guarantee.
 
 ### Stability
 
@@ -129,27 +137,27 @@ It accepts `locale`, `punctuation`, `spacing`, and `phase`, with the same meanin
 
 ## Finished Markdown: web, email, and Markdown output
 
-For text that is complete before anyone reads it, such as a daily brief written overnight by an agent, use `typeset` from `@calebduren/typograph/static`. It parses, typesets, and serializes in one call.
+For text that is complete before anyone reads it, such as a daily brief written overnight by an agent, use `typeset` from `@calebduren/typograph/markdown`. It parses, typesets, and serializes in one call.
 
 ```sh
 npm install @calebduren/typograph unified remark-parse remark-gfm remark-rehype rehype-stringify
 ```
 
 ```ts
-import { typeset } from '@calebduren/typograph/static';
+import { typeset } from '@calebduren/typograph/markdown';
 
 const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true });
 ```
 
-| `target`   | Returns                           | Hanging markup                        | Peers needed                                                                 |
-| ---------- | --------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
-| `web`      | HTML fragment                     | on by default (`hanging: false` off)  | `unified`, `remark-parse`, `remark-gfm`, `remark-rehype`, `rehype-stringify` |
-| `email`    | HTML fragment                     | never; email clients do not render it | same as `web`                                                                |
-| `markdown` | typeset Markdown, same formatting | not applicable                        | `unified`, `remark-parse`, `remark-gfm`                                      |
+| `target`   | Returns                           | Hanging markup                        | Peers needed                                                                               |
+| ---------- | --------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `web`      | HTML fragment                     | on by default (`hanging: false` off)  | the five above                                                                             |
+| `email`    | HTML fragment                     | never; email clients do not render it | the five above                                                                             |
+| `markdown` | typeset Markdown, same formatting | not applicable                        | the five above; the entry imports all five, although this target runs only the first three |
 
-`target` is required. Options otherwise match the plugin (`locale`, `punctuation`, `spacing`, `skip`), except that `phase` is always `complete`. The parser packages are optional peer dependencies, loaded only when `typeset` runs. If one is missing, `typeset` rejects with an error naming every package to install.
+`target` is required. Options otherwise match the plugin (`locale`, `punctuation`, `spacing`, `skip`), except that `phase` is always `complete`. The entry imports its five peers statically, so a bundler resolves those five and no others. If one is missing, the build or the import fails with the bundler's or Node's own error. There is no HTML input here: `input: 'html'` throws and names `@calebduren/typograph/html`.
 
-- **Syntax:** CommonMark plus GFM (tables, strikethrough, autolink literals, footnotes, task lists). Math is off by default because `remark-math` reads single dollars, which are usually currency, as inline math. Pass `math: true` (and install `remark-math`) to parse `$…$` and `$$…$$`; math is rendered as `remark-rehype`'s default `<code class="language-math">` markup, so bring your own TeX renderer.
+- **Syntax:** CommonMark plus GFM (tables, strikethrough, autolink literals, footnotes, task lists). Math is off by default because `remark-math` reads single dollars, which are usually currency, as inline math. To parse `$…$` and `$$…$$`, install `remark-math` and pass the plugin itself as `math`, as in the example below. `math: true` throws, because this entry does not import `remark-math`. Math is rendered as `remark-rehype`'s default `<code class="language-math">` markup, so bring your own TeX renderer.
 - **Raw HTML** is dropped from `web` and `email` output, following `remark-rehype`'s defaults; sanitize and add it yourself if you need it. `markdown` output keeps it as written.
 - **Unsafe URLs** are removed from `web` and `email` output, as in the CommonMark reference renderer. Links keep `http`, `https`, `irc`, `ircs`, `mailto`, `xmpp`, and relative URLs; images keep `http`, `https`, and relative URLs. Any other `href` or `src` attribute, such as a `javascript:` or `data:` URL, is removed, and the element and its text stay: `[x](javascript:alert(1))` becomes `<p><a>x</a></p>`. `markdown` output keeps the URL as written.
 - **Not a sanitizer.** With raw HTML dropped, the remaining attributes come from `remark-rehype`. A product that needs attribute-level control should still run `rehype-sanitize` or its own sanitizer on the output.
@@ -157,22 +165,40 @@ const html = await typeset(brief, { target: 'web', locale: 'en', spacing: true }
 - **`markdown` output** writes each change back into your original text, so emphasis markers, bullets, line wrapping, and escapes stay as they were. Backslash-escaped quotes stay straight. Quotes written as entities (`&quot;`) stay as entities, although `web` output curls them. Text containing a named entity other than `&amp; &lt; &gt; &quot; &apos; &nbsp;` keeps its original characters.
 - **Idempotent:** typesetting the `markdown` output again returns it unchanged.
 
+```sh
+npm install remark-math
+```
+
+```ts
+import remarkMath from 'remark-math';
+import { typeset } from '@calebduren/typograph/markdown';
+
+const html = await typeset(notes, { target: 'web', locale: 'en', math: remarkMath });
+```
+
 If your pipeline already has a Markdown renderer, the simplest option is to typeset the Markdown before it enters your HTML or email template. That covers text the model wrote, but not prose the template adds itself.
 
 If outbound mail is rendered outside JavaScript, such as by a Python template, `typeset` cannot sit in that pipeline. Typeset a separate copy with `target: 'markdown'` when the text is generated, and pass that copy to the template. Keep the stored original unchanged, because the same string may also feed SMS or copy actions.
+
+### The `/static` entry
+
+`@calebduren/typograph/static` is the one entry that can do everything. Its `typeset` takes Markdown with the options above, or HTML with `input: 'html'` and the options in [HTML input](#html-input), and its `math` option accepts either `true` or the `remark-math` plugin. It loads its seven peers with dynamic imports, so in Node it needs only the packages a call uses, and it rejects with an error naming any that are missing. That suits Node scripts and CLIs. A bundler that resolves imports at build time, such as Turbopack (the default in Next.js 16) or esbuild, fails on the ones that are not installed, so under such a bundler `/static` needs all seven peers installed even when a call never uses them: a project that typesets only Markdown still needs `rehype-parse` and `remark-math`. In applications, use `/markdown` or `/html`.
 
 ## HTML input
 
 For prose that is already HTML, such as an email template with a brief interpolated into it, use one of two entry points:
 
-- **`typeset(html, { input: 'html', target: 'web' | 'email', locale: 'en' })`** from `@calebduren/typograph/static` returns your HTML with only typographic characters changed. Markup, attributes, comments, the doctype, and line endings stay byte for byte. Install `unified` and `rehype-parse`. Pass `html: 'document'` for a full document; the default parses a fragment. Both targets return the same string. The `target` option is kept for symmetry with Markdown input, and both values are stable.
+- **`typeset(html, { target: 'web' | 'email', locale: 'en' })`** from `@calebduren/typograph/html` returns your HTML with only typographic characters changed. Markup, attributes, comments, the doctype, and line endings stay byte for byte. Install `unified` and `rehype-parse`; the entry imports no Markdown packages. Pass `html: 'document'` for a full document; the default parses a fragment. Both targets return the same string. The `target` option is kept for symmetry with Markdown input, and both values are stable.
 - **`rehypeTypography`** from `@calebduren/typograph` typesets hast text nodes inside your own rehype pipeline. Pair it with `rehypeHangingPunctuation({ locale: 'en', source: 'html' })` for hanging quotes on the web.
 
+```sh
+npm install @calebduren/typograph unified rehype-parse
+```
+
 ```ts
-import { typeset } from '@calebduren/typograph/static';
+import { typeset } from '@calebduren/typograph/html';
 
 const email = await typeset(template, {
-  input: 'html',
   html: 'document',
   target: 'email',
   locale: 'en',
@@ -222,4 +248,4 @@ npm run test:chat-integration
 npm run bench:chat
 ```
 
-Browser prerequisites and local startup are in the fixture README. The clean-package check installs the packed artifact into a temporary generic Remark consumer and checks public types without `skipLibCheck`. The [1.0.0 verification record](https://github.com/calebduren/typograph/blob/main/docs/verification.md) lists what ran for this release, the model-reply review, and what was not verified. The earlier [hardening report](https://github.com/calebduren/typograph/blob/main/docs/history/HARDENING_TEST.md) is kept as history.
+Browser prerequisites and local startup are in the fixture README. The clean-package check installs the packed artifact into a temporary generic Remark consumer and checks public types without `skipLibCheck`. It also bundles each entry with esbuild in a clean consumer that has only that entry's peers, and confirms that `/static` with only the Markdown peers fails to bundle. The [verification record](https://github.com/calebduren/typograph/blob/main/docs/verification.md) lists what ran for each release, the 1.0.0 model-reply review, and what was not verified. The earlier [hardening report](https://github.com/calebduren/typograph/blob/main/docs/history/HARDENING_TEST.md) is kept as history.

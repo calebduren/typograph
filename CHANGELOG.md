@@ -9,6 +9,14 @@ Versions are releases of the npm package `@calebduren/typograph`. From 1.0.0 the
 
 Before 1.0.0, a minor version could change rendered output and a patch version did not; 0.1.1, which stopped hanging quotes in lists, was the one exception.
 
+## 1.1.0 — 2026-09-29
+
+- Add `@calebduren/typograph/markdown`: `typeset(markdown, { target })` for finished Markdown with `web`, `email`, and `markdown` targets, matching `/static` with Markdown input. It needs only `unified`, `remark-parse`, `remark-gfm`, `remark-rehype`, and `rehype-stringify`. To parse math, pass the plugin itself: `import remarkMath from 'remark-math'`, then `math: remarkMath`. `math: true` throws and says so, and `input: 'html'` throws and names the HTML entry. Its options type is `MarkdownOptions`.
+- Add `@calebduren/typograph/html`: `typeset(html, { target })` for trusted HTML, matching `/static` with `input: 'html'`. It needs only `unified` and `rehype-parse`. Its options type is `HtmlOptions`.
+- Both entries import their peers statically. `/static` loads its seven peers with dynamic imports so it can report a missing one at runtime, but a bundler that resolves imports at build time, such as Turbopack (the default in Next.js 16) or esbuild, fails on the ones that are not installed, so a project that imported `/static` only for Markdown still had to install `rehype-parse` and `remark-math`. The 1.0.0 README said the parser packages were loaded only when `typeset` runs; that held only in Node, outside a bundler.
+- Keep `/static` unchanged in behavior. Its `math` option now accepts the `remark-math` plugin as well as `true`, typed as `boolean | MathPlugin`, with `MathPlugin` exported from `/static` and `/markdown`. Rendered output is unchanged for every entry.
+- Extend `npm run check:package` to bundle every entry with esbuild in a clean consumer that has only that entry's documented peers, and to confirm that `/static` with only the Markdown peers fails to bundle.
+
 ## 1.0.0 — 2026-09-29
 
 - Freeze the API. This release adds no typography rules; the two changes below are the only differences from 0.4.1.

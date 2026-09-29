@@ -1,5 +1,6 @@
 import { typesetText } from '@calebduren/typograph';
-import { typeset } from '@calebduren/typograph/static';
+import { typeset as typesetMarkdown } from '@calebduren/typograph/markdown';
+import { typeset as typesetHtml } from '@calebduren/typograph/html';
 import type { TypographySettings } from './integration-settings';
 export { charName, codePoint } from './glyphs';
 
@@ -154,14 +155,14 @@ function annotate(baselineHtml: string, resultHtml: string): { html: string; cha
   return { html: body.innerHTML, changes };
 }
 
-// The first typeset() call loads its parser packages. Load them once up front so the
-// reported time measures typesetting, not downloading.
+// Each entry imports its parsers statically, but the first call still builds its processor.
+// Run each once up front so the reported time measures typesetting, not setup.
 let warm: Promise<unknown> | undefined;
 const ready = () =>
   (warm ??= Promise.all([
-    typeset('', { target: 'markdown' }),
-    typeset('', { target: 'web' }),
-    typeset('', { input: 'html', target: 'email' }),
+    typesetMarkdown('', { target: 'markdown' }),
+    typesetMarkdown('', { target: 'web' }),
+    typesetHtml('', { target: 'email' }),
   ]));
 
 async function timed<T>(run: () => T | Promise<T>): Promise<[T, number]> {
@@ -190,24 +191,24 @@ export async function runDemo(
     const html = /^\s*(?:<!--[\s\S]*?-->\s*)*(?:<!doctype|<html)/i.test(input)
       ? 'document'
       : 'fragment';
-    const [output, ms] = await timed(() =>
-      typeset(input, { input: 'html', target: 'email', html, ...rules }),
-    );
+    const [output, ms] = await timed(() => typesetHtml(input, { target: 'email', html, ...rules }));
     const annotated = annotate(input, output);
     return {
       output,
       preview: annotated.html,
       changes: annotated.changes,
       ms,
-      call: `await typeset(input, { input: 'html', target: 'email', html: ${literal(html)}, ${shown} })`,
+      call: `await typesetHtml(input, { target: 'email', html: ${literal(html)}, ${shown} })`,
     };
   }
   if (target === 'markdown') {
-    const [output, ms] = await timed(() => typeset(input, { target: 'markdown', ...rules }));
+    const [output, ms] = await timed(() =>
+      typesetMarkdown(input, { target: 'markdown', ...rules }),
+    );
     // Render both Markdown strings without typography to compare what readers see.
     const [before, after] = await Promise.all([
-      typeset(input, { target: 'web', hanging: false }),
-      typeset(output, { target: 'web', hanging: false }),
+      typesetMarkdown(input, { target: 'web', hanging: false }),
+      typesetMarkdown(output, { target: 'web', hanging: false }),
     ]);
     const annotated = annotate(before, after);
     return {
@@ -219,8 +220,8 @@ export async function runDemo(
     };
   }
   const hanging = target === 'web' && settings.hanging;
-  const [output, ms] = await timed(() => typeset(input, { target, ...rules, hanging }));
-  const baseline = await typeset(input, { target, hanging: false });
+  const [output, ms] = await timed(() => typesetMarkdown(input, { target, ...rules, hanging }));
+  const baseline = await typesetMarkdown(input, { target, hanging: false });
   const annotated = annotate(baseline, output);
   return {
     output,

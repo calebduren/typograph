@@ -85,7 +85,7 @@ test('the changelog is typeset by the package and linked from every page', async
     .click();
   await expect(page).toHaveURL(/\/changelog$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Changelog');
-  await expect(page.getByRole('heading', { level: 2, name: /^1\.0\.0/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: /^1\.1\.0/ })).toBeVisible();
   await expect(page.locator('.changelog-body')).toContainText('Curl the apostrophe in possessives');
   await expect(page.locator('.changelog-body')).toContainText('a published version’s tarball');
   await expect(page.getByRole('link', { name: 'Typograph home' })).toHaveAttribute('href', '/');
@@ -132,7 +132,9 @@ test('the workbench typesets your own text with the real package', async ({ page
   await expect(preview).not.toContainText('Shown only in Outlook');
   await expect(preview.locator('a')).toHaveAttribute('target', '_blank');
   await expect(preview.locator('a')).toHaveAttribute('rel', 'noopener noreferrer');
-  await expect(page.locator('.bench-call')).toContainText("input: 'html'");
+  await expect(page.locator('.bench-call')).toContainText(
+    "await typesetHtml(input, { target: 'email'",
+  );
 
   await page
     .getByRole('group', { name: 'Input' })

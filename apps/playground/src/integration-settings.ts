@@ -27,16 +27,18 @@ export function integrationCode(stack: IntegrationStack, settings: TypographySet
   const imports = `import typography from '@calebduren/typograph';${settings.hanging ? "\nimport hangingPunctuation from '@calebduren/typograph/hanging';\nimport '@calebduren/typograph/hanging.css';" : ''}`;
   if (stack === 'Finished text') {
     const rules = `locale: 'en', punctuation: ${settings.punctuation}, spacing: ${settings.spacing}`;
-    return `// npm install unified remark-parse remark-gfm remark-rehype rehype-stringify rehype-parse
+    return `// npm install @calebduren/typograph unified remark-parse remark-gfm remark-rehype rehype-stringify rehype-parse
+// Markdown needs unified, remark-parse, remark-gfm, remark-rehype, rehype-stringify; HTML needs unified, rehype-parse.
 import { typesetText } from '@calebduren/typograph';
-import { typeset } from '@calebduren/typograph/static';${settings.hanging ? "\nimport '@calebduren/typograph/hanging.css';" : ''}
+import { typeset } from '@calebduren/typograph/markdown';
+import { typeset as typesetHtml } from '@calebduren/typograph/html';${settings.hanging ? "\nimport '@calebduren/typograph/hanging.css';" : ''}
 
 // A finished Markdown brief: 'web' or 'email' HTML, or 'markdown' with formatting kept.
 const html = await typeset(brief, { target: 'web', ${rules}, hanging: ${settings.hanging} });
 const email = await typeset(brief, { target: 'email', ${rules} });
 
 // Finished HTML, such as an email template. Only typographic characters change.
-const sent = await typeset(template, { input: 'html', target: 'email', ${rules} });
+const sent = await typesetHtml(template, { target: 'email', ${rules} });
 
 // A plain string, such as a title or notification. Synchronous; no parser.
 const title = typesetText(generatedTitle, { ${rules} });`;
