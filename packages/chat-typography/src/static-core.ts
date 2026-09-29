@@ -8,6 +8,12 @@ import rehypeDropUnsafeUrls from './safe-urls';
 
 export type TypesetTarget = 'web' | 'email' | 'markdown';
 
+/**
+ * A remark plugin passed as `math`, such as `remark-math`'s default export. Typed loosely
+ * so these declarations need neither `remark-math` nor `unified` to be installed.
+ */
+export type MathPlugin = (...settings: never[]) => unknown;
+
 interface SharedTypesetOptions {
   /** A valid English language tag enables typography; otherwise text passes through. */
   locale?: string;
@@ -20,8 +26,11 @@ export interface MarkdownTypesetOptions extends SharedTypesetOptions {
   /** Required. 'web' and 'email' return an HTML fragment; 'markdown' returns typeset Markdown. */
   target: TypesetTarget;
   skip?: TypographyOptions['skip'];
-  /** Parse `$…$` and `$$…$$` as math. Off by default: single dollars are usually currency. */
-  math?: boolean;
+  /**
+   * Parse `$…$` and `$$…$$` as math. Off by default: single dollars are usually currency.
+   * `true` loads the installed `remark-math`; a plugin function is used as given.
+   */
+  math?: boolean | MathPlugin;
   /** Opening-quote hanging markup for 'web' (default true). Ignored for 'email' and 'markdown'. */
   hanging?: boolean;
 }
@@ -49,6 +58,13 @@ export type PeerName =
   | 'rehype-stringify'
   | 'rehype-parse';
 export type Peers = Record<PeerName, () => Promise<unknown>>;
+
+/** The error for a truthy non-plugin `math` on an entry that cannot load `remark-math` itself. */
+export function mathPluginRequired(entry: string): TypeError {
+  return new TypeError(
+    `typeset() from ${entry} takes the remark-math plugin as math: import remarkMath from "remark-math" and pass math: remarkMath.`,
+  );
+}
 
 interface Processor {
   use(plugin: unknown, options?: unknown): Processor;
@@ -164,12 +180,21 @@ function splice(source: string, root: Node, transform: (tree: Node) => void): st
   return chars.join('');
 }
 
-export function createTypeset(peers: Peers) {
+/**
+ * `unavailable` loads any peer absent from `peers`, so an entry that imports its peers
+ * statically never names the packages it does not support.
+ */
+export function createTypeset(
+  peers: Partial<Peers>,
+  unavailable: (name: PeerName) => Promise<never> = (name) =>
+    Promise.reject(new Error(`No loader for ${name}.`)),
+) {
   const cache = new Map<PeerName, Promise<unknown>>();
   const load = (name: PeerName) => {
     let loading = cache.get(name);
     if (!loading) {
-      loading = peers[name]();
+      const loader = peers[name];
+      loading = loader ? loader() : unavailable(name);
       cache.set(name, loading);
       // Evict failures so a later install can succeed in a long-lived process.
       loading.catch(() => cache.delete(name));
@@ -255,14 +280,17 @@ export function createTypeset(peers: Peers) {
       throw new TypeError('typeset() needs a target: "web", "email", or "markdown".');
     }
     const names: PeerName[] = ['unified', 'remark-parse', 'remark-gfm'];
-    if (options.math) names.push('remark-math');
+    const math = options.math;
+    if (math && typeof math !== 'function') names.push('remark-math');
     if (target !== 'markdown') names.push('remark-rehype', 'rehype-stringify');
     const loaded = await modules(names, target);
 
     let processor = loaded.unified!.unified!()
       .use(loaded['remark-parse']!.default)
       .use(loaded['remark-gfm']!.default);
-    if (options.math) processor = processor.use(loaded['remark-math']!.default);
+    if (math) {
+      processor = processor.use(typeof math === 'function' ? math : loaded['remark-math']!.default);
+    }
     const settings: TypographyOptions = {
       locale: options.locale,
       phase: 'complete',

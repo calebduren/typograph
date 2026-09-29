@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { typeset } from '@calebduren/typograph/static';
+import { typeset } from '@calebduren/typograph/markdown';
 import source from '../../../CHANGELOG.md?raw';
 import { SiteFooter, SiteHeader } from './SiteHeader';
 

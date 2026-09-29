@@ -42,7 +42,7 @@ npm run test:landing
 npm run test:chat-integration
 ```
 
-`check` builds both apps and the package, checks types, runs unit/renderer tests, and installs the packed package in a fresh consumer. Browser tests use local recorded responses. See [contributing](CONTRIBUTING.md), [release preparation](docs/releasing.md), and the [1.0.0 verification record](docs/verification.md). Earlier reports are kept in [docs/history](docs/history/).
+`check` builds both apps and the package, checks types, runs unit/renderer tests, and installs the packed package in a fresh consumer. Browser tests use local recorded responses. See [contributing](CONTRIBUTING.md), [release preparation](docs/releasing.md), and the [verification record](docs/verification.md). Earlier reports are kept in [docs/history](docs/history/).
 
 After building the package, `npm run bench:chat` measures the transformation and bundle size; `npm run bench` measures Streamdown server rendering. Measurements depend on the machine and do not promise whole-app performance.
 

@@ -3,6 +3,7 @@ import { createTypeset } from './static-core';
 export type {
   HtmlTypesetOptions,
   MarkdownTypesetOptions,
+  MathPlugin,
   TypesetOptions,
   TypesetTarget,
 } from './static-core';

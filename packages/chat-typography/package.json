@@ -1,6 +1,6 @@
 {
   "name": "@calebduren/typograph",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Conservative English typography for AI-generated text: streamed chat, finished Markdown, and plain strings",
   "type": "module",
   "license": "MIT",
@@ -29,10 +29,18 @@
       "types": "./dist/static.d.ts",
       "import": "./dist/static.js"
     },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "import": "./dist/markdown.js"
+    },
+    "./html": {
+      "types": "./dist/typeset-html.d.ts",
+      "import": "./dist/typeset-html.js"
+    },
     "./hanging.css": "./dist/hanging.css"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/hanging.ts src/static.ts --format esm --dts --minify --clean && cp src/hanging.css dist/hanging.css"
+    "build": "tsup src/index.ts src/hanging.ts src/static.ts src/markdown.ts src/typeset-html.ts --format esm --dts --minify --clean && cp src/hanging.css dist/hanging.css"
   },
   "dependencies": {
     "@typehug/en": "0.2.0",

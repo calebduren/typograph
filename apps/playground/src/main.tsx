@@ -246,7 +246,7 @@ const places = [
     key: 'html',
     title: 'Templates, untouched',
     text: 'Already HTML? Only typographic characters change, including template-escaped quotes. Markup stays byte for byte.',
-    call: "await typeset(html, { input: 'html' })",
+    call: "await typesetHtml(html, { target: 'email' })",
   },
 ];
 
