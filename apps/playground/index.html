@@ -6,14 +6,15 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ebebe7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#121410" media="(prefers-color-scheme: dark)" />
+    <!-- Each route's title, description, canonical, and og:* tags come from src/head.ts. -->
     <meta
       name="description"
-      content="English-only typography for AI-generated text: streaming chat, finished Markdown, and plain strings. Compare careful punctuation and optional no-break spacing in your browser."
+      content="Careful English typography for AI-generated text. A small Remark plugin for streaming chat, plus typeset() for finished Markdown, HTML, and plain strings."
     />
-    <meta property="og:title" content="Typograph — Better typography for AI-generated text." />
+    <meta property="og:title" content="Typograph — Better typography for AI-generated text" />
     <meta
       property="og:description"
-      content="Careful English punctuation for AI-generated text, streamed or finished. Open source, local, and designed for your existing Markdown renderer."
+      content="Careful English typography for AI-generated text. A small Remark plugin for streaming chat, plus typeset() for finished Markdown, HTML, and plain strings."
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Typograph" />
@@ -43,10 +44,36 @@
     <meta name="application-name" content="Typograph" />
     <meta name="apple-mobile-web-app-title" content="Typograph" />
     <link rel="canonical" href="https://typograph.dev/" />
+    <!-- The hero heading, the largest paint, is set in this face. -->
+    <link
+      rel="preload"
+      href="/fonts/HedvigLettersSerif.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link rel="manifest" href="/site.webmanifest" />
-    <title>Typograph — Better typography for AI-generated text.</title>
+    <title>Typograph — Better typography for AI-generated text</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Typograph",
+        "description": "Careful English typography for AI-generated text: streamed chat, finished Markdown, and plain strings.",
+        "url": "https://typograph.dev/",
+        "codeRepository": "https://github.com/calebduren/typograph",
+        "programmingLanguage": "TypeScript",
+        "runtimePlatform": "Node.js 22, modern browsers",
+        "license": "https://opensource.org/licenses/MIT",
+        "author": {
+          "@type": "Person",
+          "name": "Caleb Durenberger",
+          "url": "https://calebduren.com/"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -7,11 +7,13 @@
   "routes": [
     { "pattern": "typograph.dev", "custom_domain": true },
     { "pattern": "typograph.ing", "custom_domain": true },
+    { "pattern": "www.typograph.dev", "custom_domain": true },
+    { "pattern": "www.typograph.ing", "custom_domain": true },
   ],
   "assets": {
     "directory": "./apps/playground/dist",
     "binding": "ASSETS",
     "run_worker_first": true,
-    "not_found_handling": "none",
+    "not_found_handling": "404-page",
   },
 }

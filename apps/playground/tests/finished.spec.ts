@@ -60,8 +60,10 @@ test('reduced motion shows the finished reply without pinning or zoom', async ({
 test('copy labels swap without resizing their buttons', async ({ page, context, browserName }) => {
   await allowClipboard(page, context, browserName);
   await page.goto('/');
-  for (const name of ['Copy install command', 'Copy agent prompt']) {
-    const button = page.getByRole('button', { name }).first();
+  for (const button of [
+    page.getByRole('button', { name: 'Copy install command' }).first(),
+    page.locator('.recipe-copy'),
+  ]) {
     await button.scrollIntoViewIfNeeded();
     const before = (await button.boundingBox())!.width;
     await button.click();
@@ -69,10 +71,10 @@ test('copy labels swap without resizing their buttons', async ({ page, context, 
     expect(Math.abs((await button.boundingBox())!.width - before)).toBeLessThan(0.5);
   }
   // The integration button also keeps its width between its two formats.
-  const recipe = page.getByRole('button', { name: 'Copy agent prompt' });
+  const recipe = page.getByRole('button', { name: 'Copy prompt', exact: true });
   const width = (await recipe.boundingBox())!.width;
   await page.getByRole('button', { name: 'Code', exact: true }).click();
-  const code = page.getByRole('button', { name: 'Copy integration code' });
+  const code = page.getByRole('button', { name: 'Copy code', exact: true });
   await expect(code).toHaveText('Copy code');
   expect(Math.abs((await code.boundingBox())!.width - width)).toBeLessThan(0.5);
 });
@@ -154,6 +156,24 @@ test('the workbench typesets your own text with the real package', async ({ page
     .setChecked(false);
   await expect(page.getByLabel('Package output')).not.toContainText('“');
   expect(foreign).toEqual([]);
+});
+
+test('the workbench preview keeps the page to one h1', async ({ page }) => {
+  await page.goto('/#finished');
+  await expect(page.getByTestId('bench-summary')).toContainText(/\d+ changes/);
+  await page.getByRole('button', { name: 'Preview' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Thursday brief');
+  // The sample's `# Thursday brief` renders two levels down, styled as the level it was written at.
+  const heading = page
+    .getByRole('region', { name: 'Preview' })
+    .getByRole('heading', { name: 'Thursday brief' });
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveJSProperty('tagName', 'H3');
+  await expect(heading).toHaveAttribute('data-level', '1');
+  // The Output tab still shows the package's own, undemoted string.
+  await page.getByRole('button', { name: /^Output$/ }).click();
+  await expect(page.getByLabel('Package output')).toContainText('<h1>Thursday brief</h1>');
 });
 
 test('the workbench fits a phone without horizontal scrolling', async ({ page }) => {

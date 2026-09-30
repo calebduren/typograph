@@ -41,7 +41,7 @@ Start with the reader's questions. What's new? Why does it matter? What should h
 
 Maya put it this way: "When someone says 'it's ready,' ask what they've checked." Keep **the important words** clear, let *a quieter aside* stay quiet, and give each paragraph one useful job.
 
-"Read [the guide](/integration.md) when you're ready." Quotation marks can span a link or **a change in emphasis** without losing their place. The words remain yours; only their presentation changes.
+"Read [the guide](/integration) when you're ready." Quotation marks can span a link or **a change in emphasis** without losing their place. The words remain yours; only their presentation changes.
 
 ### Plan the review
 

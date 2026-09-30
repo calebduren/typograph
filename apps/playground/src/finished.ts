@@ -56,6 +56,25 @@ function sanitize(root: ParentNode) {
   }
 }
 
+/**
+ * The preview sits inside the page, so a Markdown `# Title` must not become a second H1.
+ * Demote every heading two levels (h1 to h3 … h5 and h6 to h6) on the parsed DOM, keeping
+ * attributes, children and change marks. The original level goes in `data-level` so the
+ * preview styles the heading as before. `Run.output` is never touched.
+ */
+const headings = 'h1,h2,h3,h4,h5,h6';
+function demoteHeadings(root: ParentNode) {
+  for (const heading of [...root.querySelectorAll(headings)]) {
+    const level = Number(heading.tagName[1]);
+    const demoted = heading.ownerDocument.createElement(`h${Math.min(level + 2, 6)}`);
+    for (const attribute of heading.attributes)
+      demoted.setAttribute(attribute.name, attribute.value);
+    demoted.dataset.level = String(level);
+    demoted.append(...heading.childNodes);
+    heading.replaceWith(demoted);
+  }
+}
+
 function parse(html: string): HTMLElement {
   const document = new DOMParser().parseFromString(html, 'text/html');
   sanitize(document);
@@ -152,6 +171,7 @@ function annotate(baselineHtml: string, resultHtml: string): { html: string; cha
   }
   // Wrap from the end so earlier indices stay valid within each node.
   for (const [node, i, kind] of edits.reverse()) wrap(node, i, kind);
+  demoteHeadings(body);
   return { html: body.innerHTML, changes };
 }
 

@@ -1,17 +1,29 @@
 # Inter Variable
 
-Inter 4.1, by Rasmus Andersson and The Inter Project Authors. The unmodified WOFF2 files come from the `web/` folder in the supplied Inter 4.1 download, alongside its variable TTF files.
+Inter 4.1, by Rasmus Andersson and The Inter Project Authors. The files here are Latin subsets of the WOFF2 files in the `web/` folder of the Inter 4.1 download (https://github.com/rsms/inter/releases/tag/v4.1), produced with fonttools 4.66.1 and brotli.
 
 Source: https://github.com/rsms/inter/releases/tag/v4.1
 Website: https://rsms.me/inter/
 License: SIL Open Font License 1.1, included in `Inter-LICENSE.txt`. These assets retain their font license; Typograph’s code is MIT-licensed.
 
-Both roman and italic faces support weights 100–900 and optical sizes 14–32. The browser loads them when earlier system faces in the font stack are unavailable. Apple fonts are requested from the operating system and are not bundled.
+Both roman and italic faces keep the full variable axes: weight 100–900 and optical size 14–32. All OpenType layout features are kept (`--layout-features='*'`), but hinting is removed. The browser loads them only when earlier system faces in the font stack are unavailable and the text falls inside the `unicode-range` in `src/fonts.css`. Apple fonts are requested from the operating system and are not bundled.
+
+Subset command, run once per file (source `Inter*.woff2` from the 4.1 download, output the same filename):
+
+```sh
+pyftsubset InterVariable.woff2 --flavor=woff2 --layout-features='*' --no-hinting \
+  --unicodes='U+0020-007E,U+00A0-00FF,U+0100-017F,U+0192,U+0218-021B,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20A0-20CF,U+2100-214F,U+2190-21FF,U+2200-22FF,U+25A0-25FF,U+FEFF,U+FFFD' \
+  --output-file=InterVariable.woff2
+```
+
+Repeat with `InterVariable-Italic.woff2`. Covered ranges: Basic Latin, Latin-1 Supplement, Latin Extended-A, a few Latin Extended-B letters (ƒ, Ș ș Ț ț), modifier letters (ʻ ʼ ˆ ˚ ˜), General Punctuation, Currency Symbols, Letterlike Symbols, Arrows, Mathematical Operators, Geometric Shapes, byte order mark, and the replacement character. Keep the `unicode-range` descriptors in `src/fonts.css` identical to this list.
+
+These files are served with a one-year immutable cache. When their contents change, rename them (for example `InterVariable.v2.woff2`) and update `src/fonts.css`.
 
 SHA-256:
 
-- `InterVariable.woff2`: `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3`
-- `InterVariable-Italic.woff2`: `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a`
+- `InterVariable.woff2`: `8d0e2148588e356a7ebf6f14bcc465ceae7f89b515ba9b24b1b0588ae385e19b`
+- `InterVariable-Italic.woff2`: `3f27cd3ff6789a9c9c2fc5df1c6d6046dc6a93a68c633eff8d5619d2cfb0051d`
 
 # Hedvig Letters Serif
 

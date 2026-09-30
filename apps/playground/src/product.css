@@ -11,8 +11,8 @@
   --card-2: #ffffff;
   --ink: #2b3222;
   --ink-2: #434a39;
-  --muted: #676c5f;
-  --faint: #979b8f;
+  --muted: #5f6456;
+  --faint: #676c5f;
   --line: rgba(43, 50, 34, 0.1);
   --line-2: rgba(43, 50, 34, 0.17);
   --lime-mark: rgba(197, 238, 88, 1);
@@ -30,7 +30,7 @@
   --pill-hover: #d5d5d0;
   --raw-mark: rgba(43, 50, 34, 0.08);
   --sans:
-    'Inter Variable', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', system-ui,
+    -apple-system, BlinkMacSystemFont, 'Inter Variable', 'Helvetica Neue', 'Segoe UI', system-ui,
     sans-serif;
   --serif: 'Hedvig Letters Serif', serif;
   --mono: ui-monospace, 'SF Mono', SFMono-Regular, monospace;
@@ -93,7 +93,7 @@
     --ink: #eceee5;
     --ink-2: #cfd3c5;
     --muted: #9ca191;
-    --faint: #6f7566;
+    --faint: #8e9384;
     --line: rgba(236, 238, 229, 0.09);
     --line-2: rgba(236, 238, 229, 0.16);
     /* The same bright lime as the light theme, with dark text on it, not a faint wash. */
@@ -1375,7 +1375,7 @@ main > .story {
 .changelog-body h1 {
   font-family: var(--serif);
   font-variation-settings: 'opsz' 24;
-  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0;
@@ -1397,14 +1397,15 @@ main > .story {
   border-top: 1px solid var(--line);
   font-family: var(--serif);
   font-variation-settings: 'opsz' 24;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: 0;
   color: var(--ink);
 }
 
-.changelog-body p + p {
+.changelog-body p + p,
+.changelog-body ul + p {
   margin-top: 1rem;
 }
 
@@ -1432,6 +1433,68 @@ main > .story {
   text-decoration: underline;
   text-decoration-color: var(--line-2);
   text-underline-offset: 0.2em;
+}
+
+/* Integration guide: the changelog's reading column, with code blocks and subheads. */
+
+.guide-source {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.guide-source a {
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 0.2em;
+}
+
+.guide-body > p {
+  font-size: inherit;
+  color: inherit;
+}
+
+.guide-body h1 + p {
+  font-size: 1.1875rem;
+  color: var(--muted);
+}
+
+.guide-body h2 {
+  margin-top: 3.5rem;
+}
+
+.guide-body h3 {
+  margin-top: 2.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.guide-body > * + :is(p, ul, ol, pre),
+.guide-body :is(h2, h3) + * {
+  margin-top: 1rem;
+}
+
+.guide-body ol {
+  margin-bottom: 0;
+  padding-left: 1.25rem;
+}
+
+.guide-body pre {
+  overflow-x: auto;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--edge);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.guide-body pre code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: inherit;
 }
 
 /* Specifications */
@@ -1666,20 +1729,46 @@ main > .story {
   margin-top: 0.9em;
 }
 
-.bench-preview h1,
-.bench-preview h2,
-.bench-preview h3 {
+/* finished.ts demotes preview headings two levels so the page keeps one h1; `data-level`
+   holds the level the sample was written at, and these rules style by that level. */
+.bench-preview [data-level='1'],
+.bench-preview [data-level='2'],
+.bench-preview [data-level='3'] {
+  margin: 0;
   font-weight: 560;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
-.bench-preview h1 {
+.bench-preview [data-level='1'],
+.bench-preview [data-level='2'] {
+  font-variant-ligatures: common-ligatures contextual;
+  font-kerning: normal;
+}
+
+.bench-preview [data-level='1'] {
   font-size: 1.625rem;
 }
 
-.bench-preview h2 {
+.bench-preview [data-level='2'] {
   font-size: 1.3125rem;
+}
+
+.bench-preview [data-level='3'] {
+  font-size: 1rem;
+}
+
+.bench-preview [data-level='4'] {
+  font-size: 1em;
+}
+
+.bench-preview [data-level='5'] {
+  font-size: 0.83em;
+}
+
+.bench-preview [data-level='6'] {
+  font-size: 0.67em;
 }
 
 .bench-preview ul,

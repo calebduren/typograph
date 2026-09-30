@@ -9,7 +9,7 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   const csp = response!.headers()['content-security-policy'];
   expect(csp).toContain("style-src 'self';");
   expect(csp).toContain("style-src-attr 'unsafe-inline'");
-  await expect(page).toHaveTitle('Typograph — Better typography for AI-generated text.');
+  await expect(page).toHaveTitle('Typograph — Better typography for AI-generated text');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
     'content',
     await page.title(),
@@ -92,11 +92,137 @@ test('production links, metadata, and asset headers work', async ({ page }) => {
   expect(data.headers()['cache-control']).toContain('immutable');
   const font = await page.request.get('/fonts/InterVariable.woff2');
   expect(font.status()).toBe(200);
-  expect(font.headers()['cache-control']).toContain('max-age=604800');
+  expect(font.headers()['cache-control']).toContain('max-age=31536000, immutable');
   const guide = await page.goto('/integration.md');
   expect(guide!.headers()['content-type']).toContain('text/plain');
   expect(guide!.headers()['content-disposition']).toBe('inline');
   await expect(page.locator('body')).toContainText('English-only');
+});
+
+const prerendered = [
+  {
+    path: '/',
+    title: 'Typograph — Better typography for AI-generated text',
+    canonical: 'https://typograph.dev/',
+    text: 'Your AI writes, typograph polishes',
+  },
+  {
+    path: '/changelog',
+    title: 'Changelog — Typograph',
+    canonical: 'https://typograph.dev/changelog',
+    text: 'Curl the apostrophe in possessives',
+  },
+  {
+    path: '/integration',
+    title: 'Integrate Typograph: AI Elements, Streamdown, Cloudflare',
+    canonical: 'https://typograph.dev/integration',
+    text: 'Typograph: integration guide',
+  },
+  {
+    path: '/specimen',
+    title: 'Specimen — Typograph',
+    canonical: 'https://typograph.dev/specimen',
+    text: 'At the edge of the olive grove',
+  },
+];
+
+/** What a crawler that runs no JavaScript reads: the served HTML, tags stripped. */
+const textOf = (html: string) =>
+  html
+    .replace(/<script[\s\S]*?<\/script>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;|\u00a0/g, ' ')
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&');
+
+test('every route is served as prerendered HTML with its own head', async ({ request }) => {
+  for (const route of prerendered) {
+    const response = await request.get(route.path, { maxRedirects: 0 });
+    expect(response.status(), route.path).toBe(200);
+    expect(response.headers()['content-type']).toContain('text/html');
+    const html = await response.text();
+    const body = html.slice(html.indexOf('<body'));
+    expect(textOf(body), route.path).toContain(route.text);
+    expect(html).toContain(`<title>${route.title}</title>`);
+    expect(html).toContain(`<link rel="canonical" href="${route.canonical}" />`);
+    expect(html).toContain(`<meta property="og:url" content="${route.canonical}" />`);
+    expect(html).toContain(`<meta property="og:title" content="${route.title}" />`);
+    expect(html.match(/<meta name="description" content="([^"]+)"/)?.[1].length).toBeLessThan(156);
+    expect(html.includes('<meta name="robots" content="noindex" />'), route.path).toBe(
+      route.path === '/specimen',
+    );
+    expect(html.includes('rel="alternate" type="text/markdown"'), route.path).toBe(
+      route.path === '/integration',
+    );
+    expect((html.match(/<h1[\s>]/g) ?? []).length, route.path).toBe(1);
+  }
+  const home = await (await request.get('/')).text();
+  const data = JSON.parse(
+    home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1],
+  );
+  expect(data['@type']).toBe('SoftwareSourceCode');
+  expect(data.codeRepository).toBe('https://github.com/calebduren/typograph');
+  expect(home).toMatch(
+    /<link\s+rel="preload"\s+href="\/fonts\/HedvigLettersSerif\.woff2"\s+as="font"\s+type="font\/woff2"\s+crossorigin/,
+  );
+});
+
+test('prerendered routes hydrate without console errors or warnings', async ({ page }) => {
+  const problems: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error' || message.type() === 'warning') {
+      problems.push(`${message.type()}: ${message.text()}`);
+    }
+  });
+  page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+  const hydrated = () =>
+    page.waitForFunction(() => {
+      const root = document.getElementById('root');
+      return !!root && Object.keys(root).some((key) => key.startsWith('__reactContainer'));
+    });
+  for (const route of prerendered) {
+    await page.goto(route.path);
+    await hydrated();
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveTitle(route.title);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', route.canonical);
+  }
+  // Interactive after hydration: the workbench runs, the stream shows today's brief, and the
+  // guide's in-page links reach their headings.
+  await page.goto('/');
+  await hydrated();
+  await expect(page.getByTestId('bench-summary')).toContainText(/\d+ changes?/);
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+  await expect(page.locator('.stream-stage p.sr-only')).toContainText(`brief for ${today}`);
+  await expect(page.locator('.stats strong').first()).toHaveText(/^\d+(\.\d)?µs$/);
+  await page.goto('/integration');
+  await hydrated();
+  await page.getByRole('link', { name: 'Finished text', exact: true }).click();
+  await expect(page).toHaveURL(/#finished-text-briefs-email-and-plain-strings$/);
+  await expect(page.locator('#finished-text-briefs-email-and-plain-strings')).toBeInViewport();
+  await expect(page.getByRole('link', { name: 'the same guide as Markdown' })).toHaveAttribute(
+    'href',
+    '/integration.md',
+  );
+  expect(problems).toEqual([]);
+});
+
+test('the landing page links the guide page, which links its Markdown', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Read the integration guide' }).click();
+  await expect(page).toHaveURL(/\/integration$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Typograph: integration guide');
+  await expect(page.getByRole('heading', { level: 2, name: 'AI Elements and shadcn' })).toHaveId(
+    'ai-elements-and-shadcn',
+  );
+  for (const link of await page.locator('.guide-body a[href^="http"]').all()) {
+    await expect(link).toHaveAttribute('target', '_blank');
+  }
 });
 
 test('the hero renders while the workbench bundle is still loading', async ({ page }) => {
@@ -179,8 +305,12 @@ test('one agent prompt covers every stack and code alone exposes stack selection
     await expect(prompt).toContainText(expected);
   }
   const originalPrompt = await prompt.textContent();
-  await page.getByRole('button', { name: 'Copy agent prompt' }).click();
-  await expect(page.getByRole('button', { name: 'Copy agent prompt' })).toHaveText('Copied');
+  // The copy button's accessible name is its visible label.
+  const copy = page.locator('.recipe-copy');
+  await expect(copy).toHaveAccessibleName('Copy prompt');
+  await copy.click();
+  await expect(copy).toHaveText('Copied');
+  await expect(copy).toHaveAccessibleName('Copied');
   await expect(page.locator('.recipe-status')).toHaveCount(0);
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   expect(copied).toBe(originalPrompt);
@@ -201,7 +331,8 @@ test('one agent prompt covers every stack and code alone exposes stack selection
     await examples.getByRole('button', { name: stack, exact: true }).click();
     const code = page.getByLabel(`${stack} code example`);
     await expect(code).toContainText(expected);
-    await page.getByRole('button', { name: 'Copy integration code' }).click();
+    await expect(copy).toHaveAccessibleName('Copy code');
+    await copy.click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       await code.textContent(),
     );
@@ -220,7 +351,7 @@ test('one agent prompt covers every stack and code alone exposes stack selection
       value: () => Promise.reject(new Error('Clipboard denied')),
     });
   });
-  await page.getByRole('button', { name: 'Copy agent prompt' }).click();
+  await copy.click();
   await expect(page.getByRole('alert').filter({ hasText: 'Copy unavailable.' })).toContainText(
     'copy it manually',
   );
@@ -257,7 +388,7 @@ test('all typography combinations stay in sync with prompts and code', async ({
         await page.getByRole('button', { name: 'Agent prompt', exact: true }).click();
       }
   const before = await page.getByRole('region', { name: 'Typography agent prompt' }).textContent();
-  await page.getByRole('button', { name: 'Copy agent prompt' }).click();
+  await page.getByRole('button', { name: 'Copy prompt', exact: true }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(before);
   for (const stack of ['Cloudflare', 'Remark']) {
     await page.getByRole('button', { name: 'Code', exact: true }).click();
@@ -387,10 +518,11 @@ test('integration switches share settings with the workbench and copied instruct
   await expect(workbench.getByRole('switch', { name: 'Smart punctuation' })).not.toBeChecked();
   await workbench.getByRole('switch', { name: 'Hanging punctuation' }).setChecked(true);
   await expect(integration.getByRole('switch', { name: 'Hanging punctuation' })).toBeChecked();
-  await page.getByRole('button', { name: 'Copy agent prompt' }).click();
+  const copy = page.locator('.recipe-copy');
+  await copy.click();
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   expect(copied).toContain('punctuation: false, spacing: true');
   expect(copied).toContain('Hanging punctuation: on');
   await integration.getByRole('switch', { name: 'Hanging punctuation' }).click();
-  await expect(page.getByRole('button', { name: 'Copy agent prompt' })).toHaveText('Copy prompt');
+  await expect(copy).toHaveText('Copy prompt');
 });

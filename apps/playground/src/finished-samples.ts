@@ -22,7 +22,7 @@ Dr. Patel's team shipped 3 fixes. J. R. Okafor reviews them at 9 a.m.
 | --- | --- |
 | "Northwind" | Won't renew until Q1 |
 
-Run \`npm run check\` before you merge, and read [the guide](https://typograph.dev/integration.md) if you haven't yet.
+Run \`npm run check\` before you merge, and read [the guide](https://typograph.dev/integration) if you haven't yet.
 `,
   },
   html: {

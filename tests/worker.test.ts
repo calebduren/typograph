@@ -41,19 +41,45 @@ it('normalises protocol and port when redirecting the secondary domain', async (
   const response = await worker.fetch(new Request('http://typograph.ing:8080/a/b?c=1'), {
     ASSETS: assets,
   });
-  expect(response.status).toBe(308);
+  expect(response.status).toBe(301);
   expect(response.headers.get('location')).toBe('https://typograph.dev/a/b?c=1');
   expect(assets.fetch).not.toHaveBeenCalled();
 });
 
-it('leaves other hostnames, including subdomains, to the asset binding', async () => {
+it('redirects www hostnames to the canonical host', async () => {
+  const assets = { fetch: vi.fn<(request: Request) => Promise<Response>>() };
+  for (const host of ['www.typograph.dev', 'www.typograph.ing']) {
+    const response = await worker.fetch(new Request(`https://${host}/changelog?a=1`), {
+      ASSETS: assets,
+    });
+    expect(response.status).toBe(308);
+    expect(response.headers.get('location')).toBe('https://typograph.dev/changelog?a=1');
+  }
+  expect(assets.fetch).not.toHaveBeenCalled();
+});
+
+it('upgrades http on production hosts with a 301, preserving path and query', async () => {
+  const assets = { fetch: vi.fn<(request: Request) => Promise<Response>>() };
+  for (const host of ['typograph.dev', 'www.typograph.dev', 'typograph.ing']) {
+    const response = await worker.fetch(new Request(`http://${host}/integration?x=y`), {
+      ASSETS: assets,
+    });
+    expect(response.status).toBe(301);
+    expect(response.headers.get('location')).toBe('https://typograph.dev/integration?x=y');
+  }
+  expect(assets.fetch).not.toHaveBeenCalled();
+});
+
+it('leaves local and unknown hostnames to the asset binding', async () => {
   const assets = {
     fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('asset')),
   };
   for (const url of [
-    'https://www.typograph.ing/',
     'http://127.0.0.1:4174/',
+    'http://localhost:8787/changelog',
     'https://typograph.dev/',
+    'https://typograph.dev/specimen',
+    'https://typograph.dev.workers.dev/',
   ]) {
     const request = new Request(url);
     await worker.fetch(request, { ASSETS: assets });
@@ -61,24 +87,19 @@ it('leaves other hostnames, including subdomains, to the asset binding', async (
   }
 });
 
-it('serves the app shell for the specimen route', async () => {
+it('passes local development requests through even though wrangler reports the route host over http', async () => {
   const assets = {
-    fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('shell')),
+    fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('asset')),
   };
-  const response = await worker.fetch(new Request('https://typograph.dev/specimen?size=18'), {
-    ASSETS: assets,
+  for (const ip of ['127.0.0.1', '::1']) {
+    const request = new Request('http://typograph.dev/changelog', {
+      headers: { 'cf-connecting-ip': ip },
+    });
+    expect(await (await worker.fetch(request, { ASSETS: assets })).text()).toBe('asset');
+    expect(assets.fetch).toHaveBeenLastCalledWith(request);
+  }
+  const remote = new Request('http://typograph.dev/', {
+    headers: { 'cf-connecting-ip': '203.0.113.9' },
   });
-  expect(await response.text()).toBe('shell');
-  expect(assets.fetch.mock.calls[0][0].url).toBe('https://typograph.dev/?size=18');
-});
-
-it('serves the app shell for the changelog route', async () => {
-  const assets = {
-    fetch: vi.fn<(request: Request) => Promise<Response>>(async () => new Response('shell')),
-  };
-  const response = await worker.fetch(new Request('https://typograph.dev/changelog'), {
-    ASSETS: assets,
-  });
-  expect(await response.text()).toBe('shell');
-  expect(assets.fetch.mock.calls[0][0].url).toBe('https://typograph.dev/');
+  expect((await worker.fetch(remote, { ASSETS: assets })).status).toBe(301);
 });

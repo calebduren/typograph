@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from 'react';
 import { typesetText } from '@calebduren/typograph';
 import { Kern } from './Kern';
 import { LogoMark } from './LogoMark';
 
-/** Today's date the way a model writes it: “Saturday, September 26th.” */
-function today(date = new Date()) {
+/** A date the way a model writes it: “Saturday, September 26th.” */
+function spoken(date: Date) {
   const day = date.getDate();
   const suffix =
     day % 100 >= 11 && day % 100 <= 13 ? 'th' : (['th', 'st', 'nd', 'rd'][day % 10] ?? 'th');
@@ -13,8 +13,8 @@ function today(date = new Date()) {
   return `${weekday}, ${month} ${day}${suffix}`;
 }
 
-/** The weekday `count` working days from today: Saturday's next working day is Monday. */
-function workday(count: number, date = new Date()) {
+/** The weekday `count` working days after `date`: Saturday's next working day is Monday. */
+function workday(count: number, date: Date) {
   const day = new Date(date);
   while (count > 0) {
     day.setDate(day.getDate() + 1);
@@ -25,20 +25,42 @@ function workday(count: number, date = new Date()) {
 
 // A daily brief, dated today, with the week's plans ahead of it. Paragraphs that hang a quote
 // open on a straight-sided capital.
-const reply = `Here's your daily brief for ${today()}:
+const brief = (date: Date) => `Here's your daily brief for ${spoken(date)}:
 
-"Every launch this quarter shipped on time," Leland wrote in last night's update. The Q3 review moves to ${workday(2)} and it's down to 30 min.
+"Every launch this quarter shipped on time," Leland wrote in last night's update. The Q3 review moves to ${workday(2, date)} and it's down to 30 min.
 
 It's clear and 67 °F by noon. Your run is 5 km, so you'll be back before Mrs. Osei's call.
 
-"Don't forget," Joan added, "the team's calling ${workday(1)}'s demo 'the big one.'"`;
+"Don't forget," Joan added, "the team's calling ${workday(1, date)}'s demo 'the big one.'"`;
 
-// Split like a model would: short, uneven tokens, so quotes arrive before their words.
-const tokens = reply.match(/\n\n|[ ]?[^\s"]{1,4}|[ ]?"/g) ?? [reply];
-const ends = tokens.reduce<number[]>(
-  (all, token) => [...all, (all.at(-1) ?? 0) + token.length],
-  [],
-);
+/** Split like a model would: short, uneven tokens, so quotes arrive before their words. */
+function tokenize(reply: string) {
+  const tokens = reply.match(/\n\n|[ ]?[^\s"]{1,4}|[ ]?"/g) ?? [reply];
+  const ends = tokens.reduce<number[]>(
+    (all, token) => [...all, (all.at(-1) ?? 0) + token.length],
+    [],
+  );
+  return { reply, tokens, ends };
+}
+type Story = ReturnType<typeof tokenize>;
+
+/*
+  The prerendered page and the first render while it hydrates date the brief to a fixed day, so
+  the build's clock never meets the reader's. Today's date takes over right after hydration,
+  before the first frame.
+*/
+const fixedDay = '2026-09-24';
+const noSubscription = () => () => {};
+const localDay = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+};
+const useDay = () => useSyncExternalStore(noSubscription, localDay, () => fixedDay);
+const dateOf = (day: string) => {
+  const [year, month, date] = day.split('-').map(Number);
+  return new Date(year, month - 1, date);
+};
+
 const streaming = { locale: 'en', spacing: true, phase: 'streaming' } as const;
 const settled = { locale: 'en', spacing: true } as const;
 
@@ -81,9 +103,14 @@ class StreamView {
   constructor(
     private root: HTMLElement,
     private side: Side,
-  ) {}
+    private script: Story,
+  ) {
+    // A new view replaces whatever an earlier one painted, such as a brief from another day.
+    root.replaceChildren();
+  }
 
   render(count: number, output: string) {
+    const { tokens, ends } = this.script;
     let paragraph = 0;
     let opens = true;
     for (let i = 0; i < tokens.length; i++) {
@@ -120,17 +147,20 @@ class StreamView {
   }
 }
 
+const reducedQuery = () => window.matchMedia?.('(prefers-reduced-motion: reduce)');
+const subscribeReduced = (update: () => void) => {
+  const query = reducedQuery();
+  query?.addEventListener('change', update);
+  return () => query?.removeEventListener('change', update);
+};
+
+/** The motion preference; the prerendered page and hydration assume motion is allowed. */
 function useReducedMotion() {
-  const [reduced, setReduced] = useState(
-    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  return useSyncExternalStore(
+    subscribeReduced,
+    () => reducedQuery()?.matches ?? false,
+    () => false,
   );
-  useEffect(() => {
-    const query = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    const update = () => setReduced(query.matches);
-    query?.addEventListener('change', update);
-    return () => query?.removeEventListener('change', update);
-  }, []);
-  return reduced;
 }
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
@@ -161,22 +191,28 @@ export function StreamStory({ hero }: { hero: ReactNode }) {
   const rawSizer = useRef<HTMLDivElement>(null);
   const typesetSizer = useRef<HTMLDivElement>(null);
 
+  const day = useDay();
+  const script = useMemo(() => tokenize(brief(dateOf(day))), [day]);
+  const { tokens } = script;
   // Every prefix a token boundary can produce, typeset once. The last one is complete.
   const outputs = useMemo(
     () =>
-      ends.map((end, index) =>
-        typesetText(reply.slice(0, end), index === ends.length - 1 ? settled : streaming),
+      script.ends.map((end, index) =>
+        typesetText(
+          script.reply.slice(0, end),
+          index === script.ends.length - 1 ? settled : streaming,
+        ),
       ),
-    [],
+    [script],
   );
   const final = outputs.at(-1)!;
 
   useEffect(() => {
     // Invisible finished copies reserve each column's height, so streaming never shifts layout.
-    new StreamView(rawSizer.current!, 'raw').render(tokens.length, final);
-    new StreamView(typesetSizer.current!, 'typeset').render(tokens.length, final);
-    const raw = new StreamView(rawRoot.current!, 'raw');
-    const typeset = new StreamView(typesetRoot.current!, 'typeset');
+    new StreamView(rawSizer.current!, 'raw', script).render(tokens.length, final);
+    new StreamView(typesetSizer.current!, 'typeset', script).render(tokens.length, final);
+    const raw = new StreamView(rawRoot.current!, 'raw', script);
+    const typeset = new StreamView(typesetRoot.current!, 'typeset', script);
     let shown = -1;
     const paint = (count: number) => {
       if (count === shown) return;
@@ -286,7 +322,7 @@ export function StreamStory({ hero }: { hero: ReactNode }) {
       resize.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [outputs, final, reduced]);
+  }, [script, tokens, outputs, final, reduced]);
 
   const column = (side: Side, label: ReactNode) => (
     <article className="stream-column" data-side={side}>

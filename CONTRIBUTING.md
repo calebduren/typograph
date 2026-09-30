@@ -19,7 +19,8 @@ The main implementation paths are:
 
 - `packages/chat-typography/src/engine.ts` and `index.ts`: English punctuation, optional no-break spacing, and the Remark plugin.
 - `packages/chat-typography/src/hanging.ts` and `hanging.css`: optional opening-quote layout.
-- `apps/playground/src/main.tsx`: landing page and integration UI.
+- `apps/playground/src/main.tsx`: landing page and integration UI, route loading, and hydration.
+- `apps/playground/scripts/prerender.mjs` and `src/head.ts`: the build prerenders `/`, `/changelog`, `/integration`, and `/specimen` to static HTML with React's static renderer, writes each route's head tags, and the browser hydrates that markup. Keep render functions free of `window`, dates, and timings; read them in an effect or through `useSyncExternalStore` with a server snapshot, or hydration will not match.
 - `apps/playground/src/ChatComparison.tsx`: editable comparison and recorded replay.
 - `examples/chat-integration`: real SDK transport fixture and browser checks.
 

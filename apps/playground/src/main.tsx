@@ -1,5 +1,15 @@
-import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import { createRoot } from 'react-dom/client';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { TypographyControls } from './TypographyControls';
 import { agentPrompt } from './agent-prompts';
@@ -22,6 +32,7 @@ import { startSegmentThumbs } from './segments';
 import { StreamStory } from './StreamStory';
 import { SwapText } from './SwapText';
 import { microsecondsPerCall } from './speed';
+import { applyHead, heads, routeOf, type Route } from './head';
 import '@calebduren/typograph/hanging.css';
 import './fonts.css';
 import './landing.css';
@@ -30,10 +41,22 @@ import './product.css';
 const FinishedDemo = lazy(() =>
   import('./FinishedDemo').then((module) => ({ default: module.FinishedDemo })),
 );
-const Changelog = lazy(() =>
-  import('./Changelog').then((module) => ({ default: module.Changelog })),
-);
-const Specimen = lazy(() => import('./Specimen').then((module) => ({ default: module.Specimen })));
+
+/*
+  The build prerenders every route, then the browser hydrates it. Anything this browser has to
+  measure renders its prerendered value while hydrating and its own value right after, through
+  a store whose server snapshot is the prerendered one.
+*/
+const noSubscription = () => () => {};
+/** False while hydrating prerendered markup (and in the prerender itself), true after. */
+const useHydrated = () =>
+  useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  );
+/** Measured in this browser; null in the prerendered page, which has no browser to measure. */
+const useMicroseconds = () => useSyncExternalStore(noSubscription, microsecondsPerCall, () => null);
 
 function Integration({
   settings,
@@ -81,8 +104,8 @@ function Integration({
           Building with an agent? Copy the prompt into your coding assistant. It will find the right
           integration for your app.
         </p>
-        <a className="underlined" href="/integration.md" target="_blank" rel="noopener noreferrer">
-          Read the integration guide <ArrowUpRight size={13} aria-hidden="true" strokeWidth={1.5} />
+        <a className="underlined" href="/integration">
+          Read the integration guide <ArrowRight size={13} aria-hidden="true" strokeWidth={1.5} />
         </a>
       </div>
       <div className="recipe">
@@ -106,9 +129,9 @@ function Integration({
               </button>
             ))}
           </div>
+          {/* The visible label is the accessible name, so speech users can say what they see. */}
           <button
             className="recipe-copy"
-            aria-label={mode === 'prompt' ? 'Copy agent prompt' : 'Copy integration code'}
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(content);
@@ -416,9 +439,12 @@ const promises = [
   },
 ];
 
+const workbenchLoading = <p role="status">Loading the workbench…</p>;
+
 function Landing() {
   const [settings, setSettings] = useState(defaultSettings);
-  const microseconds = microsecondsPerCall();
+  const microseconds = useMicroseconds();
+  const hydrated = useHydrated();
   useEffect(() => {
     // React mounts after navigation, so initial fragment targets do not exist yet.
     const target = document.getElementById(window.location.hash.slice(1));
@@ -458,7 +484,7 @@ function Landing() {
         <section className="stats" aria-label="Measured facts">
           <div>
             <strong>
-              {microseconds.toFixed(microseconds < 10 ? 1 : 0)}
+              {microseconds === null ? '–' : microseconds.toFixed(microseconds < 10 ? 1 : 0)}
               <small>µs</small>
             </strong>
             <span>Per call, measured just now in your browser</span>
@@ -520,9 +546,14 @@ function Landing() {
               Paste your text. Nothing leaves the page.
             </p>
           </div>
-          <Suspense fallback={<p role="status">Loading the workbench…</p>}>
-            <FinishedDemo settings={settings} onSettingsChange={setSettings} />
-          </Suspense>
+          {/* The prerendered page carries the loading state; the workbench loads once hydrated. */}
+          {hydrated ? (
+            <Suspense fallback={workbenchLoading}>
+              <FinishedDemo settings={settings} onSettingsChange={setSettings} />
+            </Suspense>
+          ) : (
+            workbenchLoading
+          )}
         </section>
 
         <section className="band" aria-labelledby="care-title">
@@ -619,18 +650,39 @@ function Landing() {
   );
 }
 
-const route = window.location.pathname.replace(/\/$/, '');
+/** Keeps the document head in step with the route; prerendered pages already match. */
+function Page({ route, children }: { route: Route; children: ReactNode }) {
+  useEffect(() => applyHead(heads[route]), [route]);
+  return children;
+}
 
-createRoot(document.getElementById('root')!).render(
-  route === '/changelog' ? (
-    <Suspense fallback={null}>
-      <Changelog />
-    </Suspense>
-  ) : route === '/specimen' ? (
-    <Suspense fallback={<p role="status">Loading the specimen…</p>}>
-      <Specimen />
-    </Suspense>
-  ) : (
-    <Landing />
-  ),
-);
+/**
+ * A route's page with everything it renders already loaded: its code and any typeset content.
+ * The prerender and the browser both await this, so hydration never suspends and matches the
+ * prerendered markup exactly.
+ */
+export async function loadPage(route: Route): Promise<ReactNode> {
+  let content: ReactNode;
+  if (route === '/changelog') {
+    const { Changelog, typesetChangelog } = await import('./Changelog');
+    content = <Changelog html={await typesetChangelog()} />;
+  } else if (route === '/integration') {
+    const { IntegrationGuide, typesetGuide } = await import('./IntegrationGuide');
+    content = <IntegrationGuide html={await typesetGuide()} />;
+  } else if (route === '/specimen') {
+    const { Specimen } = await import('./Specimen');
+    content = <Specimen />;
+  } else {
+    content = <Landing />;
+  }
+  return <Page route={route}>{content}</Page>;
+}
+
+if (!import.meta.env.SSR) {
+  const container = document.getElementById('root')!;
+  void loadPage(routeOf(window.location.pathname)).then((page) => {
+    // Built pages are prerendered; the dev server serves an empty root.
+    if (container.firstElementChild) hydrateRoot(container, page);
+    else createRoot(container).render(page);
+  });
+}
