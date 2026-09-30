@@ -309,7 +309,7 @@ function Hero() {
     <section className="hero" aria-labelledby="hero-title">
       <a className="badge" href="/changelog">
         <span className="badge-new">New</span>
-        <span className="badge-text">1.0.0 is out: the API is now stable</span>
+        <span className="badge-text">1.1.0 adds /markdown and /html entries</span>
         <ArrowUpRight size={14} aria-hidden="true" strokeWidth={1.75} />
       </a>
       <h1 id="hero-title">
